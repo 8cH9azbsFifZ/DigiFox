@@ -128,9 +128,9 @@ enum CATError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notConnected:
-            return "Nicht mit Funkgerät verbunden"
+            return "Not connected to radio"
         case .initFailed(let id):
-            return "Hamlib Rig-Modell \(id) konnte nicht initialisiert werden"
+            return "Failed to initialize Hamlib rig model \(id)"
         }
     }
 }

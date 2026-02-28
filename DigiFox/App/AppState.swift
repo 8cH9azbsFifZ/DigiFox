@@ -134,8 +134,17 @@ class AppState: ObservableObject {
                     guard let first = devices.first else { statusText = "No USB serial device found"; return }
                     try await catController.connect(modelId: modelId, path: first.path, baudRate: baudRate)
                 }
+
+                // FT8 and JS8Call require USB mode
+                try await catController.setMode("USB")
+
+                // Set dial frequency for current band/mode
+                if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: settings.digitalMode) {
+                    try await catController.setFrequency(UInt64(freq))
+                }
+
                 radioState = await catController.state
-                statusText = "Connected: \(radioState.rigName)"
+                statusText = "Connected: \(radioState.rigName) (USB)"
             } catch { statusText = "Rig error: \(error.localizedDescription)" }
         }
     }

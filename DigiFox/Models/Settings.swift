@@ -9,8 +9,17 @@ class AppSettings: ObservableObject {
     // Mode selection
     @AppStorage("digitalMode") var digitalModeRaw = 0
 
-    // Frequency
+    // Frequency & Band
     @AppStorage("dialFrequency") var dialFrequency = 14_074_000.0
+    @AppStorage("selectedBand") var selectedBand: String = "20m"
+
+    /// Update dial frequency when band changes, based on current digital mode
+    func selectBand(_ bandId: String) {
+        selectedBand = bandId
+        if let freq = BandPlan.dialFrequency(band: bandId, mode: digitalMode) {
+            dialFrequency = freq
+        }
+    }
 
     // Audio
     @AppStorage("txPower") var txPower: Double = 0.5
