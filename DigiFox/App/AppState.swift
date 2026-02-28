@@ -452,8 +452,8 @@ class AppState: ObservableObject {
     }
 
     func sendCW() {
-        guard !cwText.isEmpty else { statusText = "No CW text"; return }
-        guard radioState.isConnected else { statusText = "No rig connected"; return }
+        guard !cwText.isEmpty else { statusText = "Kein CW-Text"; return }
+        guard radioState.isConnected else { statusText = "Kein Rig verbunden"; return }
         let text = cwText.uppercased()
         let speed = cwSpeed
         statusText = "CW: \(text)"
@@ -461,37 +461,26 @@ class AppState: ObservableObject {
         if cwLog.count > 50 { cwLog.removeLast() }
         cwText = ""
         cwKeying = true
-        Task {
-            do {
-                try await catController.setMode("CW")
-                let cat = catController
-                await morseKeyer.key(
-                    text: text, wpm: speed,
-                    pttOn:  { try await cat.pttOn() },
-                    pttOff: { try await cat.pttOff() }
-                )
-                await MainActor.run {
-                    self.cwKeying = false
-                    self.statusText = "CW sent"
-                }
-            } catch {
-                await MainActor.run {
-                    self.cwKeying = false
-                    self.statusText = "CW error: \(error.localizedDescription)"
-                }
-            }
+
+        // Set CW mode before keying
+        Task { try? await catController.setMode("CW") }
+
+        // Synchronous PTT callbacks for the keying thread
+        let cat = catController
+        let keyDown = { let s = DispatchSemaphore(value: 0); Task { try? await cat.pttOn(); s.signal() }; s.wait() }
+        let keyUp   = { let s = DispatchSemaphore(value: 0); Task { try? await cat.pttOff(); s.signal() }; s.wait() }
+
+        morseKeyer.key(text: text, wpm: speed, keyDown: keyDown, keyUp: keyUp) { [weak self] in
+            self?.cwKeying = false
+            self?.statusText = "CW gesendet"
         }
     }
 
     func stopCW() {
-        Task {
-            await morseKeyer.stop()
-            try? await catController.pttOff()
-            await MainActor.run {
-                self.cwKeying = false
-                self.statusText = "CW stopped"
-            }
-        }
+        morseKeyer.stop()
+        Task { try? await catController.pttOff() }
+        cwKeying = false
+        statusText = "CW gestoppt"
     }
 
     // MARK: - Helpers

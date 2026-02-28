@@ -1,4 +1,5 @@
 import Foundation
+import QuartzCore
 
 /// Software Morse keyer for (tr)uSDX.
 ///
@@ -6,12 +7,31 @@ import Foundation
 /// Instead, CW is keyed by toggling TX0;/RX; with proper timing.
 /// Mode must be set to CW (MD3;) first.
 ///
-/// Timing: dot = 1200/WPM ms, dash = 3×dot, inter-element = dot,
-/// inter-char = 3×dot, inter-word = 7×dot.
-actor MorseKeyer {
+/// Runs on a dedicated high-priority thread with Thread.sleep for
+/// precise real-time timing. Swift async Task.sleep is too imprecise.
+///
+/// PARIS standard timing:
+///   dot  = 1200 / WPM ms
+///   dash = 3 × dot
+///   inter-element gap = 1 × dot
+///   inter-character gap = 3 × dot
+///   inter-word gap = 7 × dot
+class MorseKeyer {
 
-    private var isKeying = false
-    private var shouldStop = false
+    private var thread: Thread?
+    private var _isKeying = false
+    private var _shouldStop = false
+    private let lock = NSLock()
+
+    var isKeying: Bool {
+        lock.lock(); defer { lock.unlock() }
+        return _isKeying
+    }
+
+    private var shouldStop: Bool {
+        lock.lock(); defer { lock.unlock() }
+        return _shouldStop
+    }
 
     /// Morse code lookup table
     static let morseTable: [Character: String] = [
@@ -30,24 +50,50 @@ actor MorseKeyer {
         "@": ".--.-.", "!": "-.-.--",
     ]
 
-    /// Key a text string as Morse code using PTT on/off.
-    /// Uses PARIS standard: 20 WPM = dot duration 60ms.
-    func key(text: String, wpm: Int, pttOn: @escaping () async throws -> Void, pttOff: @escaping () async throws -> Void) async {
+    /// Key a text string as Morse code.
+    /// Runs on a dedicated thread for precise timing.
+    /// `keyDown` and `keyUp` are called synchronously on the keying thread.
+    func key(text: String, wpm: Int, keyDown: @escaping () -> Void, keyUp: @escaping () -> Void, completion: @escaping () -> Void) {
         guard !isKeying else { return }
-        isKeying = true
-        shouldStop = false
 
-        // PARIS standard: dot duration = 1200ms / WPM
-        let dotDuration: UInt64 = UInt64(1_200_000_000 / max(wpm, 5)) // nanoseconds
+        lock.lock()
+        _isKeying = true
+        _shouldStop = false
+        lock.unlock()
+
+        let t = Thread {
+            self.keyingLoop(text: text, wpm: wpm, keyDown: keyDown, keyUp: keyUp)
+            DispatchQueue.main.async {
+                self.lock.lock()
+                self._isKeying = false
+                self.lock.unlock()
+                completion()
+            }
+        }
+        t.qualityOfService = .userInteractive
+        t.name = "MorseKeyer"
+        thread = t
+        t.start()
+    }
+
+    /// Stop keying immediately
+    func stop() {
+        lock.lock()
+        _shouldStop = true
+        lock.unlock()
+    }
+
+    private func keyingLoop(text: String, wpm: Int, keyDown: () -> Void, keyUp: () -> Void) {
+        // PARIS standard: dot = 1200ms / WPM
+        let dotSec = 1.2 / Double(max(wpm, 5))
 
         let chars = Array(text.uppercased())
         for (ci, char) in chars.enumerated() {
             if shouldStop { break }
 
             if char == " " {
-                // Inter-word gap: 7 dots total. 3-dot inter-char gap already elapsed,
-                // so wait 4 more dots.
-                try? await Task.sleep(nanoseconds: 4 * dotDuration)
+                // Word gap: 7 dots. Already waited 3 after last char, so 4 more.
+                preciseSleep(4.0 * dotSec)
                 continue
             }
 
@@ -56,46 +102,41 @@ actor MorseKeyer {
             for (ei, element) in code.enumerated() {
                 if shouldStop { break }
 
-                let elementDuration: UInt64 = element == "-" ? 3 * dotDuration : dotDuration
+                let dur = element == "-" ? 3.0 * dotSec : dotSec
 
-                // Measure time spent in pttOn call to compensate for serial latency
-                let t0 = ContinuousClock.now
-                try? await pttOn()
-                let pttOnElapsed = ContinuousClock.now - t0
-                let pttOnNs = UInt64(pttOnElapsed.components.attoseconds / 1_000_000_000)
-
-                // Sleep remaining element duration (subtract pttOn latency)
-                if elementDuration > pttOnNs {
-                    try? await Task.sleep(nanoseconds: elementDuration - pttOnNs)
-                }
+                // Key down — measure latency and subtract from sleep
+                let t0 = CACurrentMediaTime()
+                keyDown()
+                let keyDownLatency = CACurrentMediaTime() - t0
+                preciseSleep(max(0, dur - keyDownLatency))
 
                 // Key up
-                let t1 = ContinuousClock.now
-                try? await pttOff()
-                let pttOffElapsed = ContinuousClock.now - t1
-                let pttOffNs = UInt64(pttOffElapsed.components.attoseconds / 1_000_000_000)
+                let t1 = CACurrentMediaTime()
+                keyUp()
+                let keyUpLatency = CACurrentMediaTime() - t1
 
-                // Inter-element gap (1 dot within character)
+                // Inter-element gap (1 dot)
                 if ei < code.count - 1 {
-                    if dotDuration > pttOffNs {
-                        try? await Task.sleep(nanoseconds: dotDuration - pttOffNs)
-                    }
+                    preciseSleep(max(0, dotSec - keyUpLatency))
                 }
             }
 
-            // Inter-character gap: 3 dots (subtract pttOff latency of last element)
+            // Inter-character gap: 3 dots
             if !shouldStop && ci < chars.count - 1 && chars[ci + 1] != " " {
-                try? await Task.sleep(nanoseconds: 3 * dotDuration)
+                preciseSleep(3.0 * dotSec)
             }
         }
-
-        isKeying = false
     }
 
-    /// Stop keying immediately
-    func stop() {
-        shouldStop = true
-    }
+    /// High-precision sleep using Thread.sleep + spin-wait for the last 1ms
+    private func preciseSleep(_ seconds: Double) {
+        guard seconds > 0, !shouldStop else { return }
 
-    var isBusy: Bool { isKeying }
+        let spinThreshold = 0.001
+        if seconds > spinThreshold {
+            Thread.sleep(forTimeInterval: seconds - spinThreshold)
+        }
+        let deadline = CACurrentMediaTime() + min(seconds, spinThreshold)
+        while CACurrentMediaTime() < deadline && !shouldStop { }
+    }
 }
