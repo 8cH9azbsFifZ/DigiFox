@@ -20,6 +20,8 @@
 	<string>1</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>DigiFox needs microphone access for audio processing with your radio.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>DigiFox uses your location to determine your Maidenhead grid locator for digital mode QSOs.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

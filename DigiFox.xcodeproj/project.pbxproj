@@ -49,6 +49,7 @@
 		7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */; };
 		B29CF7D27F7F19F17A853557 /* NetworkClientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C446030769D53BE75AF1A38 /* NetworkClientView.swift */; };
 		E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */; };
+		CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5104ACA8BBA24A30B17A891E /* LocationManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +100,7 @@
 		BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8MessageListView.swift"; path = "DigiFox/Views/JS8/JS8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
 		5C446030769D53BE75AF1A38 /* NetworkClientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "NetworkClientView.swift"; path = "DigiFox/Views/JS8/NetworkClientView.swift"; sourceTree = SOURCE_ROOT; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
+		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -185,7 +187,8 @@
 				63731F1ED4EE31CC29CE5632 /* Network */,
 				16FFA9D4604AE7535C90539A /* Serial */,
 				E17000C80B9D69E84FA2A1CC /* Views */,
-			);
+			
+				BDE601E697BC41898EAB17C8 /* Location */,);
 			path = DigiFox;
 			sourceTree = "<group>";
 		};
@@ -256,6 +259,14 @@
 				A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */,
 			);
 			path = JS8;
+			sourceTree = "<group>";
+		};
+		BDE601E697BC41898EAB17C8 /* Location */ = {
+			isa = PBXGroup;
+			children = (
+				5104ACA8BBA24A30B17A891E /* LocationManager.swift */,
+			);
+			path = Location;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -369,7 +380,8 @@
 				7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */,
 				B29CF7D27F7F19F17A853557 /* NetworkClientView.swift in Sources */,
 				E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */,
-			);
+							CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */,
+);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -396,9 +408,17 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/vendor/hamlib/lib";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
 				OTHER_LDFLAGS = "-lhamlib";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
@@ -427,9 +447,17 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/vendor/hamlib/lib";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
 				OTHER_LDFLAGS = "-lhamlib";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
@@ -496,9 +524,17 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/vendor/hamlib/lib";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
 				OTHER_LDFLAGS = "-lhamlib";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
@@ -572,9 +608,17 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/vendor/hamlib/lib";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
 				OTHER_LDFLAGS = "-lhamlib";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";

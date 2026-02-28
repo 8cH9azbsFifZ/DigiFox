@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
     @State private var rigModels: [HamlibModelInfo] = []
     @State private var searchText = ""
+    @StateObject private var locationManager = LocationManager()
 
     private var filteredModels: [HamlibModelInfo] {
         if searchText.isEmpty { return rigModels }
@@ -24,15 +25,30 @@ struct SettingsView: View {
                 Section("Station") {
                     HStack {
                         Text("Rufzeichen"); Spacer()
-                        TextField("z.B. DL1ABC", text: $settings.callsign)
+                        TextField("e.g. DL1ABC", text: $settings.callsign)
                             .multilineTextAlignment(.trailing).autocorrectionDisabled()
                             .textInputAutocapitalization(.characters)
                     }
                     HStack {
                         Text("Grid Locator"); Spacer()
-                        TextField("z.B. JO31", text: $settings.grid)
+                        TextField("e.g. JO31", text: $settings.grid)
                             .multilineTextAlignment(.trailing).autocorrectionDisabled()
                             .textInputAutocapitalization(.characters)
+                        Button {
+                            locationManager.requestGrid { grid in
+                                if let grid { settings.grid = String(grid.prefix(4)).uppercased() }
+                            }
+                        } label: {
+                            if locationManager.isLocating {
+                                ProgressView().controlSize(.small)
+                            } else {
+                                Image(systemName: "location.fill")
+                            }
+                        }
+                        .disabled(locationManager.isLocating)
+                    }
+                    if let error = locationManager.error {
+                        Text(error).font(.caption).foregroundStyle(.red)
                     }
                 }
 
@@ -99,20 +115,42 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Funkgerät (Hamlib)") {
+                Section("Radio Profile") {
+                    Picker("Connection", selection: Binding(
+                        get: { settings.radioProfile },
+                        set: { settings.radioProfile = $0 }
+                    )) {
+                        ForEach(RadioProfile.allCases) { profile in
+                            Text(profile.rawValue).tag(profile)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    Text(settings.radioProfile.description)
+                        .font(.caption).foregroundStyle(.secondary)
+                    if settings.radioProfile == .trusdx {
+                        HStack {
+                            Image(systemName: "info.circle").foregroundStyle(.blue)
+                            Text("Baud rate auto-set to 115200 for CAT_STREAMING")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Section("Rig (Hamlib)") {
                     NavigationLink {
                         RigModelPicker(models: filteredModels, selectedModel: $settings.rigModel, searchText: $searchText)
                     } label: {
                         HStack {
-                            Text("Rig-Modell"); Spacer()
+                            Text("Rig Model"); Spacer()
                             Text(selectedRigName).foregroundStyle(.secondary)
                         }
                     }
                     HStack {
-                        Text("Baudrate"); Spacer()
+                        Text("Baud Rate"); Spacer()
                         TextField("9600", value: $settings.rigSerialRate, format: .number)
                             .multilineTextAlignment(.trailing).keyboardType(.numberPad)
                     }
+                    .disabled(settings.radioProfile == .trusdx)
                 }
 
                 Section("Frequenz") {
