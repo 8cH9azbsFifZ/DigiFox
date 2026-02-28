@@ -48,6 +48,7 @@ class AppState: ObservableObject {
     private var demodTask: Task<Void, Never>?
     private var usbScanTask: Task<Void, Never>?
     private var cycleTask: Task<Void, Never>?
+    private var rigPollTask: Task<Void, Never>?
 
     init() {
         setupBindings()
@@ -139,17 +140,52 @@ class AppState: ObservableObject {
 
                 radioState = await catController.state
                 statusText = "Connected: \(radioState.rigName) (USB)"
+                startRigPolling()
             } catch { statusText = "Rig error: \(error.localizedDescription)" }
         }
     }
 
     func disconnectRig() {
+        rigPollTask?.cancel(); rigPollTask = nil
         Task { await catController.disconnect(); radioState = await catController.state; statusText = "Rig disconnected" }
+    }
+
+    /// Periodically poll rig for frequency and mode changes (every 500ms).
+    /// Syncs rig state back to the UI so dial display stays current.
+    private func startRigPolling() {
+        rigPollTask?.cancel()
+        rigPollTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
+                guard let self, await self.catController.isConnected else { break }
+                do {
+                    let freq = try await self.catController.getFrequency()
+                    let mode = try await self.catController.getMode()
+                    await MainActor.run {
+                        self.settings.dialFrequency = Double(freq)
+                        self.radioState.frequency = freq
+                        self.radioState.mode = mode
+                        // Update selected band to match rig frequency
+                        if let band = BandPlan.band(for: Double(freq)) {
+                            self.settings.selectedBand = band.id
+                        }
+                    }
+                } catch {
+                    // Polling failed — rig may have been disconnected
+                    await MainActor.run { self.radioState.isConnected = false; self.statusText = "Rig connection lost" }
+                    break
+                }
+            }
+        }
     }
 
     func setRigFrequency(_ hz: UInt64) {
         Task {
-            do { try await catController.setFrequency(hz); radioState = await catController.state }
+            do {
+                try await catController.setFrequency(hz)
+                settings.dialFrequency = Double(hz)
+                radioState.frequency = hz
+            }
             catch { statusText = "Frequency error: \(error.localizedDescription)" }
         }
     }
@@ -190,9 +226,10 @@ class AppState: ObservableObject {
         audioEngine.stop()
         demodTask?.cancel(); demodTask = nil
         cycleTask?.cancel(); cycleTask = nil
+        rigPollTask?.cancel(); rigPollTask = nil
         if radioState.isConnected { disconnectRig() }
         isReceiving = false; txEnabled = false
-        statusText = "Gestoppt"
+        statusText = "Stopped"
     }
 
     // MARK: - FT8 Cycle

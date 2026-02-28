@@ -44,9 +44,6 @@ class AppSettings: ObservableObject {
     // JS8-specific
     @AppStorage("speedRaw") var speedRaw = 0
     @AppStorage("audioOffset") var audioOffset = 1000.0
-    @AppStorage("networkHost") var networkHost = "localhost"
-    @AppStorage("networkPort") var networkPort = 2442
-    @AppStorage("useNetworkMode") var useNetworkMode = false
 
     init() {
         if UserDefaults.standard.object(forKey: "rigModel") as? Int == 0 {
