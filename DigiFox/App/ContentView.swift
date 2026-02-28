@@ -17,7 +17,7 @@ struct ContentView: View {
                 .tag(1)
 
             CWView()
-                .tabItem { Label("CW", systemImage: "bolt.horizontal.fill") }
+                .tabItem { Label("CW", systemImage: "dot.radiowaves.right") }
                 .tag(4)
 
             ActivityView()
