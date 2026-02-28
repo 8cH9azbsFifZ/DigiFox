@@ -49,14 +49,6 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Modus") {
-                    Picker("Digitalmodus", selection: $settings.digitalModeRaw) {
-                        Text("FT8").tag(0)
-                        Text("JS8Call").tag(1)
-                    }
-                    .pickerStyle(.segmented)
-                }
-
                 // USB devices
                 Section {
                     HStack {
