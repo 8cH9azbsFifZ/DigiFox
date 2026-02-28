@@ -12,6 +12,7 @@
 		878BD6DAA8F527AED144390F /* Assets.xcassets */ = {isa = PBXBuildFile; fileRef = 76982514E152DC4257AEAF8E /* Assets.xcassets */; };
 		6B590F40FDC56F137AD30859 /* AudioEngine.swift */ = {isa = PBXBuildFile; fileRef = 9415F6DDC061C739D07E7635 /* AudioEngine.swift */; };
 		92A7553E210E2B35C9F3DD08 /* FFTProcessor.swift */ = {isa = PBXBuildFile; fileRef = 5784EA10FA80D66B7D6605BC /* FFTProcessor.swift */; };
+		280FF3D23295B2995FAA5A16 /* TruSDXSerialAudio.swift */ = {isa = PBXBuildFile; fileRef = 89C503B2FA4BF36EDDEB15D5 /* TruSDXSerialAudio.swift */; };
 		D0A6795CB1A506602FC0672F /* USBAudioManager.swift */ = {isa = PBXBuildFile; fileRef = 31F34BE0EA4A978069A368FC /* USBAudioManager.swift */; };
 		1E014E8925E1EA219F3BB2B8 /* CATController.swift */ = {isa = PBXBuildFile; fileRef = A3D5281665B3D1BB7354D023 /* CATController.swift */; };
 		A0596FAA90E2C8A7427F4DAE /* FT8CRC.swift */ = {isa = PBXBuildFile; fileRef = 5486327652BF5C3F8848A34C /* FT8CRC.swift */; };
@@ -30,6 +31,7 @@
 		52000F8B57F1D0FF85D493BE /* PackMessage.swift */ = {isa = PBXBuildFile; fileRef = 527DAD47E55BA648690EFE21 /* PackMessage.swift */; };
 		94D437C0134D99DFD62F7E3B /* hamlib_missing.c */ = {isa = PBXBuildFile; fileRef = AB3F9B3904B9247A6DD54FFA /* hamlib_missing.c */; };
 		6DC4E0509D401B664C5D9DE5 /* Message.swift */ = {isa = PBXBuildFile; fileRef = C2F2BE953915B7B5FDA75A20 /* Message.swift */; };
+		F1335E25CDC69792B8046790 /* RadioProfile.swift */ = {isa = PBXBuildFile; fileRef = 5F0DBFC75C0624A73789F056 /* RadioProfile.swift */; };
 		3E387B4AFB3E188EDE28A583 /* Settings.swift */ = {isa = PBXBuildFile; fileRef = 347DFE4C04CCC67C287F6045 /* Settings.swift */; };
 		DC63D342976371708C358462 /* Station.swift */ = {isa = PBXBuildFile; fileRef = F3F65BAAE737600888342C39 /* Station.swift */; };
 		0DDDF7534FD8475825EF9C61 /* JS8APIMessage.swift */ = {isa = PBXBuildFile; fileRef = 6917D82226FB0F411E8A90B1 /* JS8APIMessage.swift */; };
@@ -74,6 +76,7 @@
 		76982514E152DC4257AEAF8E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Assets.xcassets"; sourceTree = "<group>"; };
 		9415F6DDC061C739D07E7635 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioEngine.swift"; sourceTree = "<group>"; };
 		5784EA10FA80D66B7D6605BC /* FFTProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FFTProcessor.swift"; sourceTree = "<group>"; };
+		89C503B2FA4BF36EDDEB15D5 /* TruSDXSerialAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TruSDXSerialAudio.swift"; sourceTree = "<group>"; };
 		31F34BE0EA4A978069A368FC /* USBAudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "USBAudioManager.swift"; sourceTree = "<group>"; };
 		A3D5281665B3D1BB7354D023 /* CATController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CATController.swift"; sourceTree = "<group>"; };
 		5486327652BF5C3F8848A34C /* FT8CRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8CRC.swift"; sourceTree = "<group>"; };
@@ -95,6 +98,7 @@
 		AB3F9B3904B9247A6DD54FFA /* hamlib_missing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "hamlib_missing.c"; sourceTree = "<group>"; };
 		29EEBAC2F5F1D2B7FAACFB81 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
 		C2F2BE953915B7B5FDA75A20 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message.swift"; sourceTree = "<group>"; };
+		5F0DBFC75C0624A73789F056 /* RadioProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RadioProfile.swift"; sourceTree = "<group>"; };
 		347DFE4C04CCC67C287F6045 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings.swift"; sourceTree = "<group>"; };
 		F3F65BAAE737600888342C39 /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Station.swift"; sourceTree = "<group>"; };
 		6917D82226FB0F411E8A90B1 /* JS8APIMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8APIMessage.swift"; sourceTree = "<group>"; };
@@ -189,6 +193,7 @@
 			children = (
 				9415F6DDC061C739D07E7635 /* AudioEngine.swift */,
 				5784EA10FA80D66B7D6605BC /* FFTProcessor.swift */,
+				89C503B2FA4BF36EDDEB15D5 /* TruSDXSerialAudio.swift */,
 				31F34BE0EA4A978069A368FC /* USBAudioManager.swift */,
 			);
 			path = "Audio";
@@ -251,6 +256,7 @@
 			isa = PBXGroup;
 			children = (
 				C2F2BE953915B7B5FDA75A20 /* Message.swift */,
+				5F0DBFC75C0624A73789F056 /* RadioProfile.swift */,
 				347DFE4C04CCC67C287F6045 /* Settings.swift */,
 				F3F65BAAE737600888342C39 /* Station.swift */,
 			);
@@ -387,6 +393,7 @@
 				9C9BF82957FB50C52657BB81 /* DigiFoxApp.swift */,
 				6B590F40FDC56F137AD30859 /* AudioEngine.swift */,
 				92A7553E210E2B35C9F3DD08 /* FFTProcessor.swift */,
+				280FF3D23295B2995FAA5A16 /* TruSDXSerialAudio.swift */,
 				D0A6795CB1A506602FC0672F /* USBAudioManager.swift */,
 				1E014E8925E1EA219F3BB2B8 /* CATController.swift */,
 				A0596FAA90E2C8A7427F4DAE /* FT8CRC.swift */,
@@ -405,6 +412,7 @@
 				52000F8B57F1D0FF85D493BE /* PackMessage.swift */,
 				94D437C0134D99DFD62F7E3B /* hamlib_missing.c */,
 				6DC4E0509D401B664C5D9DE5 /* Message.swift */,
+				F1335E25CDC69792B8046790 /* RadioProfile.swift */,
 				3E387B4AFB3E188EDE28A583 /* Settings.swift */,
 				DC63D342976371708C358462 /* Station.swift */,
 				0DDDF7534FD8475825EF9C61 /* JS8APIMessage.swift */,

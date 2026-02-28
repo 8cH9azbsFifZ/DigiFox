@@ -1,20 +1,32 @@
 import Foundation
 import Combine
 
-/// Handles audio I/O over the (tr)uSDX serial connection.
+/// Handles audio I/O over the (tr)uSDX serial connection using the CAT_STREAMING protocol.
 ///
-/// The (tr)uSDX sends both CAT commands and audio data over the same USB CDC serial port.
-/// - CAT commands: ASCII text terminated by ';'
-/// - Audio data: raw 8-bit unsigned PCM at ~4808 Hz sample rate
+/// Protocol details (from usdx.ino firmware):
+/// - Enable streaming:  send `UA1;`
+/// - Disable streaming: send `UA0;`
+/// - RX audio is sent as `US<audio bytes>;` blocks at 7812 Hz, 8-bit unsigned PCM
+/// - The byte value 0x3B (';') is never sent as audio data (incremented to 0x3C)
+/// - CAT responses are interleaved: `;US[audio...];[CAT response];US[audio...];`
+/// - Baud rate must be 115200 for streaming
 ///
-/// This manager demultiplexes the incoming stream, forwarding CAT responses
-/// to a callback and converting audio samples for processing.
+/// Demux state machine (from firmware source):
+///   State 0 (CAT):   ';' → state 1; else forward to CAT
+///   State 1 (after ';'): 'U' → state 2; else forward to CAT, state 0
+///   State 2 (after ';U'): 'S' → state 3 (audio); else forward "U"+byte to CAT, state 0
+///   State 3 (audio): ';' → state 1 (end of audio block); else → audio sample
 class TruSDXSerialAudio: ObservableObject {
 
-    // (tr)uSDX audio parameters
-    static let sampleRate: Double = 4807.69
-    static let bitsPerSample = 8
-    static let pcmBias: Float = 128.0    // unsigned 8-bit center
+    /// Sample rate depends on crystal frequency:
+    /// - 20 MHz crystal (standard TruSDX): 7812.5 Hz
+    /// - 16 MHz crystal (Arduino Uno/Nano): 6250 Hz
+    static let sampleRate20MHz: Double = 7812.5
+    static let sampleRate16MHz: Double = 6250.0
+    static let defaultSampleRate: Double = sampleRate20MHz
+
+    /// Required baud rate for CAT_STREAMING
+    static let requiredBaudRate: speed_t = 115200
 
     enum State: Equatable {
         case idle
@@ -31,8 +43,20 @@ class TruSDXSerialAudio: ObservableObject {
     /// Called with complete CAT response strings (e.g. "FA00007074000;")
     var onCATResponse: ((String) -> Void)?
 
+    var sampleRate: Double = defaultSampleRate
+
     private var serialPort: USBSerialPort?
-    private var catBuffer = Data()
+    private var demuxState: DemuxState = .cat
+    private var catBuffer = ""
+    private var audioBuffer = [Float]()
+
+    // Demux state machine matching the firmware
+    private enum DemuxState {
+        case cat        // State 0: normal CAT data
+        case semicolon  // State 1: just saw ';'
+        case semicolonU // State 2: just saw ';U'
+        case audio      // State 3: receiving audio samples
+    }
 
     // MARK: - Lifecycle
 
@@ -40,59 +64,109 @@ class TruSDXSerialAudio: ObservableObject {
     func attach(to port: USBSerialPort) {
         self.serialPort = port
         port.onDataReceived = { [weak self] data in
-            self?.demux(data)
+            self?.processIncoming(data)
         }
+    }
+
+    /// Send UA1; to enable audio streaming from the (tr)uSDX
+    func startStreaming() {
+        guard let port = serialPort, port.isConnected else {
+            state = .error("Serial port not connected")
+            return
+        }
+        try? port.write("UA1;")
         state = .streaming
+        demuxState = .cat
+    }
+
+    /// Send UA0; to disable audio streaming
+    func stopStreaming() {
+        guard let port = serialPort, port.isConnected else { return }
+        try? port.write("UA0;")
+        state = .idle
+        demuxState = .cat
     }
 
     /// Detach from the serial port
     func detach() {
+        if state == .streaming { stopStreaming() }
         serialPort?.onDataReceived = nil
         serialPort = nil
         state = .idle
     }
 
-    // MARK: - TX Audio
+    // MARK: - Demultiplexer (matching firmware state machine)
 
-    /// Send audio samples to the (tr)uSDX for transmission.
-    /// Converts float samples (-1.0...1.0) to 8-bit unsigned PCM.
-    func sendAudio(_ samples: [Float]) {
-        guard let port = serialPort, port.isConnected else { return }
+    private func processIncoming(_ data: Data) {
+        var audioSamples = [Float]()
 
-        var bytes = Data(capacity: samples.count)
-        for sample in samples {
-            let clamped = max(-1.0, min(1.0, sample))
-            let byte = UInt8(clamped * 127.0 + Self.pcmBias)
-            bytes.append(byte)
-        }
+        for byte in data {
+            switch demuxState {
+            case .cat:
+                // State 0: looking for ';' to transition
+                if byte == 0x3B { // ';'
+                    // Flush any accumulated CAT data as a complete response
+                    if !catBuffer.isEmpty {
+                        let response = catBuffer + ";"
+                        catBuffer = ""
+                        DispatchQueue.main.async {
+                            self.onCATResponse?(response)
+                        }
+                    }
+                    demuxState = .semicolon
+                } else {
+                    catBuffer.append(Character(UnicodeScalar(byte)))
+                }
 
-        try? port.write(bytes)
-    }
+            case .semicolon:
+                // State 1: just saw ';', check for 'U'
+                if byte == UInt8(ascii: "U") {
+                    demuxState = .semicolonU
+                } else {
+                    // Not a US prefix, this byte is part of a new CAT command
+                    catBuffer.append(Character(UnicodeScalar(byte)))
+                    demuxState = .cat
+                }
 
-    /// Resample from standard sample rate (e.g. 48000) down to TruSDX rate (~4808 Hz)
-    static func downsample(_ samples: [Float], from sourceSR: Double, to targetSR: Double = sampleRate) -> [Float] {
-        let ratio = sourceSR / targetSR
-        let outputCount = Int(Double(samples.count) / ratio)
-        var output = [Float](repeating: 0, count: outputCount)
+            case .semicolonU:
+                // State 2: saw ';U', check for 'S'
+                if byte == UInt8(ascii: "S") {
+                    demuxState = .audio
+                } else {
+                    // Not 'US', forward 'U' + this byte as CAT data
+                    catBuffer.append("U")
+                    catBuffer.append(Character(UnicodeScalar(byte)))
+                    demuxState = .cat
+                }
 
-        for i in 0..<outputCount {
-            let srcIndex = Double(i) * ratio
-            let idx = Int(srcIndex)
-            let frac = Float(srcIndex - Double(idx))
-
-            if idx + 1 < samples.count {
-                output[i] = samples[idx] * (1.0 - frac) + samples[idx + 1] * frac
-            } else if idx < samples.count {
-                output[i] = samples[idx]
+            case .audio:
+                // State 3: audio data until next ';'
+                if byte == 0x3B { // ';'
+                    demuxState = .semicolon
+                } else {
+                    // Convert 8-bit unsigned PCM to float (-1.0 ... 1.0)
+                    let sample = (Float(byte) - 128.0) / 128.0
+                    audioSamples.append(sample)
+                }
             }
         }
-        return output
+
+        if !audioSamples.isEmpty {
+            let rms = sqrt(audioSamples.reduce(0) { $0 + $1 * $1 } / Float(audioSamples.count))
+            DispatchQueue.main.async {
+                self.inputLevel = rms
+                self.onAudioReceived?(audioSamples)
+            }
+        }
     }
 
-    /// Upsample from TruSDX rate (~4808 Hz) to standard sample rate (e.g. 48000)
-    static func upsample(_ samples: [Float], from sourceSR: Double = sampleRate, to targetSR: Double) -> [Float] {
+    // MARK: - Resampling Utilities
+
+    /// Upsample from TruSDX rate (~7812 Hz) to standard sample rate (e.g. 48000)
+    static func upsample(_ samples: [Float], from sourceSR: Double = defaultSampleRate, to targetSR: Double) -> [Float] {
         let ratio = targetSR / sourceSR
         let outputCount = Int(Double(samples.count) * ratio)
+        guard outputCount > 0 else { return [] }
         var output = [Float](repeating: 0, count: outputCount)
 
         for i in 0..<outputCount {
@@ -109,65 +183,24 @@ class TruSDXSerialAudio: ObservableObject {
         return output
     }
 
-    // MARK: - Demultiplexer
+    /// Downsample from standard sample rate (e.g. 48000) to TruSDX rate (~7812 Hz)
+    static func downsample(_ samples: [Float], from sourceSR: Double, to targetSR: Double = defaultSampleRate) -> [Float] {
+        let ratio = sourceSR / targetSR
+        let outputCount = Int(Double(samples.count) / ratio)
+        guard outputCount > 0 else { return [] }
+        var output = [Float](repeating: 0, count: outputCount)
 
-    /// Separate incoming serial data into CAT responses and audio samples.
-    ///
-    /// Heuristic: bytes in the printable ASCII range (0x20-0x7E) that form
-    /// semicolon-terminated strings are CAT responses. All other bytes are
-    /// treated as 8-bit unsigned PCM audio samples.
-    private func demux(_ data: Data) {
-        var audioSamples = [Float]()
+        for i in 0..<outputCount {
+            let srcIndex = Double(i) * ratio
+            let idx = Int(srcIndex)
+            let frac = Float(srcIndex - Double(idx))
 
-        for byte in data {
-            if isPrintableASCII(byte) || byte == 0x0A || byte == 0x0D {
-                // Accumulate potential CAT data
-                catBuffer.append(byte)
-
-                if byte == UInt8(ascii: ";") {
-                    // Complete CAT response
-                    if let response = String(data: catBuffer, encoding: .ascii) {
-                        DispatchQueue.main.async {
-                            self.onCATResponse?(response)
-                        }
-                    }
-                    catBuffer.removeAll()
-                }
-
-                // Prevent buffer overflow from malformed data
-                if catBuffer.count > 256 {
-                    // Not a valid CAT response, treat accumulated bytes as audio
-                    audioSamples.append(contentsOf: catBuffer.map { byteToSample($0) })
-                    catBuffer.removeAll()
-                }
-            } else {
-                // Flush any partial CAT buffer as audio (was not a valid command)
-                if !catBuffer.isEmpty {
-                    audioSamples.append(contentsOf: catBuffer.map { byteToSample($0) })
-                    catBuffer.removeAll()
-                }
-                // Audio sample
-                audioSamples.append(byteToSample(byte))
+            if idx + 1 < samples.count {
+                output[i] = samples[idx] * (1.0 - frac) + samples[idx + 1] * frac
+            } else if idx < samples.count {
+                output[i] = samples[idx]
             }
         }
-
-        if !audioSamples.isEmpty {
-            // Calculate RMS level
-            let rms = sqrt(audioSamples.reduce(0) { $0 + $1 * $1 } / Float(audioSamples.count))
-            DispatchQueue.main.async {
-                self.inputLevel = rms
-                self.onAudioReceived?(audioSamples)
-            }
-        }
-    }
-
-    /// Convert unsigned 8-bit PCM to float (-1.0 ... 1.0)
-    private func byteToSample(_ byte: UInt8) -> Float {
-        return (Float(byte) - Self.pcmBias) / Self.pcmBias
-    }
-
-    /// Check if byte is printable ASCII (space through tilde)
-    private func isPrintableASCII(_ byte: UInt8) -> Bool {
-        return byte >= 0x20 && byte <= 0x7E
+        return output
     }
 }

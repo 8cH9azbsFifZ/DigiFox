@@ -20,7 +20,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
     var defaultBaudRate: Int {
         switch self {
         case .digirig: return 9600
-        case .trusdx:  return 38400
+        case .trusdx:  return 115200    // Required for CAT_STREAMING audio
         }
     }
 
