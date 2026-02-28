@@ -1,0 +1,35 @@
+name: DigiFox
+options:
+  bundleIdPrefix: com.digifox
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1,2"
+
+targets:
+  DigiFox:
+    type: application
+    platform: iOS
+    sources:
+      - DigiFox
+    settings:
+      base:
+        INFOPLIST_FILE: DigiFox/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.digifox.app
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: 1
+        DEVELOPMENT_TEAM: ""
+    info:
+      path: DigiFox/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSMicrophoneUsageDescription: "DigiFox needs microphone access for audio processing with your radio."

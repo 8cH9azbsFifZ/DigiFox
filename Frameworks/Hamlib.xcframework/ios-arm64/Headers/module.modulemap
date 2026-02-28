@@ -1,0 +1,5 @@
+module Hamlib [system] {
+    header "hamlib/rig.h"
+    link "hamlib"
+    export *
+}
