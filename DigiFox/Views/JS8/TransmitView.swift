@@ -27,7 +27,7 @@ struct TransmitView: View {
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.characters)
                 Button(action: {
-                    appState.mode == .standalone ? appState.transmit() : appState.sendNetworkMessage()
+                    appState.js8Mode == .standalone ? appState.transmitJS8() : appState.sendNetworkMessage()
                 }) {
                     Image(systemName: "arrow.up.circle.fill").font(.title2)
                 }

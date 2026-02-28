@@ -1,566 +1,554 @@
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
-	classes = {
-	};
-	objectVersion = 77;
+	classes = {};
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		064254843EF46811A0F64A1C /* QSOPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */; };
-		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
-		1C9087A95FD4DFCD78BFF001 /* JS8NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0498F7D3191907C57EAE540 /* JS8NetworkClient.swift */; };
-		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
-		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
-		3DD47D3D86CC03B027C0D2FD /* FT8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418435FE10D17B959EF0917F /* FT8CRC.swift */; };
-		42F83FA9E2F09CB15A4185CD /* CATController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9044084B06353D6E0BA292F0 /* CATController.swift */; };
-		45395C5049E39FFC267D9021 /* FT8CostasSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D552626313496C2C53436CC /* FT8CostasSync.swift */; };
-		47CF22F68DE0DB3001BD604B /* CATController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580375583F534EC4B83A224 /* CATController.swift */; };
-		4E98547E4734AB6FB01A7214 /* SerialPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5BB22A1B82163851B452FC /* SerialPort.swift */; };
-		54494D51D2B9EEC718D2F8C7 /* FT8MessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */; };
-		5580F6D76606C76672C0C2C2 /* USBSerialPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA9B4C132578FB406F4F9CC /* USBSerialPort.swift */; };
-		56454416AC5E0719E6594B03 /* JS8Demodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DED2C96F47C2E9EBA84A99 /* JS8Demodulator.swift */; };
-		56FBE2200A28FCA4671187FE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14583D19B921994C4665B7E /* ContentView.swift */; };
-		5D78E577BC3BA5E4BCC45FE8 /* DigiFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6ED5782F101779C286560E /* DigiFoxApp.swift */; };
-		7FC4C58E90E2D9980692F1C4 /* FT8Demodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */; };
-		8720DD51995DA5D5CA21DC88 /* IOKitUSBSerial.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */; };
-		89CA2F072218AE7A16625C59 /* JS8CostasSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9347F13C309171E2EE0FA2F /* JS8CostasSync.swift */; };
-		9333C074877601AFBDC6BCD0 /* TransmitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192E563AD496F876A00BCCC6 /* TransmitView.swift */; };
-		96F2C9535FBC3CFB73EF0A27 /* FFTProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */; };
-		9D2A5A6C306BF35B02D878D3 /* Station.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E07C9F63A23433D9AC19B7 /* Station.swift */; };
-		A2C0C56E20AE4ED76BDB7BED /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7362B696CD0741400AECD33 /* AppState.swift */; };
-		A610F56A8E75AF78DA03BB31 /* JS8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F13E1F0B7D04F5EDE880BE /* JS8Protocol.swift */; };
-		A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */; };
-		A7D652EBFF30B44F4F2F7202 /* FT8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */; };
-		ACFEF84CE50EB7CB5D1D3B5B /* JS8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABA1961DFD56F773EFFBE68 /* JS8CRC.swift */; };
-		AE868273CA2133436CE66553 /* JS8APIMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B631F508D71F51974F35FAE3 /* JS8APIMessage.swift */; };
-		B412839F42DFAB78C39D04FD /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F7BC2894D85D4BA72E7D5 /* ClockView.swift */; };
-		D945D8CD0010A1F5C266E9E0 /* JS8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */; };
-		DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */; };
-		DB441E98FB481124E6AA6231 /* USBAudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B279A2AEBB68D6FE427CBF2 /* USBAudioManager.swift */; };
-		E409D68845E8DB65BF6A02CD /* HamlibRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48778C5CEC1F377AD721046 /* HamlibRig.swift */; };
-		E7CCC16F41B3BF38F3AFB2C9 /* FT8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529893966F36D4348C07DF45 /* FT8Modulator.swift */; };
-		E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B57730840D19777B21EEDA5 /* AudioEngine.swift */; };
-		F6ECCE514B23BF191B4761E8 /* RadioViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56000543222196BCC310BEE7 /* RadioViewModel.swift */; };
-		FAEB95B767BE19E8293239E5 /* JS8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD4C25E26B814B10704A659 /* JS8LDPC.swift */; };
-		FDF44DC5CB1DEFB68997677F /* hamlib_missing.c in Sources */ = {isa = PBXBuildFile; fileRef = A03C34181F0E5CFD42AD650F /* hamlib_missing.c */; };
+		CF4C5CEEC887C35E67DACC6A /* AppState.swift */ = {isa = PBXBuildFile; fileRef = 7FFC302278DB4291D37089F1 /* AppState.swift */; };
+		5E567D8AD594190897CEE543 /* ContentView.swift */ = {isa = PBXBuildFile; fileRef = 9708E23A210F5E0B3AD476C6 /* ContentView.swift */; };
+		9C9BF82957FB50C52657BB81 /* DigiFoxApp.swift */ = {isa = PBXBuildFile; fileRef = 708FBDCF24CD3F5BA7B7B945 /* DigiFoxApp.swift */; };
+		878BD6DAA8F527AED144390F /* Assets.xcassets */ = {isa = PBXBuildFile; fileRef = 76982514E152DC4257AEAF8E /* Assets.xcassets */; };
+		6B590F40FDC56F137AD30859 /* AudioEngine.swift */ = {isa = PBXBuildFile; fileRef = 9415F6DDC061C739D07E7635 /* AudioEngine.swift */; };
+		92A7553E210E2B35C9F3DD08 /* FFTProcessor.swift */ = {isa = PBXBuildFile; fileRef = 5784EA10FA80D66B7D6605BC /* FFTProcessor.swift */; };
+		D0A6795CB1A506602FC0672F /* USBAudioManager.swift */ = {isa = PBXBuildFile; fileRef = 31F34BE0EA4A978069A368FC /* USBAudioManager.swift */; };
+		1E014E8925E1EA219F3BB2B8 /* CATController.swift */ = {isa = PBXBuildFile; fileRef = A3D5281665B3D1BB7354D023 /* CATController.swift */; };
+		A0596FAA90E2C8A7427F4DAE /* FT8CRC.swift */ = {isa = PBXBuildFile; fileRef = 5486327652BF5C3F8848A34C /* FT8CRC.swift */; };
+		D4EB0268F58F04090C167BD3 /* FT8CostasSync.swift */ = {isa = PBXBuildFile; fileRef = 2507411C09971E4DB69A5432 /* FT8CostasSync.swift */; };
+		BB6EBFF85EB18A6CEF45F087 /* FT8Demodulator.swift */ = {isa = PBXBuildFile; fileRef = B8D7963C2526611FE62E2201 /* FT8Demodulator.swift */; };
+		1356B1625C79A92F54626762 /* FT8LDPC.swift */ = {isa = PBXBuildFile; fileRef = 5F654157AC44DD6A54F0CB86 /* FT8LDPC.swift */; };
+		3F483572EA0FB2817A0D9C32 /* FT8MessagePack.swift */ = {isa = PBXBuildFile; fileRef = 48EA88E2573DF7BE496EAD88 /* FT8MessagePack.swift */; };
+		7F0C4795688DF56B2D1DC85B /* FT8Modulator.swift */ = {isa = PBXBuildFile; fileRef = 77785D12AC77609DA67C060B /* FT8Modulator.swift */; };
+		2ECFC9EDB92808FFEFF852EB /* FT8Protocol.swift */ = {isa = PBXBuildFile; fileRef = 2E38ED37DF59DB8995F61EA2 /* FT8Protocol.swift */; };
+		109518BDBFC7689973964900 /* JS8CRC.swift */ = {isa = PBXBuildFile; fileRef = 9295595E2C678A7AD880D1DB /* JS8CRC.swift */; };
+		BF35FC7D5BD37B14E3B6E6B3 /* JS8CostasSync.swift */ = {isa = PBXBuildFile; fileRef = A3815E6BC270DFC90B94DB1D /* JS8CostasSync.swift */; };
+		506CD99078F6432BE47DABB9 /* JS8Demodulator.swift */ = {isa = PBXBuildFile; fileRef = 4F6E2F0BBC6334EBF5C2CB45 /* JS8Demodulator.swift */; };
+		6D7B165CC54477BC5708ECFC /* JS8LDPC.swift */ = {isa = PBXBuildFile; fileRef = 6A26CD45FF075010F7D5A04E /* JS8LDPC.swift */; };
+		C742D7675EB7081088BFC719 /* JS8Modulator.swift */ = {isa = PBXBuildFile; fileRef = 53DC9C5389EC0955D2FFF93B /* JS8Modulator.swift */; };
+		927E5628B2973659C6CB2AB0 /* JS8Protocol.swift */ = {isa = PBXBuildFile; fileRef = 2B4224807BF2DAD761D38183 /* JS8Protocol.swift */; };
+		52000F8B57F1D0FF85D493BE /* PackMessage.swift */ = {isa = PBXBuildFile; fileRef = 527DAD47E55BA648690EFE21 /* PackMessage.swift */; };
+		94D437C0134D99DFD62F7E3B /* hamlib_missing.c */ = {isa = PBXBuildFile; fileRef = AB3F9B3904B9247A6DD54FFA /* hamlib_missing.c */; };
+		6DC4E0509D401B664C5D9DE5 /* Message.swift */ = {isa = PBXBuildFile; fileRef = C2F2BE953915B7B5FDA75A20 /* Message.swift */; };
+		3E387B4AFB3E188EDE28A583 /* Settings.swift */ = {isa = PBXBuildFile; fileRef = 347DFE4C04CCC67C287F6045 /* Settings.swift */; };
+		DC63D342976371708C358462 /* Station.swift */ = {isa = PBXBuildFile; fileRef = F3F65BAAE737600888342C39 /* Station.swift */; };
+		0DDDF7534FD8475825EF9C61 /* JS8APIMessage.swift */ = {isa = PBXBuildFile; fileRef = 6917D82226FB0F411E8A90B1 /* JS8APIMessage.swift */; };
+		2F67C1F86E2B6A171101A1E5 /* JS8NetworkClient.swift */ = {isa = PBXBuildFile; fileRef = 279C6D10BAC379F049D7CB0D /* JS8NetworkClient.swift */; };
+		4170C7429410B9D661BBF72A /* CATController.swift */ = {isa = PBXBuildFile; fileRef = EF77378E3982CCCA188DC7FB /* CATController.swift */; };
+		6602D810AD8BB8EC34D6BAEE /* HamlibRig.swift */ = {isa = PBXBuildFile; fileRef = 7EB161050BC464A8AF49D4A2 /* HamlibRig.swift */; };
+		FB588D65FF12AAC3BF5668CB /* IOKitUSBSerial.m */ = {isa = PBXBuildFile; fileRef = D1D5095F2306B6F636BAA46F /* IOKitUSBSerial.m */; };
+		EADDF4D8408B4A325E5AC905 /* SerialPort.swift */ = {isa = PBXBuildFile; fileRef = FB9177EDA85F850AE61F95CF /* SerialPort.swift */; };
+		C77B06C366761346BA73B1FC /* USBSerialPort.swift */ = {isa = PBXBuildFile; fileRef = DEE6B3C35CC7AE001DB2A14E /* USBSerialPort.swift */; };
+		E64858477ECC980C8ABCF805 /* RadioViewModel.swift */ = {isa = PBXBuildFile; fileRef = 03429688C9C1FA4B8246F977 /* RadioViewModel.swift */; };
+		9FA1BD5802FE8E069AE1A413 /* BandActivityView.swift */ = {isa = PBXBuildFile; fileRef = 832199661C95DA4720F0489B /* BandActivityView.swift */; };
+		74EC33829413DB6B937AF6DA /* ClockView.swift */ = {isa = PBXBuildFile; fileRef = 923D804589CC62CAB10CD085 /* ClockView.swift */; };
+		04A6956E4C1D3E9C1B13C503 /* FT8FrequencyView.swift */ = {isa = PBXBuildFile; fileRef = 3B67FD81481306FE46FC2B14 /* FT8FrequencyView.swift */; };
+		A181EDC834AF734EB6554545 /* FT8MessageListView.swift */ = {isa = PBXBuildFile; fileRef = 75EE0F94C597E9063CFE1EEB /* FT8MessageListView.swift */; };
+		9B1677ECD66A364EF5FFA9C9 /* QSOPanelView.swift */ = {isa = PBXBuildFile; fileRef = C65B0F1ED21246107F908807 /* QSOPanelView.swift */; };
+		AAD2244EFB92B87E6AB0AB90 /* JS8FrequencyView.swift */ = {isa = PBXBuildFile; fileRef = 258BFCF60BAD5D4E5BFCBAB2 /* JS8FrequencyView.swift */; };
+		F89E5DFC1DE87C67655E8EE6 /* JS8MessageListView.swift */ = {isa = PBXBuildFile; fileRef = D9FD16784682D9605ABE9328 /* JS8MessageListView.swift */; };
+		DA93E1D1176205D98E585221 /* NetworkClientView.swift */ = {isa = PBXBuildFile; fileRef = A4E6D7D85C161D62BD0338F5 /* NetworkClientView.swift */; };
+		D42CA1FE13035960024DF6F9 /* TransmitView.swift */ = {isa = PBXBuildFile; fileRef = 4FC81940B05FE8D511F3A528 /* TransmitView.swift */; };
+		E25B0CE146EAB17E7C7DD487 /* SettingsView.swift */ = {isa = PBXBuildFile; fileRef = BCD835AFB58A109AB46D6DB6 /* SettingsView.swift */; };
+		A39990F663C247345D8B3E9B /* WaterfallView.swift */ = {isa = PBXBuildFile; fileRef = 45CD9B4FC723B1B45C9A17FA /* WaterfallView.swift */; };
+		85A94DE1D8022E5A817BC55B /* Hamlib.xcframework */ = {isa = PBXBuildFile; fileRef = 4096495ED75B2C06F661528A /* Hamlib.xcframework */; };
+		FC5955F3EF54EC6F1FA8C6AC /* Hamlib.xcframework */ = {isa = PBXBuildFile; fileRef = 4096495ED75B2C06F661528A /* Hamlib.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		125E2C08DF6D0D6AA4265A45 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (FC5955F3EF54EC6F1FA8C6AC /* Hamlib.xcframework */,);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Protocol.swift; sourceTree = "<group>"; };
-		0ABA1961DFD56F773EFFBE68 /* JS8CRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8CRC.swift; sourceTree = "<group>"; };
-		114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8Modulator.swift; sourceTree = "<group>"; };
-		192E563AD496F876A00BCCC6 /* TransmitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransmitView.swift; sourceTree = "<group>"; };
-		1BD4C25E26B814B10704A659 /* JS8LDPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8LDPC.swift; sourceTree = "<group>"; };
-		2B279A2AEBB68D6FE427CBF2 /* USBAudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBAudioManager.swift; sourceTree = "<group>"; };
-		31DED2C96F47C2E9EBA84A99 /* JS8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8Demodulator.swift; sourceTree = "<group>"; };
-		3BA9B4C132578FB406F4F9CC /* USBSerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBSerialPort.swift; sourceTree = "<group>"; };
-		402F7BC2894D85D4BA72E7D5 /* ClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockView.swift; sourceTree = "<group>"; };
-		418435FE10D17B959EF0917F /* FT8CRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8CRC.swift; sourceTree = "<group>"; };
-		529893966F36D4348C07DF45 /* FT8Modulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Modulator.swift; sourceTree = "<group>"; };
-		56000543222196BCC310BEE7 /* RadioViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioViewModel.swift; sourceTree = "<group>"; };
-		69BA09EC57DA87A82A7B35D6 /* DigiFox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DigiFox.entitlements; sourceTree = "<group>"; };
-		70E07C9F63A23433D9AC19B7 /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Station.swift; sourceTree = "<group>"; };
-		7354379C821B3BA96621F06D /* WaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterfallView.swift; sourceTree = "<group>"; };
-		7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTProcessor.swift; sourceTree = "<group>"; };
-		8D552626313496C2C53436CC /* FT8CostasSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8CostasSync.swift; sourceTree = "<group>"; };
-		9044084B06353D6E0BA292F0 /* CATController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATController.swift; sourceTree = "<group>"; };
-		994344ED8663AD082F19E5F0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		9974C4B72639154796AEA187 /* DigiFox.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DigiFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IOKitUSBSerial.m; sourceTree = "<group>"; };
-		9B57730840D19777B21EEDA5 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
-		9E5BB22A1B82163851B452FC /* SerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialPort.swift; sourceTree = "<group>"; };
-		A03C34181F0E5CFD42AD650F /* hamlib_missing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hamlib_missing.c; sourceTree = "<group>"; };
-		A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackMessage.swift; sourceTree = "<group>"; };
-		A580375583F534EC4B83A224 /* CATController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATController.swift; sourceTree = "<group>"; };
-		A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOPanelView.swift; sourceTree = "<group>"; };
-		A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Demodulator.swift; sourceTree = "<group>"; };
-		B14583D19B921994C4665B7E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8MessagePack.swift; sourceTree = "<group>"; };
-		B631F508D71F51974F35FAE3 /* JS8APIMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8APIMessage.swift; sourceTree = "<group>"; };
-		B6F13E1F0B7D04F5EDE880BE /* JS8Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8Protocol.swift; sourceTree = "<group>"; };
-		B7362B696CD0741400AECD33 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
-		DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandActivityView.swift; sourceTree = "<group>"; };
-		E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8LDPC.swift; sourceTree = "<group>"; };
-		E9347F13C309171E2EE0FA2F /* JS8CostasSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8CostasSync.swift; sourceTree = "<group>"; };
-		F0498F7D3191907C57EAE540 /* JS8NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8NetworkClient.swift; sourceTree = "<group>"; };
-		F05D9D59090B41B404812A32 /* IOKitUSBSerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IOKitUSBSerial.h; sourceTree = "<group>"; };
-		F48778C5CEC1F377AD721046 /* HamlibRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamlibRig.swift; sourceTree = "<group>"; };
-		FA2E4E8F3202061B2C6D40FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		FB6ED5782F101779C286560E /* DigiFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigiFoxApp.swift; sourceTree = "<group>"; };
-		FC88B5C6BE929AAA2439AE99 /* DigiFox-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DigiFox-Bridging-Header.h"; sourceTree = "<group>"; };
+		7FFC302278DB4291D37089F1 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppState.swift"; sourceTree = "<group>"; };
+		9708E23A210F5E0B3AD476C6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView.swift"; sourceTree = "<group>"; };
+		708FBDCF24CD3F5BA7B7B945 /* DigiFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DigiFoxApp.swift"; sourceTree = "<group>"; };
+		76982514E152DC4257AEAF8E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Assets.xcassets"; sourceTree = "<group>"; };
+		9415F6DDC061C739D07E7635 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioEngine.swift"; sourceTree = "<group>"; };
+		5784EA10FA80D66B7D6605BC /* FFTProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FFTProcessor.swift"; sourceTree = "<group>"; };
+		31F34BE0EA4A978069A368FC /* USBAudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "USBAudioManager.swift"; sourceTree = "<group>"; };
+		A3D5281665B3D1BB7354D023 /* CATController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CATController.swift"; sourceTree = "<group>"; };
+		5486327652BF5C3F8848A34C /* FT8CRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8CRC.swift"; sourceTree = "<group>"; };
+		2507411C09971E4DB69A5432 /* FT8CostasSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8CostasSync.swift"; sourceTree = "<group>"; };
+		B8D7963C2526611FE62E2201 /* FT8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8Demodulator.swift"; sourceTree = "<group>"; };
+		5F654157AC44DD6A54F0CB86 /* FT8LDPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8LDPC.swift"; sourceTree = "<group>"; };
+		48EA88E2573DF7BE496EAD88 /* FT8MessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8MessagePack.swift"; sourceTree = "<group>"; };
+		77785D12AC77609DA67C060B /* FT8Modulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8Modulator.swift"; sourceTree = "<group>"; };
+		2E38ED37DF59DB8995F61EA2 /* FT8Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8Protocol.swift"; sourceTree = "<group>"; };
+		9295595E2C678A7AD880D1DB /* JS8CRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8CRC.swift"; sourceTree = "<group>"; };
+		A3815E6BC270DFC90B94DB1D /* JS8CostasSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8CostasSync.swift"; sourceTree = "<group>"; };
+		4F6E2F0BBC6334EBF5C2CB45 /* JS8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8Demodulator.swift"; sourceTree = "<group>"; };
+		6A26CD45FF075010F7D5A04E /* JS8LDPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8LDPC.swift"; sourceTree = "<group>"; };
+		53DC9C5389EC0955D2FFF93B /* JS8Modulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8Modulator.swift"; sourceTree = "<group>"; };
+		2B4224807BF2DAD761D38183 /* JS8Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8Protocol.swift"; sourceTree = "<group>"; };
+		527DAD47E55BA648690EFE21 /* PackMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PackMessage.swift"; sourceTree = "<group>"; };
+		FD1D688197AEE42C89D098A0 /* DigiFox-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DigiFox-Bridging-Header.h"; sourceTree = "<group>"; };
+		B37DA3CA4A5A17B8D4F2E485 /* DigiFox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "DigiFox.entitlements"; sourceTree = "<group>"; };
+		AB3F9B3904B9247A6DD54FFA /* hamlib_missing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "hamlib_missing.c"; sourceTree = "<group>"; };
+		29EEBAC2F5F1D2B7FAACFB81 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
+		C2F2BE953915B7B5FDA75A20 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message.swift"; sourceTree = "<group>"; };
+		347DFE4C04CCC67C287F6045 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings.swift"; sourceTree = "<group>"; };
+		F3F65BAAE737600888342C39 /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Station.swift"; sourceTree = "<group>"; };
+		6917D82226FB0F411E8A90B1 /* JS8APIMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8APIMessage.swift"; sourceTree = "<group>"; };
+		279C6D10BAC379F049D7CB0D /* JS8NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8NetworkClient.swift"; sourceTree = "<group>"; };
+		EF77378E3982CCCA188DC7FB /* CATController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CATController.swift"; sourceTree = "<group>"; };
+		7EB161050BC464A8AF49D4A2 /* HamlibRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HamlibRig.swift"; sourceTree = "<group>"; };
+		01A1666B2E16000FBA04F35A /* IOKitUSBSerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "IOKitUSBSerial.h"; sourceTree = "<group>"; };
+		D1D5095F2306B6F636BAA46F /* IOKitUSBSerial.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IOKitUSBSerial.m"; sourceTree = "<group>"; };
+		FB9177EDA85F850AE61F95CF /* SerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SerialPort.swift"; sourceTree = "<group>"; };
+		DEE6B3C35CC7AE001DB2A14E /* USBSerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "USBSerialPort.swift"; sourceTree = "<group>"; };
+		03429688C9C1FA4B8246F977 /* RadioViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RadioViewModel.swift"; sourceTree = "<group>"; };
+		832199661C95DA4720F0489B /* BandActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BandActivityView.swift"; sourceTree = "<group>"; };
+		923D804589CC62CAB10CD085 /* ClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClockView.swift"; sourceTree = "<group>"; };
+		3B67FD81481306FE46FC2B14 /* FT8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8FrequencyView.swift"; sourceTree = "<group>"; };
+		75EE0F94C597E9063CFE1EEB /* FT8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FT8MessageListView.swift"; sourceTree = "<group>"; };
+		C65B0F1ED21246107F908807 /* QSOPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QSOPanelView.swift"; sourceTree = "<group>"; };
+		258BFCF60BAD5D4E5BFCBAB2 /* JS8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8FrequencyView.swift"; sourceTree = "<group>"; };
+		D9FD16784682D9605ABE9328 /* JS8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JS8MessageListView.swift"; sourceTree = "<group>"; };
+		A4E6D7D85C161D62BD0338F5 /* NetworkClientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NetworkClientView.swift"; sourceTree = "<group>"; };
+		4FC81940B05FE8D511F3A528 /* TransmitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TransmitView.swift"; sourceTree = "<group>"; };
+		BCD835AFB58A109AB46D6DB6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
+		45CD9B4FC723B1B45C9A17FA /* WaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WaterfallView.swift"; sourceTree = "<group>"; };
+		4096495ED75B2C06F661528A /* Hamlib.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = "Hamlib.xcframework"; sourceTree = "<group>"; };
+		4096495ED75B2C06F661528A /* Hamlib.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Hamlib.xcframework; sourceTree = "<group>"; };
+		2142FBA363CB47B63982E357 /* DigiFox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DigiFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		29B2D46AA747A59804D46E1F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (85A94DE1D8022E5A817BC55B /* Hamlib.xcframework */,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
-		16FFA9D4604AE7535C90539A /* Serial */ = {
+		8D3FC6DB5D0827F168A73277 = {
 			isa = PBXGroup;
 			children = (
-				A580375583F534EC4B83A224 /* CATController.swift */,
-				F48778C5CEC1F377AD721046 /* HamlibRig.swift */,
-				F05D9D59090B41B404812A32 /* IOKitUSBSerial.h */,
-				9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */,
-				9E5BB22A1B82163851B452FC /* SerialPort.swift */,
-				3BA9B4C132578FB406F4F9CC /* USBSerialPort.swift */,
-			);
-			path = Serial;
-			sourceTree = "<group>";
-		};
-		3162F0A739A1503D79C5C77C /* FT8 */ = {
-			isa = PBXGroup;
-			children = (
-				8D552626313496C2C53436CC /* FT8CostasSync.swift */,
-				418435FE10D17B959EF0917F /* FT8CRC.swift */,
-				A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */,
-				E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */,
-				B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */,
-				529893966F36D4348C07DF45 /* FT8Modulator.swift */,
-				02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */,
-			);
-			path = FT8;
-			sourceTree = "<group>";
-		};
-		35D4949E2C6C8D887CA076C9 = {
-			isa = PBXGroup;
-			children = (
-				885EECA46C00596EF02074FE /* DigiFox */,
-				D4A564A37B2E058AD68C20FD /* Products */,
+				1F894C0CB8C1D00D979C20E2 /* DigiFox */,
+				8FC3D1C4F959C81BEBDC9F2A /* Frameworks */,
+				1BADDC1D73C1A20F347483E1 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		4156F892096B291FE7627B1E /* ViewModels */ = {
+		1BADDC1D73C1A20F347483E1 /* Products */ = {
 			isa = PBXGroup;
-			children = (
-				56000543222196BCC310BEE7 /* RadioViewModel.swift */,
-			);
-			path = ViewModels;
-			sourceTree = "<group>";
-		};
-		42CA9773F9222CC41D2D11E7 /* Audio */ = {
-			isa = PBXGroup;
-			children = (
-				9B57730840D19777B21EEDA5 /* AudioEngine.swift */,
-				7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */,
-				2B279A2AEBB68D6FE427CBF2 /* USBAudioManager.swift */,
-			);
-			path = Audio;
-			sourceTree = "<group>";
-		};
-		4775D2CE0E7257D1E9781109 /* HamlibStubs */ = {
-			isa = PBXGroup;
-			children = (
-				A03C34181F0E5CFD42AD650F /* hamlib_missing.c */,
-			);
-			path = HamlibStubs;
-			sourceTree = "<group>";
-		};
-		63731F1ED4EE31CC29CE5632 /* Network */ = {
-			isa = PBXGroup;
-			children = (
-				B631F508D71F51974F35FAE3 /* JS8APIMessage.swift */,
-				F0498F7D3191907C57EAE540 /* JS8NetworkClient.swift */,
-			);
-			path = Network;
-			sourceTree = "<group>";
-		};
-		6458CC06F3E6FB57D79D5340 /* JS8 */ = {
-			isa = PBXGroup;
-			children = (
-				192E563AD496F876A00BCCC6 /* TransmitView.swift */,
-			);
-			path = JS8;
-			sourceTree = "<group>";
-		};
-		885EECA46C00596EF02074FE /* DigiFox */ = {
-			isa = PBXGroup;
-			children = (
-				994344ED8663AD082F19E5F0 /* Assets.xcassets */,
-				FC88B5C6BE929AAA2439AE99 /* DigiFox-Bridging-Header.h */,
-				69BA09EC57DA87A82A7B35D6 /* DigiFox.entitlements */,
-				FA2E4E8F3202061B2C6D40FB /* Info.plist */,
-				F2F14C716C3C551D84A5C425 /* App */,
-				42CA9773F9222CC41D2D11E7 /* Audio */,
-				F65D6411386A404DB79AA2EF /* CAT */,
-				B59712FC1DAE2E8A56C55184 /* Codec */,
-				4775D2CE0E7257D1E9781109 /* HamlibStubs */,
-				DEDAD50F16D8183C5F27EE88 /* Models */,
-				63731F1ED4EE31CC29CE5632 /* Network */,
-				16FFA9D4604AE7535C90539A /* Serial */,
-				4156F892096B291FE7627B1E /* ViewModels */,
-				E17000C80B9D69E84FA2A1CC /* Views */,
-			);
-			path = DigiFox;
-			sourceTree = "<group>";
-		};
-		B59712FC1DAE2E8A56C55184 /* Codec */ = {
-			isa = PBXGroup;
-			children = (
-				3162F0A739A1503D79C5C77C /* FT8 */,
-				F3C3A79EE0AB64B4B1FA781A /* JS8 */,
-			);
-			path = Codec;
-			sourceTree = "<group>";
-		};
-		D4A564A37B2E058AD68C20FD /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9974C4B72639154796AEA187 /* DigiFox.app */,
-			);
+			children = (2142FBA363CB47B63982E357 /* DigiFox.app */,);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D6BDE5B4F829D7E61279FCDE /* FT8 */ = {
+		8FC3D1C4F959C81BEBDC9F2A /* Frameworks */ = {
 			isa = PBXGroup;
-			children = (
-				DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */,
-				402F7BC2894D85D4BA72E7D5 /* ClockView.swift */,
-				A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */,
-			);
-			path = FT8;
+			children = (4096495ED75B2C06F661528A /* Hamlib.xcframework */,);
+			path = Frameworks;
 			sourceTree = "<group>";
 		};
-		DEDAD50F16D8183C5F27EE88 /* Models */ = {
+		1F894C0CB8C1D00D979C20E2 /* DigiFox */ = {
 			isa = PBXGroup;
 			children = (
-				70E07C9F63A23433D9AC19B7 /* Station.swift */,
+				F0A32A4FF0E0F6C3E5E16AF2 /* App */,
+				76982514E152DC4257AEAF8E /* Assets.xcassets */,
+				3CDBB7511E45C700BD5A6822 /* Audio */,
+				3CE8C0340F2DD8F1C44937F3 /* CAT */,
+				0E9C91FDA4757C24E87690CD /* Codec */,
+				FD1D688197AEE42C89D098A0 /* DigiFox-Bridging-Header.h */,
+				B37DA3CA4A5A17B8D4F2E485 /* DigiFox.entitlements */,
+				F428807C86891A062CB96719 /* HamlibStubs */,
+				29EEBAC2F5F1D2B7FAACFB81 /* Info.plist */,
+				1A86FEDDD249B21EEBD30B9A /* Models */,
+				17F82296F32EB07C076FF851 /* Network */,
+				BC29D71D8710A2F8AFC25FC9 /* Serial */,
+				39CC4403B2077900D62E8F17 /* ViewModels */,
+				18A581E80CDD2B3A7280ACFC /* Views */,
 			);
-			path = Models;
+			path = "DigiFox";
 			sourceTree = "<group>";
 		};
-		E17000C80B9D69E84FA2A1CC /* Views */ = {
+		F0A32A4FF0E0F6C3E5E16AF2 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				7354379C821B3BA96621F06D /* WaterfallView.swift */,
-				D6BDE5B4F829D7E61279FCDE /* FT8 */,
-				6458CC06F3E6FB57D79D5340 /* JS8 */,
+				7FFC302278DB4291D37089F1 /* AppState.swift */,
+				9708E23A210F5E0B3AD476C6 /* ContentView.swift */,
+				708FBDCF24CD3F5BA7B7B945 /* DigiFoxApp.swift */,
 			);
-			path = Views;
+			path = "App";
 			sourceTree = "<group>";
 		};
-		F2F14C716C3C551D84A5C425 /* App */ = {
+		3CDBB7511E45C700BD5A6822 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
-				B7362B696CD0741400AECD33 /* AppState.swift */,
-				B14583D19B921994C4665B7E /* ContentView.swift */,
-				FB6ED5782F101779C286560E /* DigiFoxApp.swift */,
+				9415F6DDC061C739D07E7635 /* AudioEngine.swift */,
+				5784EA10FA80D66B7D6605BC /* FFTProcessor.swift */,
+				31F34BE0EA4A978069A368FC /* USBAudioManager.swift */,
 			);
-			path = App;
+			path = "Audio";
 			sourceTree = "<group>";
 		};
-		F3C3A79EE0AB64B4B1FA781A /* JS8 */ = {
+		3CE8C0340F2DD8F1C44937F3 /* CAT */ = {
 			isa = PBXGroup;
 			children = (
-				E9347F13C309171E2EE0FA2F /* JS8CostasSync.swift */,
-				0ABA1961DFD56F773EFFBE68 /* JS8CRC.swift */,
-				31DED2C96F47C2E9EBA84A99 /* JS8Demodulator.swift */,
-				1BD4C25E26B814B10704A659 /* JS8LDPC.swift */,
-				114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */,
-				B6F13E1F0B7D04F5EDE880BE /* JS8Protocol.swift */,
-				A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */,
+				A3D5281665B3D1BB7354D023 /* CATController.swift */,
 			);
-			path = JS8;
+			path = "CAT";
 			sourceTree = "<group>";
 		};
-		F65D6411386A404DB79AA2EF /* CAT */ = {
+		0E9C91FDA4757C24E87690CD /* Codec */ = {
 			isa = PBXGroup;
 			children = (
-				9044084B06353D6E0BA292F0 /* CATController.swift */,
+				59A796A7EB1E3BC306F88D85 /* FT8 */,
+				9A6D83B6D12C6A21FE76C2EA /* JS8 */,
 			);
-			path = CAT;
+			path = "Codec";
+			sourceTree = "<group>";
+		};
+		59A796A7EB1E3BC306F88D85 /* FT8 */ = {
+			isa = PBXGroup;
+			children = (
+				5486327652BF5C3F8848A34C /* FT8CRC.swift */,
+				2507411C09971E4DB69A5432 /* FT8CostasSync.swift */,
+				B8D7963C2526611FE62E2201 /* FT8Demodulator.swift */,
+				5F654157AC44DD6A54F0CB86 /* FT8LDPC.swift */,
+				48EA88E2573DF7BE496EAD88 /* FT8MessagePack.swift */,
+				77785D12AC77609DA67C060B /* FT8Modulator.swift */,
+				2E38ED37DF59DB8995F61EA2 /* FT8Protocol.swift */,
+			);
+			path = "FT8";
+			sourceTree = "<group>";
+		};
+		9A6D83B6D12C6A21FE76C2EA /* JS8 */ = {
+			isa = PBXGroup;
+			children = (
+				9295595E2C678A7AD880D1DB /* JS8CRC.swift */,
+				A3815E6BC270DFC90B94DB1D /* JS8CostasSync.swift */,
+				4F6E2F0BBC6334EBF5C2CB45 /* JS8Demodulator.swift */,
+				6A26CD45FF075010F7D5A04E /* JS8LDPC.swift */,
+				53DC9C5389EC0955D2FFF93B /* JS8Modulator.swift */,
+				2B4224807BF2DAD761D38183 /* JS8Protocol.swift */,
+				527DAD47E55BA648690EFE21 /* PackMessage.swift */,
+			);
+			path = "JS8";
+			sourceTree = "<group>";
+		};
+		F428807C86891A062CB96719 /* HamlibStubs */ = {
+			isa = PBXGroup;
+			children = (
+				AB3F9B3904B9247A6DD54FFA /* hamlib_missing.c */,
+			);
+			path = "HamlibStubs";
+			sourceTree = "<group>";
+		};
+		1A86FEDDD249B21EEBD30B9A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C2F2BE953915B7B5FDA75A20 /* Message.swift */,
+				347DFE4C04CCC67C287F6045 /* Settings.swift */,
+				F3F65BAAE737600888342C39 /* Station.swift */,
+			);
+			path = "Models";
+			sourceTree = "<group>";
+		};
+		17F82296F32EB07C076FF851 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				6917D82226FB0F411E8A90B1 /* JS8APIMessage.swift */,
+				279C6D10BAC379F049D7CB0D /* JS8NetworkClient.swift */,
+			);
+			path = "Network";
+			sourceTree = "<group>";
+		};
+		BC29D71D8710A2F8AFC25FC9 /* Serial */ = {
+			isa = PBXGroup;
+			children = (
+				EF77378E3982CCCA188DC7FB /* CATController.swift */,
+				7EB161050BC464A8AF49D4A2 /* HamlibRig.swift */,
+				01A1666B2E16000FBA04F35A /* IOKitUSBSerial.h */,
+				D1D5095F2306B6F636BAA46F /* IOKitUSBSerial.m */,
+				FB9177EDA85F850AE61F95CF /* SerialPort.swift */,
+				DEE6B3C35CC7AE001DB2A14E /* USBSerialPort.swift */,
+			);
+			path = "Serial";
+			sourceTree = "<group>";
+		};
+		39CC4403B2077900D62E8F17 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				03429688C9C1FA4B8246F977 /* RadioViewModel.swift */,
+			);
+			path = "ViewModels";
+			sourceTree = "<group>";
+		};
+		18A581E80CDD2B3A7280ACFC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				46BDA42CF011D551D4F9B9BF /* FT8 */,
+				FEBA93570E7978B643934808 /* JS8 */,
+				BCD835AFB58A109AB46D6DB6 /* SettingsView.swift */,
+				45CD9B4FC723B1B45C9A17FA /* WaterfallView.swift */,
+			);
+			path = "Views";
+			sourceTree = "<group>";
+		};
+		46BDA42CF011D551D4F9B9BF /* FT8 */ = {
+			isa = PBXGroup;
+			children = (
+				832199661C95DA4720F0489B /* BandActivityView.swift */,
+				923D804589CC62CAB10CD085 /* ClockView.swift */,
+				3B67FD81481306FE46FC2B14 /* FT8FrequencyView.swift */,
+				75EE0F94C597E9063CFE1EEB /* FT8MessageListView.swift */,
+				C65B0F1ED21246107F908807 /* QSOPanelView.swift */,
+			);
+			path = "FT8";
+			sourceTree = "<group>";
+		};
+		FEBA93570E7978B643934808 /* JS8 */ = {
+			isa = PBXGroup;
+			children = (
+				258BFCF60BAD5D4E5BFCBAB2 /* JS8FrequencyView.swift */,
+				D9FD16784682D9605ABE9328 /* JS8MessageListView.swift */,
+				A4E6D7D85C161D62BD0338F5 /* NetworkClientView.swift */,
+				4FC81940B05FE8D511F3A528 /* TransmitView.swift */,
+			);
+			path = "JS8";
+			sourceTree = "<group>";
+		};
+		9E343D8AEF1AEAE4D1A2CC24 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4096495ED75B2C06F661528A /* Hamlib.xcframework */,
+			);
+			path = "Frameworks";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8263661C9454D5A9F74A2452 /* DigiFox */ = {
+		6772EC0E5D0CA05E04DDDB49 /* DigiFox */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D046ED489AA4F7047CE3A9AC /* Build configuration list for PBXNativeTarget "DigiFox" */;
+			buildConfigurationList = 88B610D245C48FE080C8F979;
 			buildPhases = (
-				786B312DDA51E168089A1E34 /* Sources */,
-				22ED092AE861360D3409E229 /* Resources */,
+				E7209FB05162B7572F88D05E /* Sources */,
+				29B2D46AA747A59804D46E1F /* Frameworks */,
+				66F8606E9F0A136E2228EBCB /* Resources */,
+				125E2C08DF6D0D6AA4265A45 /* Embed Frameworks */,
 			);
-			buildRules = (
-			);
-			dependencies = (
-			);
+			buildRules = ();
+			dependencies = ();
 			name = DigiFox;
-			packageProductDependencies = (
-			);
 			productName = DigiFox;
-			productReference = 9974C4B72639154796AEA187 /* DigiFox.app */;
+			productReference = 2142FBA363CB47B63982E357 /* DigiFox.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A4BAE52D63E8EF221C9AA163 /* Project object */ = {
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
 			isa = PBXProject;
-			attributes = {
-				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					8263661C9454D5A9F74A2452 = {
-						DevelopmentTeam = "";
-					};
-				};
-			};
-			buildConfigurationList = 90B13F05ED0D3BA23D4F8A8D /* Build configuration list for PBXProject "DigiFox" */;
+			buildConfigurationList = 171ECEDBB1E323C51A029750;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = de;
 			hasScannedForEncodings = 0;
-			knownRegions = (
-				Base,
-				en,
-			);
-			mainGroup = 35D4949E2C6C8D887CA076C9;
-			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			knownRegions = (de, Base);
+			mainGroup = 8D3FC6DB5D0827F168A73277;
+			productRefGroup = 1BADDC1D73C1A20F347483E1 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (
-				8263661C9454D5A9F74A2452 /* DigiFox */,
-			);
+			targets = (6772EC0E5D0CA05E04DDDB49 /* DigiFox */,);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		22ED092AE861360D3409E229 /* Resources */ = {
+		66F8606E9F0A136E2228EBCB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */,
+				878BD6DAA8F527AED144390F /* Assets.xcassets */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		786B312DDA51E168089A1E34 /* Sources */ = {
+		E7209FB05162B7572F88D05E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2C0C56E20AE4ED76BDB7BED /* AppState.swift in Sources */,
-				E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */,
-				A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */,
-				42F83FA9E2F09CB15A4185CD /* CATController.swift in Sources */,
-				47CF22F68DE0DB3001BD604B /* CATController.swift in Sources */,
-				B412839F42DFAB78C39D04FD /* ClockView.swift in Sources */,
-				56FBE2200A28FCA4671187FE /* ContentView.swift in Sources */,
-				5D78E577BC3BA5E4BCC45FE8 /* DigiFoxApp.swift in Sources */,
-				96F2C9535FBC3CFB73EF0A27 /* FFTProcessor.swift in Sources */,
-				3DD47D3D86CC03B027C0D2FD /* FT8CRC.swift in Sources */,
-				45395C5049E39FFC267D9021 /* FT8CostasSync.swift in Sources */,
-				7FC4C58E90E2D9980692F1C4 /* FT8Demodulator.swift in Sources */,
-				A7D652EBFF30B44F4F2F7202 /* FT8LDPC.swift in Sources */,
-				54494D51D2B9EEC718D2F8C7 /* FT8MessagePack.swift in Sources */,
-				E7CCC16F41B3BF38F3AFB2C9 /* FT8Modulator.swift in Sources */,
-				DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */,
-				E409D68845E8DB65BF6A02CD /* HamlibRig.swift in Sources */,
-				8720DD51995DA5D5CA21DC88 /* IOKitUSBSerial.m in Sources */,
-				AE868273CA2133436CE66553 /* JS8APIMessage.swift in Sources */,
-				ACFEF84CE50EB7CB5D1D3B5B /* JS8CRC.swift in Sources */,
-				89CA2F072218AE7A16625C59 /* JS8CostasSync.swift in Sources */,
-				56454416AC5E0719E6594B03 /* JS8Demodulator.swift in Sources */,
-				FAEB95B767BE19E8293239E5 /* JS8LDPC.swift in Sources */,
-				D945D8CD0010A1F5C266E9E0 /* JS8Modulator.swift in Sources */,
-				1C9087A95FD4DFCD78BFF001 /* JS8NetworkClient.swift in Sources */,
-				A610F56A8E75AF78DA03BB31 /* JS8Protocol.swift in Sources */,
-				3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */,
-				064254843EF46811A0F64A1C /* QSOPanelView.swift in Sources */,
-				F6ECCE514B23BF191B4761E8 /* RadioViewModel.swift in Sources */,
-				4E98547E4734AB6FB01A7214 /* SerialPort.swift in Sources */,
-				9D2A5A6C306BF35B02D878D3 /* Station.swift in Sources */,
-				9333C074877601AFBDC6BCD0 /* TransmitView.swift in Sources */,
-				DB441E98FB481124E6AA6231 /* USBAudioManager.swift in Sources */,
-				5580F6D76606C76672C0C2C2 /* USBSerialPort.swift in Sources */,
-				136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */,
-				FDF44DC5CB1DEFB68997677F /* hamlib_missing.c in Sources */,
+				CF4C5CEEC887C35E67DACC6A /* AppState.swift */,
+				5E567D8AD594190897CEE543 /* ContentView.swift */,
+				9C9BF82957FB50C52657BB81 /* DigiFoxApp.swift */,
+				6B590F40FDC56F137AD30859 /* AudioEngine.swift */,
+				92A7553E210E2B35C9F3DD08 /* FFTProcessor.swift */,
+				D0A6795CB1A506602FC0672F /* USBAudioManager.swift */,
+				1E014E8925E1EA219F3BB2B8 /* CATController.swift */,
+				A0596FAA90E2C8A7427F4DAE /* FT8CRC.swift */,
+				D4EB0268F58F04090C167BD3 /* FT8CostasSync.swift */,
+				BB6EBFF85EB18A6CEF45F087 /* FT8Demodulator.swift */,
+				1356B1625C79A92F54626762 /* FT8LDPC.swift */,
+				3F483572EA0FB2817A0D9C32 /* FT8MessagePack.swift */,
+				7F0C4795688DF56B2D1DC85B /* FT8Modulator.swift */,
+				2ECFC9EDB92808FFEFF852EB /* FT8Protocol.swift */,
+				109518BDBFC7689973964900 /* JS8CRC.swift */,
+				BF35FC7D5BD37B14E3B6E6B3 /* JS8CostasSync.swift */,
+				506CD99078F6432BE47DABB9 /* JS8Demodulator.swift */,
+				6D7B165CC54477BC5708ECFC /* JS8LDPC.swift */,
+				C742D7675EB7081088BFC719 /* JS8Modulator.swift */,
+				927E5628B2973659C6CB2AB0 /* JS8Protocol.swift */,
+				52000F8B57F1D0FF85D493BE /* PackMessage.swift */,
+				94D437C0134D99DFD62F7E3B /* hamlib_missing.c */,
+				6DC4E0509D401B664C5D9DE5 /* Message.swift */,
+				3E387B4AFB3E188EDE28A583 /* Settings.swift */,
+				DC63D342976371708C358462 /* Station.swift */,
+				0DDDF7534FD8475825EF9C61 /* JS8APIMessage.swift */,
+				2F67C1F86E2B6A171101A1E5 /* JS8NetworkClient.swift */,
+				4170C7429410B9D661BBF72A /* CATController.swift */,
+				6602D810AD8BB8EC34D6BAEE /* HamlibRig.swift */,
+				FB588D65FF12AAC3BF5668CB /* IOKitUSBSerial.m */,
+				EADDF4D8408B4A325E5AC905 /* SerialPort.swift */,
+				C77B06C366761346BA73B1FC /* USBSerialPort.swift */,
+				E64858477ECC980C8ABCF805 /* RadioViewModel.swift */,
+				9FA1BD5802FE8E069AE1A413 /* BandActivityView.swift */,
+				74EC33829413DB6B937AF6DA /* ClockView.swift */,
+				04A6956E4C1D3E9C1B13C503 /* FT8FrequencyView.swift */,
+				A181EDC834AF734EB6554545 /* FT8MessageListView.swift */,
+				9B1677ECD66A364EF5FFA9C9 /* QSOPanelView.swift */,
+				AAD2244EFB92B87E6AB0AB90 /* JS8FrequencyView.swift */,
+				F89E5DFC1DE87C67655E8EE6 /* JS8MessageListView.swift */,
+				DA93E1D1176205D98E585221 /* NetworkClientView.swift */,
+				D42CA1FE13035960024DF6F9 /* TransmitView.swift */,
+				E25B0CE146EAB17E7C7DD487 /* SettingsView.swift */,
+				A39990F663C247345D8B3E9B /* WaterfallView.swift */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		740A430D440BE14607885B31 /* Release */ = {
+		AAEA14000790462964F89243 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = DigiFox/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
+
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASCL_COMPILER_FLAGS = "";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		A6FC6807E711AFB81AA82856 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = DigiFox/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_VERSION = 5.0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ONLY_ACTIVE_ARCH = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		F450EA02D0205EE3F6FE7B55 /* Release */ = {
+		555260E2B9879D6B41B034DF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASCL_COMPILER_FLAGS = "";
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		FDC30D98FADD8E48BD0507AF /* Debug */ = {
+		386F21FB6CCFBF3FBFDA1CC3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"DEBUG=1",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
+
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "DigiFox/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.digifox.ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.9;
+				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				HEADER_SEARCH_PATHS = ("$(PROJECT_DIR)/vendor/hamlib/include", "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Hamlib.framework/Headers");
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/vendor/hamlib/lib";
+				OTHER_LDFLAGS = ("-lhamlib",);
+				EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64;
 			};
 			name = Debug;
+		};
+		99EA497894306B9F39FE5709 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "DigiFox/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.digifox.ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				HEADER_SEARCH_PATHS = ("$(PROJECT_DIR)/vendor/hamlib/include", "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Hamlib.framework/Headers");
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/vendor/hamlib/lib";
+				OTHER_LDFLAGS = ("-lhamlib",);
+				EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64;
+			};
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		90B13F05ED0D3BA23D4F8A8D /* Build configuration list for PBXProject "DigiFox" */ = {
+		171ECEDBB1E323C51A029750 /* Build configuration list for PBXProject */ = {
 			isa = XCConfigurationList;
-			buildConfigurations = (
-				FDC30D98FADD8E48BD0507AF /* Debug */,
-				F450EA02D0205EE3F6FE7B55 /* Release */,
-			);
+			buildConfigurations = (AAEA14000790462964F89243 /* Debug */, 555260E2B9879D6B41B034DF /* Release */,);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
-		D046ED489AA4F7047CE3A9AC /* Build configuration list for PBXNativeTarget "DigiFox" */ = {
+		88B610D245C48FE080C8F979 /* Build configuration list for PBXNativeTarget */ = {
 			isa = XCConfigurationList;
-			buildConfigurations = (
-				A6FC6807E711AFB81AA82856 /* Debug */,
-				740A430D440BE14607885B31 /* Release */,
-			);
+			buildConfigurations = (386F21FB6CCFBF3FBFDA1CC3 /* Debug */, 99EA497894306B9F39FE5709 /* Release */,);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
 	};
-	rootObject = A4BAE52D63E8EF221C9AA163 /* Project object */;
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
 }

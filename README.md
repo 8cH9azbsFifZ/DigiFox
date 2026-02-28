@@ -1,52 +1,49 @@
 # DigiFox
 
-DigiFox is an iOS application that connects to amateur (ham) radio transceivers via a single USB-C cable to operate digital modes.
-
-## Overview
-
-DigiFox enables hams to use their iPhone or iPad as a digital mode interface by establishing a direct USB-C connection to their radio. No additional hardware or sound card interfaces are required — just plug in a USB-C cable and get on the air.
-
-## Supported Hardware
-
-### (tr)uSDX
-The [(tr)uSDX](https://dl2man.de/) is a compact QRP transceiver that exposes both **CAT control** and **audio I/O** over a single USB-C connection:
-
-- **USB CDC ACM** — Serial interface for CAT commands (Kenwood TS-480 protocol subset, 38400 baud, 8N1)
-- **USB Audio Class** — Standard USB audio device for TX/RX digital audio
-
-This means a single cable handles everything: rig control and audio.
+iOS-App für digitale Amateurfunk-Betriebsarten (**FT8** und **JS8Call**) mit USB-C-Anbindung an Transceiver.
 
 ## Features
 
-- Single USB-C cable connection (CAT + audio)
-- CAT control via Kenwood TS-480 protocol (frequency, mode, PTT)
-- USB Audio Class I/O via AVAudioEngine
-- Real-time RX audio level monitoring
-- Auto-detection of USB serial ports
-- SwiftUI interface for iPhone and iPad
+- **FT8** — WSJT-X-kompatible Kodierung/Dekodierung, 15-Sekunden-Zyklen, Auto-Sequencing, Band-Aktivitätsanzeige, QSO-Log
+- **JS8Call** — Freitext-Messaging mit variabler Geschwindigkeit (Normal/Fast/Turbo/Slow/Ultra), Netzwerk-Client-Modus
+- **Umschalten** zwischen FT8 und JS8Call per Segmented Control im UI
+- **CAT-Steuerung** via Hamlib (~400 Rig-Modelle), Digirig-Erkennung
+- **USB-Audio** via AVAudioEngine (12 kHz, 8-FSK)
+- **Wasserfall-Anzeige** in Echtzeit
+- SwiftUI für iPhone und iPad, iOS 17+
 
-## Architecture
+## Architektur
 
 ```
-┌──────────────┐     USB-C      ┌───────────────┐
-│   DigiFox    │◄──────────────►│   (tr)uSDX    │
-│   iOS App    │                │  Transceiver  │
-├──────────────┤                ├───────────────┤
-│ USBAudioMgr  │◄── USB Audio ──│  Audio Codec  │
-│ CATController│◄── USB Serial ─│  CAT (serial) │
-└──────────────┘                └───────────────┘
+DigiFox/
+├── App/           DigiFoxApp, AppState (unified), ContentView
+├── Audio/         AudioEngine, FFTProcessor
+├── Codec/
+│   ├── FT8/       FT8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, MessagePack
+│   └── JS8/       JS8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, PackMessage
+├── Serial/        CATController, HamlibRig, SerialPort, IOKitUSBSerial
+├── Network/       JS8NetworkClient, JS8APIMessage
+├── Models/        Message, Settings, Station
+└── Views/         Shared + FT8/ + JS8/ mode-specific Views
 ```
 
-## Requirements
+## Setup
 
-- iOS 17+ device with USB-C port
-- (tr)uSDX transceiver (or compatible Kenwood CAT radio with USB)
-- USB-C cable
+1. `python3 generate_project.py`
+2. Öffne `DigiFox.xcodeproj` in Xcode
+3. Rufzeichen und Grid Locator in den Einstellungen konfigurieren
+4. Build & Run auf einem iOS-Gerät
+
+## Voraussetzungen
+
+- iOS 17+ Gerät mit USB-C
+- Transceiver mit USB (z.B. Digirig Mobile, (tr)uSDX)
+- Xcode 15+
 
 ## Disclaimer
 
-This entire project has been generated using various AI models and is therefore experimental in nature. Use at your own risk.
+Dieses Projekt wurde mit Unterstützung von KI generiert und ist experimentell. Nutzung auf eigene Gefahr.
 
-## License
+## Lizenz
 
 TBD
