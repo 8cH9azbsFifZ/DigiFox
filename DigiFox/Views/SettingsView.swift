@@ -56,19 +56,19 @@ struct SettingsView: View {
                             .foregroundStyle(appState.ioKitAvailable ? .green : .red)
                         Text("IOKit USB-Serial")
                         Spacer()
-                        Text(appState.ioKitAvailable ? "Verfügbar" : "Nicht verfügbar")
+                        Text(appState.ioKitAvailable ? "Available" : "Not available")
                             .foregroundStyle(.secondary)
                     }
                     if appState.usbDevices.isEmpty {
                         HStack {
                             Image(systemName: "usb").foregroundStyle(.gray)
-                            Text("Kein USB-Gerät erkannt").foregroundStyle(.secondary)
+                            Text("No USB device detected").foregroundStyle(.secondary)
                         }
                     } else {
                         ForEach(appState.usbDevices) { device in
                             HStack {
-                                Image(systemName: device.isDigirig ? "cable.connector" : "usb")
-                                    .foregroundStyle(device.isDigirig ? .orange : .blue)
+                                Image(systemName: device.isDigirig ? "cable.connector" : device.isTruSDX ? "antenna.radiowaves.left.and.right" : "usb")
+                                    .foregroundStyle(device.isDigirig ? .orange : device.isTruSDX ? .green : .blue)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(device.name).font(.subheadline)
                                     Text(device.path).font(.caption2).foregroundStyle(.secondary)
@@ -81,26 +81,31 @@ struct SettingsView: View {
                                         .padding(.horizontal, 6).padding(.vertical, 2)
                                         .background(Capsule().fill(.orange.opacity(0.2)))
                                 }
+                                if device.isTruSDX {
+                                    Text("(tr)uSDX").font(.caption)
+                                        .padding(.horizontal, 6).padding(.vertical, 2)
+                                        .background(Capsule().fill(.green.opacity(0.2)))
+                                }
                             }
                         }
                     }
                     Button { appState.scanUSBDevices() } label: {
-                        HStack { Image(systemName: "arrow.clockwise"); Text("USB-Geräte scannen") }
+                        HStack { Image(systemName: "arrow.clockwise"); Text("Scan USB devices") }
                     }
                     if appState.radioState.isConnected {
                         Button(role: .destructive) { appState.disconnectRig() } label: {
-                            HStack { Image(systemName: "antenna.radiowaves.left.and.right.slash"); Text("Rig trennen (\(appState.radioState.rigName))") }
+                            HStack { Image(systemName: "antenna.radiowaves.left.and.right.slash"); Text("Disconnect \(appState.radioState.rigName)") }
                         }
-                    } else if appState.digirigConnected && settings.useHamlib {
+                    } else if appState.hasCompatibleDevice && settings.useHamlib {
                         Button { appState.connectRig() } label: {
-                            HStack { Image(systemName: "antenna.radiowaves.left.and.right"); Text("Digirig verbinden") }
+                            HStack { Image(systemName: "antenna.radiowaves.left.and.right"); Text("Connect \(settings.radioProfile.rawValue)") }
                         }.tint(.green)
                     }
                 } header: {
-                    Text("USB-Geräte")
+                    Text("USB Devices")
                 } footer: {
                     if !appState.ioKitAvailable {
-                        Text("IOKit ist auf diesem Gerät nicht verfügbar. USB-Serial benötigt iOS mit IOKit-Zugriff (Sideload oder EU Alt-Store).")
+                        Text("IOKit is not available on this device. USB serial requires iOS with IOKit access (sideload or EU AltStore).")
                     }
                 }
 
@@ -191,10 +196,10 @@ struct SettingsView: View {
                 Section("Info") {
                     HStack { Text("Version"); Spacer(); Text("1.0.0").foregroundStyle(.secondary) }
                     HStack { Text("Hamlib"); Spacer(); Text("4.7.1").foregroundStyle(.secondary) }
-                    HStack { Text("Rig-Modelle"); Spacer(); Text("\(rigModels.count)").foregroundStyle(.secondary) }
+                    HStack { Text("Rig Models"); Spacer(); Text("\(rigModels.count)").foregroundStyle(.secondary) }
                 }
             }
-            .navigationTitle("Einstellungen")
+            .navigationTitle("Settings")
             .task {
                 if rigModels.isEmpty {
                     let models = await Task.detached { HamlibRig.listModels() }.value
@@ -205,8 +210,8 @@ struct SettingsView: View {
     }
 
     private var selectedRigName: String {
-        if settings.rigModel == 0 { return "Nicht ausgewählt" }
-        return rigModels.first { $0.id == settings.rigModel }?.displayName ?? "Modell #\(settings.rigModel)"
+        if settings.rigModel == 0 { return "Not selected" }
+        return rigModels.first { $0.id == settings.rigModel }?.displayName ?? "Model #\(settings.rigModel)"
     }
 }
 
@@ -222,7 +227,7 @@ struct RigModelPicker: View {
     var body: some View {
         List {
             Section {
-                Button("Kein Rig (deaktiviert)") { selectedModel = 0 }
+                Button("No rig (disabled)") { selectedModel = 0 }
                     .foregroundStyle(selectedModel == 0 ? .blue : .primary)
             }
             ForEach(manufacturers, id: \.self) { mfg in
@@ -244,7 +249,7 @@ struct RigModelPicker: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Rig suchen...")
-        .navigationTitle("Rig-Modell")
+        .searchable(text: $searchText, prompt: "Search rigs...")
+        .navigationTitle("Rig Model")
     }
 }

@@ -122,13 +122,18 @@ class AppState: ObservableObject {
         let modelId = settings.radioProfile == .trusdx ? settings.radioProfile.defaultHamlibModel : settings.rigModel
         Task {
             do {
-                if let digirig = SerialPort.findDigirig() {
-                    try await catController.connect(modelId: modelId, path: digirig.path, baudRate: baudRate)
+                let devices = SerialPort.discoverDevices()
+
+                // Pick the right device based on radio profile
+                let device: SerialDeviceInfo?
+                if settings.radioProfile == .trusdx {
+                    device = devices.first { $0.isTruSDX } ?? devices.first
                 } else {
-                    let devices = SerialPort.discoverDevices()
-                    guard let first = devices.first else { statusText = "No USB serial device found"; return }
-                    try await catController.connect(modelId: modelId, path: first.path, baudRate: baudRate)
+                    device = devices.first { $0.isDigirig } ?? devices.first
                 }
+
+                guard let dev = device else { statusText = "No USB serial device found"; return }
+                try await catController.connect(modelId: modelId, path: dev.path, baudRate: baudRate)
 
                 // FT8 and JS8Call require USB mode
                 try await catController.setMode("USB")
@@ -201,6 +206,13 @@ class AppState: ObservableObject {
     }
 
     var digirigConnected: Bool { usbDevices.contains { $0.isDigirig } }
+    var trusdxConnected: Bool { usbDevices.contains { $0.isTruSDX } }
+    var hasCompatibleDevice: Bool {
+        switch settings.radioProfile {
+        case .trusdx: return trusdxConnected || !usbDevices.isEmpty
+        case .digirig: return digirigConnected || !usbDevices.isEmpty
+        }
+    }
 
     private func startUSBMonitoring() {
         scanUSBDevices()

@@ -21,6 +21,11 @@ struct SerialDeviceInfo: Identifiable, CustomStringConvertible {
         vendorID == 0x10C4 // Silicon Labs
     }
 
+    /// Whether this looks like a (tr)uSDX (CH340, VID=0x1A86)
+    var isTruSDX: Bool {
+        vendorID == 0x1A86 // QinHeng CH340/CH341
+    }
+
     var description: String {
         "\(name) (\(path)) [VID=0x\(String(vendorID, radix: 16)) PID=0x\(String(productID, radix: 16))]"
     }
