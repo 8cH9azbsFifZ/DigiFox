@@ -4,8 +4,10 @@ struct ContentView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var settings: AppSettings
 
+    @State private var selectedTab = 0
+
     var body: some View {
-        TabView(selection: $settings.digitalModeRaw) {
+        TabView(selection: $selectedTab) {
             FT8MainView()
                 .tabItem { Label("FT8", systemImage: "waveform.path") }
                 .tag(0)
@@ -14,6 +16,10 @@ struct ContentView: View {
                 .tabItem { Label("JS8Call", systemImage: "text.bubble") }
                 .tag(1)
 
+            CWView()
+                .tabItem { Label("CW", systemImage: "bolt.horizontal.fill") }
+                .tag(4)
+
             ActivityView()
                 .tabItem { Label("Aktivität", systemImage: "antenna.radiowaves.left.and.right") }
                 .tag(2)
@@ -21,6 +27,11 @@ struct ContentView: View {
             SettingsView()
                 .tabItem { Label("Einstellungen", systemImage: "gear") }
                 .tag(3)
+        }
+        .onChange(of: selectedTab) { newTab in
+            if let mode = DigitalMode(rawValue: newTab) {
+                appState.switchMode(mode)
+            }
         }
     }
 }
@@ -80,7 +91,6 @@ struct FT8MainView: View {
             .navigationTitle("FT8")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { StatusToolbar() }
-            .onAppear { settings.digitalModeRaw = 0 }
         }
     }
 }
@@ -105,7 +115,6 @@ struct JS8MainView: View {
             .navigationTitle("JS8Call")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { StatusToolbar() }
-            .onAppear { settings.digitalModeRaw = 1 }
         }
     }
 }

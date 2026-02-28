@@ -12,10 +12,6 @@ struct SettingsView: View {
         return rigModels.filter { $0.displayName.localizedCaseInsensitiveContains(searchText) }
     }
 
-    private var availableBands: [Band] {
-        BandPlan.availableBands(for: settings.digitalMode)
-    }
-
     var body: some View {
         NavigationStack {
             Form {
@@ -94,7 +90,7 @@ struct SettingsView: View {
                     }
                     if appState.radioState.isConnected {
                         Button(role: .destructive) { appState.disconnectRig() } label: {
-                            HStack { Image(systemName: "antenna.radiowaves.left.and.right.slash"); Text("Disconnect \(appState.radioState.rigName)") }
+                            HStack { Image(systemName: "antenna.radiowaves.left.and.right.slash"); Text("Disconnect \(settings.radioProfile.rawValue)") }
                         }
                     } else if appState.hasCompatibleDevice && settings.useHamlib {
                         Button { appState.connectRig() } label: {
@@ -147,46 +143,66 @@ struct SettingsView: View {
                     .disabled(settings.radioProfile == .trusdx)
                 }
 
-                Section("Frequency") {
-                    HStack {
-                        Text("Band"); Spacer()
-                        Picker("Band", selection: Binding(
-                            get: { settings.selectedBand },
-                            set: { settings.selectBand($0) }
-                        )) {
-                            ForEach(availableBands) { band in
-                                Text(band.name).tag(band.id)
+                Section {
+                    Picker("Band", selection: Binding(
+                        get: { settings.selectedBand },
+                        set: { newBand in
+                            settings.selectBand(newBand)
+                            // Send frequency to rig if connected
+                            if appState.radioState.isConnected,
+                               let freq = BandPlan.dialFrequency(band: newBand, mode: settings.digitalMode) {
+                                appState.setRigFrequency(UInt64(freq))
                             }
                         }
-                        .labelsHidden()
+                    )) {
+                        ForEach(BandPlan.allBands) { band in
+                            Text(band.name).tag(band.id)
+                        }
                     }
-                    HStack {
-                        Text("Dial (Hz)"); Spacer()
-                        TextField("14074000", value: $settings.dialFrequency, format: .number)
-                            .multilineTextAlignment(.trailing).keyboardType(.numberPad)
-                    }
-                    if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: settings.digitalMode) {
+
+                    if let ft8 = BandPlan.ft8Frequency(for: settings.selectedBand) {
                         HStack {
-                            Text("Standard \(settings.digitalMode.name)"); Spacer()
-                            Text(Band.formatMHz(freq)).foregroundStyle(.secondary)
-                        }
-                        .font(.caption)
-                    }
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(availableBands) { band in
-                                Button(band.name) { settings.selectBand(band.id) }
-                                    .buttonStyle(.bordered)
-                                    .tint(settings.selectedBand == band.id ? .blue : .gray)
-                                    .controlSize(.small)
-                            }
+                            Image(systemName: "waveform").foregroundStyle(.blue)
+                            Text("FT8"); Spacer()
+                            Text(Band.formatMHz(ft8))
+                                .foregroundStyle(settings.digitalMode == .ft8 ? .primary : .secondary)
+                                .fontWeight(settings.digitalMode == .ft8 ? .semibold : .regular)
                         }
                     }
+                    if let js8 = BandPlan.js8Frequency(for: settings.selectedBand) {
+                        HStack {
+                            Image(systemName: "waveform.path").foregroundStyle(.green)
+                            Text("JS8Call"); Spacer()
+                            Text(Band.formatMHz(js8))
+                                .foregroundStyle(settings.digitalMode == .js8 ? .primary : .secondary)
+                                .fontWeight(settings.digitalMode == .js8 ? .semibold : .regular)
+                        }
+                    }
+                    if let cw = BandPlan.cwFrequency(for: settings.selectedBand) {
+                        HStack {
+                            Image(systemName: "bolt.horizontal.fill").foregroundStyle(.orange)
+                            Text("CW"); Spacer()
+                            Text(Band.formatMHz(cw))
+                                .foregroundStyle(settings.digitalMode == .cw ? .primary : .secondary)
+                                .fontWeight(settings.digitalMode == .cw ? .semibold : .regular)
+                        }
+                    }
+
+                    HStack {
+                        Text("Dial"); Spacer()
+                        Text(Band.formatMHz(settings.dialFrequency))
+                            .foregroundStyle(.secondary)
+                    }
+
                     if settings.digitalMode == .js8 {
                         Picker("Speed", selection: $settings.speedRaw) {
                             ForEach(JS8Speed.allCases) { s in Text(s.name).tag(s.rawValue) }
                         }
                     }
+                } header: {
+                    Text("Band & Frequenz")
+                } footer: {
+                    Text("Frequenz wird automatisch für FT8/JS8Call gesetzt und per CAT an das Radio gesendet.")
                 }
 
                 Section("Audio") {
@@ -197,6 +213,14 @@ struct SettingsView: View {
                     HStack { Text("Version"); Spacer(); Text("1.0.0").foregroundStyle(.secondary) }
                     HStack { Text("Hamlib"); Spacer(); Text("4.7.1").foregroundStyle(.secondary) }
                     HStack { Text("Rig Models"); Spacer(); Text("\(rigModels.count)").foregroundStyle(.secondary) }
+                    Link(destination: URL(string: "https://github.com/gerolfziegenhain/DigiFox")!) {
+                        HStack {
+                            Image(systemName: "globe")
+                            Text("DigiFox auf GitHub")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square").foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
             .navigationTitle("Settings")

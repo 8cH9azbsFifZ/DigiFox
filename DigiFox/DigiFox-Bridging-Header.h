@@ -3,5 +3,6 @@
 
 #import "IOKitUSBSerial.h"
 #include <hamlib/rig.h>
+#include "cw_decoder.h"
 
 #endif

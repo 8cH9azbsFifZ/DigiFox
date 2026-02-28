@@ -53,7 +53,13 @@ class AppSettings: ObservableObject {
 
     var digitalMode: DigitalMode {
         get { DigitalMode(rawValue: digitalModeRaw) ?? .ft8 }
-        set { digitalModeRaw = newValue.rawValue }
+        set {
+            digitalModeRaw = newValue.rawValue
+            // Auto-update dial frequency for the new mode
+            if let freq = BandPlan.dialFrequency(band: selectedBand, mode: newValue) {
+                dialFrequency = freq
+            }
+        }
     }
 
     var speed: JS8Speed {

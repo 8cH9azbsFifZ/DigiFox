@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		064254843EF46811A0F64A1C /* QSOPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */; };
+		98BAAD4DDFF444E3E7195165 /* CWView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5721BEC64C1746861BAF08C0 /* CWView.swift */; };
 		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
 		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
 		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
 		3DD47D3D86CC03B027C0D2FD /* FT8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418435FE10D17B959EF0917F /* FT8CRC.swift */; };
 		45395C5049E39FFC267D9021 /* FT8CostasSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D552626313496C2C53436CC /* FT8CostasSync.swift */; };
 		47CF22F68DE0DB3001BD604B /* CATController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580375583F534EC4B83A224 /* CATController.swift */; };
+		E85DC350C18EFFFB2C57092D /* MorseKeyer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */; };
 		4E98547E4734AB6FB01A7214 /* SerialPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5BB22A1B82163851B452FC /* SerialPort.swift */; };
 		54494D51D2B9EEC718D2F8C7 /* FT8MessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */; };
 		56454416AC5E0719E6594B03 /* JS8Demodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DED2C96F47C2E9EBA84A99 /* JS8Demodulator.swift */; };
@@ -48,6 +50,18 @@
 		E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */; };
 		CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5104ACA8BBA24A30B17A891E /* LocationManager.swift */; };
 		C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86CEB297BD5C455ABADCDE45 /* BandPlan.swift */; };
+		895AA7806CBE4034873A908F /* cw_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E06FBEBBED340788E8162AD /* cw_decoder.c */; };
+		2F4D06F3D4614BF5A33C4584 /* iir_filter.c in Sources */ = {isa = PBXBuildFile; fileRef = DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */; };
+		1FF8D79DBBD745A18397D012 /* iir_filter_neon.c in Sources */ = {isa = PBXBuildFile; fileRef = 39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */; };
+		1E75AB85B60449F382BF827E /* envelope.c in Sources */ = {isa = PBXBuildFile; fileRef = A33A39B26B8F4D1EAF6BD204 /* envelope.c */; };
+		75A4E287C49744B48AE753DF /* envelope_neon.c in Sources */ = {isa = PBXBuildFile; fileRef = B6D9C5A82F8246258AC46538 /* envelope_neon.c */; };
+		3D38325041224F90B52708EA /* morse_table.c in Sources */ = {isa = PBXBuildFile; fileRef = D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */; };
+		FB80595FCE204D208E63087A /* timing.c in Sources */ = {isa = PBXBuildFile; fileRef = 78E62E17ECB04CC19AD7A050 /* timing.c */; };
+		5209CBB95EF2468BAB57B2B6 /* output_filter.c in Sources */ = {isa = PBXBuildFile; fileRef = A03C8C0854D54BDFBBC05609 /* output_filter.c */; };
+		E2112DC554CE4287992E1D0B /* kalman.c in Sources */ = {isa = PBXBuildFile; fileRef = 77B9C3D1CE92445794D89AE6 /* kalman.c */; };
+		E2AD17D58F154912ADF38F8C /* multipass_avg.c in Sources */ = {isa = PBXBuildFile; fileRef = 800C5FA98B9F476C903DC872 /* multipass_avg.c */; };
+		EB62927D3F374271BA782020 /* simd_detect.c in Sources */ = {isa = PBXBuildFile; fileRef = A2569AA4DE6F4CEE921224EE /* simd_detect.c */; };
+		3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +87,7 @@
 		A03C34181F0E5CFD42AD650F /* hamlib_missing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hamlib_missing.c; sourceTree = "<group>"; };
 		A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackMessage.swift; sourceTree = "<group>"; };
 		A580375583F534EC4B83A224 /* CATController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATController.swift; sourceTree = "<group>"; };
+		62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseKeyer.swift; sourceTree = "<group>"; };
 		A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOPanelView.swift; sourceTree = "<group>"; };
 		A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Demodulator.swift; sourceTree = "<group>"; };
 		B14583D19B921994C4665B7E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -94,9 +109,31 @@
 		16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FT8MessageListView.swift"; path = "DigiFox/Views/FT8/FT8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
 		1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8FrequencyView.swift"; path = "DigiFox/Views/JS8/JS8FrequencyView.swift"; sourceTree = SOURCE_ROOT; };
 		BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8MessageListView.swift"; path = "DigiFox/Views/JS8/JS8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
+		5721BEC64C1746861BAF08C0 /* CWView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CWView.swift"; path = "DigiFox/Views/CW/CWView.swift"; sourceTree = SOURCE_ROOT; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
 		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
+		9E06FBEBBED340788E8162AD /* cw_decoder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cw_decoder.c; sourceTree = "<group>"; };
+		28DB1A768DE04CC3B1D90109 /* cw_decoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cw_decoder.h; sourceTree = "<group>"; };
+		DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = iir_filter.c; sourceTree = "<group>"; };
+		6D03778B77934362AA13A632 /* iir_filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iir_filter.h; sourceTree = "<group>"; };
+		39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = iir_filter_neon.c; sourceTree = "<group>"; };
+		A33A39B26B8F4D1EAF6BD204 /* envelope.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = envelope.c; sourceTree = "<group>"; };
+		64E6B2DAB6BE426995ED44EE /* envelope.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = envelope.h; sourceTree = "<group>"; };
+		B6D9C5A82F8246258AC46538 /* envelope_neon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = envelope_neon.c; sourceTree = "<group>"; };
+		D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = morse_table.c; sourceTree = "<group>"; };
+		7804783FCEAB470CA69D0BAC /* morse_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = morse_table.h; sourceTree = "<group>"; };
+		78E62E17ECB04CC19AD7A050 /* timing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = timing.c; sourceTree = "<group>"; };
+		FA40EBB57BCC4A37B40832B6 /* timing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timing.h; sourceTree = "<group>"; };
+		A03C8C0854D54BDFBBC05609 /* output_filter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = output_filter.c; sourceTree = "<group>"; };
+		EC4B3B9075C2431ABBCAB084 /* output_filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = output_filter.h; sourceTree = "<group>"; };
+		77B9C3D1CE92445794D89AE6 /* kalman.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kalman.c; sourceTree = "<group>"; };
+		5967F824EFF541CDAAAA5A4D /* kalman.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kalman.h; sourceTree = "<group>"; };
+		800C5FA98B9F476C903DC872 /* multipass_avg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = multipass_avg.c; sourceTree = "<group>"; };
+		ECCDC51ECD1B43EEBD5686F8 /* multipass_avg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = multipass_avg.h; sourceTree = "<group>"; };
+		A2569AA4DE6F4CEE921224EE /* simd_detect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = simd_detect.c; sourceTree = "<group>"; };
+		A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = simd_detect.h; sourceTree = "<group>"; };
+		8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWDecoder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -104,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				A580375583F534EC4B83A224 /* CATController.swift */,
+				62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */,
 				F48778C5CEC1F377AD721046 /* HamlibRig.swift */,
 				F05D9D59090B41B404812A32 /* IOKitUSBSerial.h */,
 				9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */,
@@ -183,7 +221,8 @@
 			children = (
 				3162F0A739A1503D79C5C77C /* FT8 */,
 				F3C3A79EE0AB64B4B1FA781A /* JS8 */,
-			);
+			
+				582CA28724C94084AF5A423F /* CW */,);
 			path = Codec;
 			sourceTree = "<group>";
 		};
@@ -205,6 +244,14 @@
 			path = FT8;
 			sourceTree = "<group>";
 		};
+		380B32B34CDD352AAAEDC231 /* CW */ = {
+			isa = PBXGroup;
+			children = (
+				5721BEC64C1746861BAF08C0 /* CWView.swift */,
+			);
+			path = CW;
+			sourceTree = "<group>";
+		};
 		DEDAD50F16D8183C5F27EE88 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -220,6 +267,7 @@
 				7354379C821B3BA96621F06D /* WaterfallView.swift */,
 				D6BDE5B4F829D7E61279FCDE /* FT8 */,
 				6458CC06F3E6FB57D79D5340 /* JS8 */,
+				380B32B34CDD352AAAEDC231 /* CW */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -254,6 +302,34 @@
 				5104ACA8BBA24A30B17A891E /* LocationManager.swift */,
 			);
 			path = Location;
+			sourceTree = "<group>";
+		};
+		582CA28724C94084AF5A423F /* CW */ = {
+			isa = PBXGroup;
+			children = (
+				9E06FBEBBED340788E8162AD /* cw_decoder.c */,
+				28DB1A768DE04CC3B1D90109 /* cw_decoder.h */,
+				DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */,
+				6D03778B77934362AA13A632 /* iir_filter.h */,
+				39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */,
+				A33A39B26B8F4D1EAF6BD204 /* envelope.c */,
+				64E6B2DAB6BE426995ED44EE /* envelope.h */,
+				B6D9C5A82F8246258AC46538 /* envelope_neon.c */,
+				D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */,
+				7804783FCEAB470CA69D0BAC /* morse_table.h */,
+				78E62E17ECB04CC19AD7A050 /* timing.c */,
+				FA40EBB57BCC4A37B40832B6 /* timing.h */,
+				A03C8C0854D54BDFBBC05609 /* output_filter.c */,
+				EC4B3B9075C2431ABBCAB084 /* output_filter.h */,
+				77B9C3D1CE92445794D89AE6 /* kalman.c */,
+				5967F824EFF541CDAAAA5A4D /* kalman.h */,
+				800C5FA98B9F476C903DC872 /* multipass_avg.c */,
+				ECCDC51ECD1B43EEBD5686F8 /* multipass_avg.h */,
+				A2569AA4DE6F4CEE921224EE /* simd_detect.c */,
+				A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */,
+				8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */,
+			);
+			path = CW;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -330,6 +406,7 @@
 				E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */,
 				A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */,
 				47CF22F68DE0DB3001BD604B /* CATController.swift in Sources */,
+				E85DC350C18EFFFB2C57092D /* MorseKeyer.swift in Sources */,
 				B412839F42DFAB78C39D04FD /* ClockView.swift in Sources */,
 				56FBE2200A28FCA4671187FE /* ContentView.swift in Sources */,
 				5D78E577BC3BA5E4BCC45FE8 /* DigiFoxApp.swift in Sources */,
@@ -364,8 +441,21 @@
 				5566A55A16186E0E1581034E /* JS8FrequencyView.swift in Sources */,
 				7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */,
 				E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */,
+				98BAAD4DDFF444E3E7195165 /* CWView.swift in Sources */,
 							CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */,
 				C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */,
+				895AA7806CBE4034873A908F /* cw_decoder.c in Sources */,
+				2F4D06F3D4614BF5A33C4584 /* iir_filter.c in Sources */,
+				1FF8D79DBBD745A18397D012 /* iir_filter_neon.c in Sources */,
+				1E75AB85B60449F382BF827E /* envelope.c in Sources */,
+				75A4E287C49744B48AE753DF /* envelope_neon.c in Sources */,
+				3D38325041224F90B52708EA /* morse_table.c in Sources */,
+				FB80595FCE204D208E63087A /* timing.c in Sources */,
+				5209CBB95EF2468BAB57B2B6 /* output_filter.c in Sources */,
+				E2112DC554CE4287992E1D0B /* kalman.c in Sources */,
+				E2AD17D58F154912ADF38F8C /* multipass_avg.c in Sources */,
+				EB62927D3F374271BA782020 /* simd_detect.c in Sources */,
+				3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */,
 );
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,13 +483,16 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
@@ -432,13 +525,16 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
@@ -509,13 +605,16 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
@@ -593,13 +692,16 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
+					"$(PROJECT_DIR)/DigiFox/Codec/CW",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
