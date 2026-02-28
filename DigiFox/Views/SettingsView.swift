@@ -196,21 +196,6 @@ struct SettingsView: View {
                     HStack { Text("TX Leistung"); Slider(value: $settings.txPower, in: 0...1) }
                 }
 
-                if settings.digitalMode == .js8 {
-                    Section("Netzwerk (JS8Call Desktop)") {
-                        HStack {
-                            Text("Host"); Spacer()
-                            TextField("localhost", text: $settings.networkHost)
-                                .multilineTextAlignment(.trailing).autocorrectionDisabled()
-                        }
-                        HStack {
-                            Text("Port"); Spacer()
-                            TextField("2442", value: $settings.networkPort, format: .number)
-                                .multilineTextAlignment(.trailing).keyboardType(.numberPad)
-                        }
-                    }
-                }
-
                 Section("Info") {
                     HStack { Text("Version"); Spacer(); Text("1.0.0").foregroundStyle(.secondary) }
                     HStack { Text("Hamlib"); Spacer(); Text("4.7.1").foregroundStyle(.secondary) }

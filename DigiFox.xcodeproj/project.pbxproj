@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		064254843EF46811A0F64A1C /* QSOPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */; };
 		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
-		1C9087A95FD4DFCD78BFF001 /* JS8NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0498F7D3191907C57EAE540 /* JS8NetworkClient.swift */; };
 		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
 		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
 		3DD47D3D86CC03B027C0D2FD /* FT8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418435FE10D17B959EF0917F /* FT8CRC.swift */; };
@@ -31,7 +30,6 @@
 		A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */; };
 		A7D652EBFF30B44F4F2F7202 /* FT8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */; };
 		ACFEF84CE50EB7CB5D1D3B5B /* JS8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABA1961DFD56F773EFFBE68 /* JS8CRC.swift */; };
-		AE868273CA2133436CE66553 /* JS8APIMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B631F508D71F51974F35FAE3 /* JS8APIMessage.swift */; };
 		B412839F42DFAB78C39D04FD /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F7BC2894D85D4BA72E7D5 /* ClockView.swift */; };
 		D945D8CD0010A1F5C266E9E0 /* JS8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */; };
 		DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */; };
@@ -47,7 +45,6 @@
 		E373813AA45A1E073A02B5EF /* FT8MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */; };
 		5566A55A16186E0E1581034E /* JS8FrequencyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */; };
 		7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */; };
-		B29CF7D27F7F19F17A853557 /* NetworkClientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C446030769D53BE75AF1A38 /* NetworkClientView.swift */; };
 		E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */; };
 		CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5104ACA8BBA24A30B17A891E /* LocationManager.swift */; };
 		C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86CEB297BD5C455ABADCDE45 /* BandPlan.swift */; };
@@ -80,13 +77,11 @@
 		A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Demodulator.swift; sourceTree = "<group>"; };
 		B14583D19B921994C4665B7E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8MessagePack.swift; sourceTree = "<group>"; };
-		B631F508D71F51974F35FAE3 /* JS8APIMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8APIMessage.swift; sourceTree = "<group>"; };
 		B6F13E1F0B7D04F5EDE880BE /* JS8Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8Protocol.swift; sourceTree = "<group>"; };
 		B7362B696CD0741400AECD33 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandActivityView.swift; sourceTree = "<group>"; };
 		E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8LDPC.swift; sourceTree = "<group>"; };
 		E9347F13C309171E2EE0FA2F /* JS8CostasSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8CostasSync.swift; sourceTree = "<group>"; };
-		F0498F7D3191907C57EAE540 /* JS8NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8NetworkClient.swift; sourceTree = "<group>"; };
 		F05D9D59090B41B404812A32 /* IOKitUSBSerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IOKitUSBSerial.h; sourceTree = "<group>"; };
 		F48778C5CEC1F377AD721046 /* HamlibRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamlibRig.swift; sourceTree = "<group>"; };
 		FA2E4E8F3202061B2C6D40FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -99,7 +94,6 @@
 		16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FT8MessageListView.swift"; path = "DigiFox/Views/FT8/FT8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
 		1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8FrequencyView.swift"; path = "DigiFox/Views/JS8/JS8FrequencyView.swift"; sourceTree = SOURCE_ROOT; };
 		BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8MessageListView.swift"; path = "DigiFox/Views/JS8/JS8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
-		5C446030769D53BE75AF1A38 /* NetworkClientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "NetworkClientView.swift"; path = "DigiFox/Views/JS8/NetworkClientView.swift"; sourceTree = SOURCE_ROOT; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
 		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
@@ -157,15 +151,6 @@
 			path = HamlibStubs;
 			sourceTree = "<group>";
 		};
-		63731F1ED4EE31CC29CE5632 /* Network */ = {
-			isa = PBXGroup;
-			children = (
-				B631F508D71F51974F35FAE3 /* JS8APIMessage.swift */,
-				F0498F7D3191907C57EAE540 /* JS8NetworkClient.swift */,
-			);
-			path = Network;
-			sourceTree = "<group>";
-		};
 		6458CC06F3E6FB57D79D5340 /* JS8 */ = {
 			isa = PBXGroup;
 			children = (
@@ -186,7 +171,6 @@
 				B59712FC1DAE2E8A56C55184 /* Codec */,
 				4775D2CE0E7257D1E9781109 /* HamlibStubs */,
 				DEDAD50F16D8183C5F27EE88 /* Models */,
-				63731F1ED4EE31CC29CE5632 /* Network */,
 				16FFA9D4604AE7535C90539A /* Serial */,
 				E17000C80B9D69E84FA2A1CC /* Views */,
 			
@@ -359,13 +343,11 @@
 				DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */,
 				E409D68845E8DB65BF6A02CD /* HamlibRig.swift in Sources */,
 				8720DD51995DA5D5CA21DC88 /* IOKitUSBSerial.m in Sources */,
-				AE868273CA2133436CE66553 /* JS8APIMessage.swift in Sources */,
 				ACFEF84CE50EB7CB5D1D3B5B /* JS8CRC.swift in Sources */,
 				89CA2F072218AE7A16625C59 /* JS8CostasSync.swift in Sources */,
 				56454416AC5E0719E6594B03 /* JS8Demodulator.swift in Sources */,
 				FAEB95B767BE19E8293239E5 /* JS8LDPC.swift in Sources */,
 				D945D8CD0010A1F5C266E9E0 /* JS8Modulator.swift in Sources */,
-				1C9087A95FD4DFCD78BFF001 /* JS8NetworkClient.swift in Sources */,
 				A610F56A8E75AF78DA03BB31 /* JS8Protocol.swift in Sources */,
 				3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */,
 				064254843EF46811A0F64A1C /* QSOPanelView.swift in Sources */,
@@ -381,7 +363,6 @@
 				E373813AA45A1E073A02B5EF /* FT8MessageListView.swift in Sources */,
 				5566A55A16186E0E1581034E /* JS8FrequencyView.swift in Sources */,
 				7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */,
-				B29CF7D27F7F19F17A853557 /* NetworkClientView.swift in Sources */,
 				E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */,
 							CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */,
 				C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */,

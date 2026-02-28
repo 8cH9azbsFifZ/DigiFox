@@ -5,22 +5,62 @@ struct ContentView: View {
     @EnvironmentObject var settings: AppSettings
 
     var body: some View {
-        TabView {
-            MainView()
-                .tabItem { Label("DigiFox", systemImage: "waveform") }
+        TabView(selection: $settings.digitalModeRaw) {
+            FT8MainView()
+                .tabItem { Label("FT8", systemImage: "waveform.path") }
+                .tag(0)
+
+            JS8MainView()
+                .tabItem { Label("JS8Call", systemImage: "text.bubble") }
+                .tag(1)
 
             ActivityView()
                 .tabItem { Label("Aktivität", systemImage: "antenna.radiowaves.left.and.right") }
+                .tag(2)
 
             SettingsView()
                 .tabItem { Label("Einstellungen", systemImage: "gear") }
+                .tag(3)
         }
     }
 }
 
-// MARK: - Main View (mode-dependent)
+// MARK: - Shared toolbar content
 
-struct MainView: View {
+struct StatusToolbar: ToolbarContent {
+    @EnvironmentObject var appState: AppState
+    @EnvironmentObject var settings: AppSettings
+
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            HStack(spacing: 8) {
+                Text(settings.callsign.isEmpty ? "–" : settings.callsign)
+                    .font(.caption)
+                    .foregroundStyle(settings.callsign.isEmpty ? .red : .green)
+
+                USBStatusBadge(
+                    ioKitAvailable: appState.ioKitAvailable,
+                    deviceCount: appState.usbDevices.count,
+                    digirigConnected: appState.digirigConnected,
+                    rigConnected: appState.radioState.isConnected
+                )
+            }
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button(action: {
+                appState.isReceiving ? appState.stopReceiving() : appState.startReceiving()
+            }) {
+                Text(appState.isReceiving ? "Stop" : "Start")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(appState.isReceiving ? .red : .green)
+            }
+        }
+    }
+}
+
+// MARK: - FT8 Main View
+
+struct FT8MainView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var settings: AppSettings
 
@@ -29,69 +69,54 @@ struct MainView: View {
             VStack(spacing: 0) {
                 WaterfallView(data: appState.waterfallData)
                     .frame(height: 120)
-
-                if settings.digitalMode == .ft8 {
-                    ClockView()
-                    FT8FrequencyView()
-                    Divider()
-                    FT8MessageListView()
-                        .frame(minHeight: 150)
-                    Divider()
-                    QSOPanelView()
-                } else {
-                    JS8FrequencyView()
-                    Divider()
-                    JS8MessageListView()
-                    Divider()
-                    TransmitView()
-                }
+                ClockView()
+                FT8FrequencyView()
+                Divider()
+                FT8MessageListView()
+                    .frame(minHeight: 150)
+                Divider()
+                QSOPanelView()
             }
-            .navigationTitle("DigiFox")
+            .navigationTitle("FT8")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 8) {
-                        // Mode Picker
-                        ModePicker(selection: $settings.digitalModeRaw)
-
-                        Text(settings.callsign.isEmpty ? "–" : settings.callsign)
-                            .font(.caption)
-                            .foregroundStyle(settings.callsign.isEmpty ? .red : .green)
-
-                        USBStatusBadge(
-                            ioKitAvailable: appState.ioKitAvailable,
-                            deviceCount: appState.usbDevices.count,
-                            digirigConnected: appState.digirigConnected,
-                            rigConnected: appState.radioState.isConnected
-                        )
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        appState.isReceiving ? appState.stopReceiving() : appState.startReceiving()
-                    }) {
-                        Text(appState.isReceiving ? "Stop" : "Start")
-                            .fontWeight(.semibold)
-                            .foregroundStyle(appState.isReceiving ? .red : .green)
-                    }
-                }
-            }
+            .toolbar { StatusToolbar() }
+            .onAppear { settings.digitalModeRaw = 0 }
         }
     }
 }
 
-// MARK: - Activity View (mode-dependent)
+// MARK: - JS8Call Main View
 
-struct ActivityView: View {
+struct JS8MainView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var settings: AppSettings
 
     var body: some View {
-        if settings.digitalMode == .ft8 {
-            BandActivityView()
-        } else {
-            NetworkClientView()
+        NavigationStack {
+            VStack(spacing: 0) {
+                WaterfallView(data: appState.waterfallData)
+                    .frame(height: 120)
+                JS8FrequencyView()
+                Divider()
+                JS8MessageListView()
+                Divider()
+                TransmitView()
+            }
+            .navigationTitle("JS8Call")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { StatusToolbar() }
+            .onAppear { settings.digitalModeRaw = 1 }
         }
+    }
+}
+
+// MARK: - Activity View
+
+struct ActivityView: View {
+    @EnvironmentObject var appState: AppState
+
+    var body: some View {
+        BandActivityView()
     }
 }
 
@@ -136,34 +161,5 @@ struct USBStatusBadge: View {
         if rigConnected { return .green.opacity(0.15) }
         if digirigConnected { return .green.opacity(0.15) }
         return .red.opacity(0.1)
-    }
-}
-
-// MARK: - Mode Picker (high-contrast)
-
-struct ModePicker: View {
-    @Binding var selection: Int
-    private let modes = ["FT8", "JS8"]
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(0..<modes.count, id: \.self) { idx in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.15)) { selection = idx }
-                } label: {
-                    Text(modes[idx])
-                        .font(.system(size: 13, weight: selection == idx ? .bold : .medium))
-                        .foregroundStyle(selection == idx ? .white : .primary)
-                        .frame(width: 52, height: 28)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(selection == idx ? Color.accentColor : Color(.systemGray5))
-                        )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(2)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.systemGray6)))
     }
 }
