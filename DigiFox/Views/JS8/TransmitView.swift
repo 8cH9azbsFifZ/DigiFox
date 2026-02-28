@@ -7,16 +7,10 @@ struct TransmitView: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Circle()
-                    .fill(appState.isTransmitting ? .red : (appState.isReceiving ? .green : .gray))
-                    .frame(width: 10, height: 10)
-                Text(appState.statusText).font(.caption).foregroundStyle(.secondary)
-                Spacer()
                 Picker("Modus", selection: $settings.speedRaw) {
                     ForEach(JS8Speed.allCases) { s in Text(s.name).tag(s.rawValue) }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 250)
             }
             .padding(.horizontal)
 

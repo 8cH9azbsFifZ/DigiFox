@@ -38,7 +38,30 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig:
             return "USB audio interface + separate CAT serial"
         case .trusdx:
-            return "Single USB-C cable: CAT + audio over serial"
+            return "Single USB-C: CAT + Audio über Serial (115200, 8N1)"
+        }
+    }
+
+    /// CAT commands for TX/RX control
+    var txCommand: String {
+        switch self {
+        case .digirig: return ""    // Uses Hamlib PTT
+        case .trusdx:  return "TX0;"
+        }
+    }
+
+    var rxCommand: String {
+        switch self {
+        case .digirig: return ""
+        case .trusdx:  return "RX;"
+        }
+    }
+
+    /// Tune command (CW mode, for antenna tuning)
+    var tuneCommand: String {
+        switch self {
+        case .digirig: return ""
+        case .trusdx:  return "TX2;"
         }
     }
 }

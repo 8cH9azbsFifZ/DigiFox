@@ -207,6 +207,26 @@ final class HamlibRig {
         return ptt != RIG_PTT_OFF
     }
 
+    // MARK: - Morse / CW
+
+    /// Send Morse code text — the rig keys CW automatically
+    func sendMorse(_ text: String, vfo: vfo_t = kRIG_VFO_CURR) throws {
+        guard let rig else { throw HamlibError.notInitialized }
+        let result = rig_send_morse(rig, vfo, text)
+        guard result == Int32(RIG_OK.rawValue) else {
+            throw HamlibError.hamlibError(code: Int(result))
+        }
+    }
+
+    /// Stop Morse transmission
+    func stopMorse(vfo: vfo_t = kRIG_VFO_CURR) throws {
+        guard let rig else { throw HamlibError.notInitialized }
+        let result = rig_stop_morse(rig, vfo)
+        guard result == Int32(RIG_OK.rawValue) else {
+            throw HamlibError.hamlibError(code: Int(result))
+        }
+    }
+
     // MARK: - Model Info
 
     /// Get capabilities of the initialized rig

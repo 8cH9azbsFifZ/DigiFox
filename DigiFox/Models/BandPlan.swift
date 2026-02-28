@@ -111,6 +111,25 @@ struct BandPlan {
         "70cm": 432_178_000,
     ]
 
+    // MARK: - CW Standard Frequencies
+
+    /// Standard CW QRP calling frequencies per band (Hz).
+    static let cwFrequencies: [String: Double] = [
+        "160m":   1_810_000,
+        "80m":    3_560_000,
+        "60m":    5_354_000,
+        "40m":    7_030_000,
+        "30m":   10_116_000,
+        "20m":   14_060_000,
+        "17m":   18_096_000,
+        "15m":   21_060_000,
+        "12m":   24_906_000,
+        "10m":   28_060_000,
+        "6m":    50_090_000,
+        "2m":   144_050_000,
+        "70cm": 432_050_000,
+    ]
+
     // MARK: - Combined Data
 
     /// All bands with their digital mode frequencies
@@ -133,6 +152,11 @@ struct BandPlan {
         js8Frequencies[bandId]
     }
 
+    /// Get CW frequency for a band
+    static func cwFrequency(for bandId: String) -> Double? {
+        cwFrequencies[bandId]
+    }
+
     /// Find which band a frequency belongs to
     static func band(for frequencyHz: Double) -> Band? {
         allBands.first { frequencyHz >= $0.lowerHz && frequencyHz <= $0.upperHz }
@@ -143,6 +167,7 @@ struct BandPlan {
         switch mode {
         case .ft8:  return ft8Frequencies[band]
         case .js8:  return js8Frequencies[band]
+        case .cw:   return cwFrequencies[band]
         }
     }
 
@@ -152,6 +177,7 @@ struct BandPlan {
             switch mode {
             case .ft8:  return ft8Frequencies[band.id] != nil
             case .js8:  return js8Frequencies[band.id] != nil
+            case .cw:   return cwFrequencies[band.id] != nil
             }
         }
     }

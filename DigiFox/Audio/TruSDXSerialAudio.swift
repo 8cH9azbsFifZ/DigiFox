@@ -5,12 +5,35 @@ import Combine
 
 /// Pure demultiplexer for the (tr)uSDX CAT_STREAMING protocol.
 ///
-/// Protocol (from usdx.ino firmware):
-/// - Audio is sent as `US<samples>;` blocks: 8-bit unsigned PCM at 7812.5 Hz
-/// - The byte 0x3B (';') never appears in audio data (firmware increments it to 0x3C)
-/// - ';' only appears as CAT delimiter
+/// Protocol reference: https://dl2man.de/5-trusdx-details/
 ///
-/// State machine (from firmware Linux script):
+/// Supported TS-480 CAT commands:
+///   FA; FAnnnnnn;  - Get/Set Frequency in Hz
+///   MD; MDn;       - Get/Set Mode (1=LSB, 2=USB, 3=CW, 4=FM, 5=AM)
+///   IF;            - Get transceiver status (Frequency, Mode)
+///   TX0;           - Set TX (transmit) state
+///   TX2;           - Set Tune state (mode must be CW)
+///   RX;            - Set RX (receive) state
+///   ID;            - Get transceiver ID: 020 (TS-480 emulation)
+///
+/// CAT Streaming extensions:
+///   UA0;           - Streaming OFF (CAT only)
+///   UA1;           - Streaming ON, speaker ON
+///   UA2;           - Streaming ON, speaker OFF
+///   USnnnnn…;      - Audio data block (U8 unsigned bytes until ';')
+///
+/// Audio stream details:
+///   - RX sample rate: 7825 Hz
+///   - TX sample rate: 11520 Hz (or lower for equidistant continuous sending)
+///   - 8-bit unsigned PCM, 46 dB dynamic range
+///   - ';' (0x3B) never appears in audio data (firmware increments to 0x3C)
+///   - Audio may be interrupted by CAT at any ';', resumed with ;US
+///
+/// Serial port settings: 115200 baud, 8N1, No flow control
+///   - DTR should be HIGH
+///   - RTS should be LOW on RX, may be HIGH to key CW/PTT
+///
+/// State machine:
 ///   State 0 (cat):       ';' → state 1; else accumulate CAT byte
 ///   State 1 (semicolon): 'U' → state 2; else start new CAT, state 0
 ///   State 2 (semicolonU):'S' → state 3 (audio); else forward "U"+byte as CAT, state 0
@@ -102,12 +125,17 @@ struct TruSDXDemuxer {
 // MARK: - TruSDX Serial Audio Manager
 
 /// Manages audio I/O over the (tr)uSDX serial connection using CAT_STREAMING.
+///
+/// Reference: https://dl2man.de/5-trusdx-details/
+///
+/// RX flow: TruSDX sends ;US<audio>; blocks → demux → upsample 7825→12000 Hz → codec
+/// TX flow: codec → downsample 12000→11520 Hz → encode U8 → ;US<audio>; → TruSDX
 class TruSDXSerialAudio: ObservableObject {
 
-    /// Sample rate: 7812.5 Hz (20 MHz XTAL) or 6250 Hz (16 MHz)
-    static let sampleRate20MHz: Double = 7812.5
-    static let sampleRate16MHz: Double = 6250.0
-    static let defaultSampleRate: Double = sampleRate20MHz
+    /// RX sample rate from (tr)uSDX: 7825 Hz
+    static let rxSampleRate: Double = 7825.0
+    /// TX sample rate to (tr)uSDX: 11520 Hz
+    static let txSampleRate: Double = 11520.0
     static let requiredBaudRate: speed_t = 115200
 
     enum AudioState: Equatable {
@@ -121,38 +149,66 @@ class TruSDXSerialAudio: ObservableObject {
 
     var onAudioReceived: (([Float]) -> Void)?
     var onCATResponse: ((String) -> Void)?
-    var sampleRate: Double = defaultSampleRate
 
-    private var serialPort: USBSerialPort?
+    private var serialPort: SerialPort?
     private var demuxer = TruSDXDemuxer()
+    private var readTask: Task<Void, Never>?
 
-    func attach(to port: USBSerialPort) {
+    func attach(to port: SerialPort) {
         self.serialPort = port
-        port.onDataReceived = { [weak self] data in
-            self?.handleData(data)
-        }
     }
 
     func startStreaming() {
-        guard let port = serialPort, port.isConnected else {
+        guard let port = serialPort, port.isOpen else {
             state = .error("Serial port not connected")
             return
         }
-        try? port.write("UA1;")
+        do {
+            try port.write("UA1;")
+        } catch {
+            state = .error("Failed to start streaming: \(error.localizedDescription)")
+            return
+        }
         state = .streaming
         demuxer.reset()
+        // Start continuous read loop
+        readTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self, let port = self.serialPort, port.isOpen else { break }
+                do {
+                    let data = try port.read(maxLength: 1024)
+                    if !data.isEmpty {
+                        self.handleData(data)
+                    }
+                } catch { break }
+                try? await Task.sleep(nanoseconds: 1_000_000) // 1ms
+            }
+        }
     }
 
     func stopStreaming() {
-        guard let port = serialPort, port.isConnected else { return }
+        readTask?.cancel()
+        readTask = nil
+        guard let port = serialPort, port.isOpen else { return }
         try? port.write("UA0;")
         state = .idle
         demuxer.reset()
     }
 
+    /// Send TX audio: downsample to TX rate, encode as US block
+    func sendAudio(_ samples: [Float], fromSampleRate: Double = 12000) {
+        guard let port = serialPort, port.isOpen else { return }
+        let downsampled = Self.downsample(samples, from: fromSampleRate, to: Self.txSampleRate)
+        var payload = Data([UInt8(ascii: "U"), UInt8(ascii: "S")])
+        for sample in downsampled {
+            payload.append(TruSDXDemuxer.sampleToByte(sample))
+        }
+        payload.append(0x3B) // ';' terminator
+        try? port.write(payload)
+    }
+
     func detach() {
         if state == .streaming { stopStreaming() }
-        serialPort?.onDataReceived = nil
         serialPort = nil
         state = .idle
     }
@@ -177,7 +233,8 @@ class TruSDXSerialAudio: ObservableObject {
 
     // MARK: - Resampling
 
-    static func upsample(_ samples: [Float], from sourceSR: Double = defaultSampleRate, to targetSR: Double) -> [Float] {
+    /// Upsample RX audio from TruSDX rate (7825 Hz) to codec rate (e.g. 12000 Hz)
+    static func upsample(_ samples: [Float], from sourceSR: Double = rxSampleRate, to targetSR: Double) -> [Float] {
         let ratio = targetSR / sourceSR
         let outputCount = Int(Double(samples.count) * ratio)
         guard outputCount > 0 else { return [] }
@@ -195,7 +252,8 @@ class TruSDXSerialAudio: ObservableObject {
         return output
     }
 
-    static func downsample(_ samples: [Float], from sourceSR: Double, to targetSR: Double = defaultSampleRate) -> [Float] {
+    /// Downsample TX audio from codec rate (e.g. 12000 Hz) to TruSDX TX rate (11520 Hz)
+    static func downsample(_ samples: [Float], from sourceSR: Double, to targetSR: Double = txSampleRate) -> [Float] {
         let ratio = sourceSR / targetSR
         let outputCount = Int(Double(samples.count) / ratio)
         guard outputCount > 0 else { return [] }

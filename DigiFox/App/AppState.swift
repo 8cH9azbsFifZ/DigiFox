@@ -4,8 +4,15 @@ import Combine
 enum DigitalMode: Int, CaseIterable, Identifiable {
     case ft8 = 0
     case js8 = 1
+    case cw = 4
     var id: Int { rawValue }
-    var name: String { self == .ft8 ? "FT8" : "JS8Call" }
+    var name: String {
+        switch self {
+        case .ft8: return "FT8"
+        case .js8: return "JS8Call"
+        case .cw:  return "CW"
+        }
+    }
 }
 
 @MainActor
@@ -36,9 +43,18 @@ class AppState: ObservableObject {
     // MARK: - JS8 State
     @Published var txMessage = TxMessage()
 
+    // MARK: - CW State
+    @Published var cwText = ""
+    @Published var cwSpeed: Int = 20
+    @Published var cwLog = [String]()
+    @Published var cwDecodedText = ""
+    @Published var cwDecoding = false
+
     let settings = AppSettings()
     let audioEngine = AudioEngine()
     let catController = CATController()
+    let morseKeyer = MorseKeyer()
+    private let cwDecoder = CWDecoder()
 
     private let ft8Modulator = FT8Modulator()
     private let ft8Demodulator = FT8Demodulator()
@@ -144,7 +160,8 @@ class AppState: ObservableObject {
                 }
 
                 radioState = await catController.state
-                statusText = "Connected: \(radioState.rigName) (USB)"
+                let displayName = settings.radioProfile == .trusdx ? "(tr)uSDX" : radioState.rigName
+                statusText = "Connected: \(displayName) (USB)"
                 startRigPolling()
             } catch { statusText = "Rig error: \(error.localizedDescription)" }
         }
@@ -153,6 +170,19 @@ class AppState: ObservableObject {
     func disconnectRig() {
         rigPollTask?.cancel(); rigPollTask = nil
         Task { await catController.disconnect(); radioState = await catController.state; statusText = "Rig disconnected" }
+    }
+
+    /// Switch digital mode: update dial frequency and send to rig if connected
+    func switchMode(_ mode: DigitalMode) {
+        guard settings.digitalMode != mode else { return }
+        settings.digitalMode = mode
+        if radioState.isConnected {
+            if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: mode) {
+                setRigFrequency(UInt64(freq))
+            }
+            let rigMode = mode == .cw ? "CW" : "USB"
+            Task { try? await catController.setMode(rigMode) }
+        }
     }
 
     /// Periodically poll rig for frequency and mode changes (every 500ms).
@@ -227,9 +257,13 @@ class AppState: ObservableObject {
     // MARK: - RX/TX
 
     func startReceiving() {
-        if settings.useHamlib && !radioState.isConnected && digirigConnected { connectRig() }
+        if settings.useHamlib && !radioState.isConnected && hasCompatibleDevice { connectRig() }
         audioEngine.start()
-        if settings.digitalMode == .ft8 { startFT8Cycle() } else { startJS8DemodLoop() }
+        switch settings.digitalMode {
+        case .ft8: startFT8Cycle()
+        case .js8: startJS8DemodLoop()
+        case .cw:  startCWDecodeLoop()
+        }
         isReceiving = true
         statusText = radioState.isConnected ? "Receiving (rig connected)" : "Receiving..."
     }
@@ -370,6 +404,92 @@ class AppState: ObservableObject {
             Task { @MainActor in
                 self?.statusText = "Sent"
                 if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
+            }
+        }
+    }
+
+    // MARK: - CW / Morse
+
+    @Published var cwKeying = false
+
+    /// Start continuous CW decoding from audio input
+    private func startCWDecodeLoop() {
+        cwDecoding = true
+        cwDecoder.reset()
+        demodTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms chunks
+                guard let self else { break }
+                let samples = self.audioEngine.getBufferedSamples()
+                guard !samples.isEmpty else { continue }
+                let decoded = self.cwDecoder.process(samples: samples)
+                if !decoded.isEmpty {
+                    await MainActor.run {
+                        self.cwDecodedText += decoded
+                        // Keep last 2000 chars
+                        if self.cwDecodedText.count > 2000 {
+                            self.cwDecodedText = String(self.cwDecodedText.suffix(1500))
+                        }
+                    }
+                }
+                self.audioEngine.clearBuffer()
+            }
+        }
+    }
+
+    /// Stop CW decoding and flush remaining text
+    func stopCWDecoding() {
+        demodTask?.cancel(); demodTask = nil
+        let remaining = cwDecoder.finalize()
+        if !remaining.isEmpty { cwDecodedText += remaining }
+        cwDecoding = false
+    }
+
+    /// Clear decoded CW text
+    func clearCWDecoded() {
+        cwDecodedText = ""
+        cwDecoder.reset()
+    }
+
+    func sendCW() {
+        guard !cwText.isEmpty else { statusText = "No CW text"; return }
+        guard radioState.isConnected else { statusText = "No rig connected"; return }
+        let text = cwText.uppercased()
+        let speed = cwSpeed
+        statusText = "CW: \(text)"
+        cwLog.insert("TX: \(text)", at: 0)
+        if cwLog.count > 50 { cwLog.removeLast() }
+        cwText = ""
+        cwKeying = true
+        Task {
+            do {
+                try await catController.setMode("CW")
+                let cat = catController
+                await morseKeyer.key(
+                    text: text, wpm: speed,
+                    pttOn:  { try await cat.pttOn() },
+                    pttOff: { try await cat.pttOff() }
+                )
+                await MainActor.run {
+                    self.cwKeying = false
+                    self.statusText = "CW sent"
+                }
+            } catch {
+                await MainActor.run {
+                    self.cwKeying = false
+                    self.statusText = "CW error: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    func stopCW() {
+        Task {
+            await morseKeyer.stop()
+            try? await catController.pttOff()
+            await MainActor.run {
+                self.cwKeying = false
+                self.statusText = "CW stopped"
             }
         }
     }

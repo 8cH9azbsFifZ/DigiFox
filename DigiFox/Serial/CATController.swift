@@ -106,6 +106,18 @@ actor CATController {
         return modeStr
     }
 
+    // MARK: - Morse / CW
+
+    func sendMorse(_ text: String) throws {
+        guard let rig = hamlibRig else { throw CATError.notConnected }
+        try rig.sendMorse(text)
+    }
+
+    func stopMorse() throws {
+        guard let rig = hamlibRig else { throw CATError.notConnected }
+        try rig.stopMorse()
+    }
+
     // MARK: - Helpers
 
     private func modeToString(_ mode: rmode_t) -> String {
