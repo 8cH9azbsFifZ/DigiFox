@@ -125,17 +125,17 @@ struct USBStatusBadge: View {
     }
 
     private var iconColor: Color {
-        if !ioKitAvailable { return .gray }
+        if !ioKitAvailable { return .red }
         if rigConnected { return .green }
-        if digirigConnected { return .orange }
-        if deviceCount > 0 { return .yellow }
-        return .gray
+        if digirigConnected { return .green }
+        if deviceCount > 0 { return .green }
+        return .red
     }
 
     private var backgroundColor: Color {
         if rigConnected { return .green.opacity(0.15) }
-        if digirigConnected { return .orange.opacity(0.15) }
-        return .clear
+        if digirigConnected { return .green.opacity(0.15) }
+        return .red.opacity(0.1)
     }
 }
 
