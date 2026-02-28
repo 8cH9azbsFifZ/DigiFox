@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="doc/img/logo.png" alt="DigiFox Logo" width="128">
+</p>
+
 # DigiFox
 
 iOS-App für digitale Amateurfunk-Betriebsarten (**FT8** und **JS8Call**) mit USB-C-Anbindung an Transceiver.
