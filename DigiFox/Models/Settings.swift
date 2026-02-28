@@ -15,9 +15,22 @@ class AppSettings: ObservableObject {
     // Audio
     @AppStorage("txPower") var txPower: Double = 0.5
 
+    // Radio profile (Digirig vs TruSDX)
+    @AppStorage("radioProfile") var radioProfileRaw: String = RadioProfile.digirig.rawValue
+
     // Rig control (default: Yaesu FT-817, 38400 baud)
     @AppStorage("rigModel") var rigModel: Int = 1020
     @AppStorage("rigSerialRate") var rigSerialRate: Int = 38400
+
+    var radioProfile: RadioProfile {
+        get { RadioProfile(rawValue: radioProfileRaw) ?? .digirig }
+        set {
+            radioProfileRaw = newValue.rawValue
+            // Auto-configure for selected profile
+            rigModel = newValue.defaultHamlibModel != 0 ? newValue.defaultHamlibModel : rigModel
+            rigSerialRate = newValue.defaultBaudRate
+        }
+    }
 
     // JS8-specific
     @AppStorage("speedRaw") var speedRaw = 0

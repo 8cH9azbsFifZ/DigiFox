@@ -110,42 +110,44 @@ class AppState: ObservableObject {
             report: dxReport, mode: settings.digitalMode.name
         )
         qsoLog.insert(entry, at: 0)
-        statusText = "QSO geloggt: \(dxCall)"
+        statusText = "QSO logged: \(dxCall)"
     }
 
     private func advanceFT8Sequence() {
         guard autoSequence else { return }
         if selectedTxMessage < 4 { selectedTxMessage += 1; updateTxMessages() }
-        else { txEnabled = false; statusText = "QSO abgeschlossen" }
+        else { txEnabled = false; statusText = "QSO complete" }
     }
 
     // MARK: - Rig Control
 
     func connectRig() {
-        guard settings.useHamlib else { statusText = "Kein Rig-Modell ausgewählt"; return }
+        guard settings.useHamlib else { statusText = "No rig model selected"; return }
+        let baudRate = settings.radioProfile.defaultBaudRate
+        let modelId = settings.radioProfile == .trusdx ? settings.radioProfile.defaultHamlibModel : settings.rigModel
         Task {
             do {
                 if let digirig = SerialPort.findDigirig() {
-                    try await catController.connect(modelId: settings.rigModel, path: digirig.path, baudRate: settings.rigSerialRate)
+                    try await catController.connect(modelId: modelId, path: digirig.path, baudRate: baudRate)
                 } else {
                     let devices = SerialPort.discoverDevices()
-                    guard let first = devices.first else { statusText = "Kein USB-Serial-Gerät gefunden"; return }
-                    try await catController.connect(modelId: settings.rigModel, path: first.path, baudRate: settings.rigSerialRate)
+                    guard let first = devices.first else { statusText = "No USB serial device found"; return }
+                    try await catController.connect(modelId: modelId, path: first.path, baudRate: baudRate)
                 }
                 radioState = await catController.state
-                statusText = "Verbunden: \(radioState.rigName)"
-            } catch { statusText = "Rig-Fehler: \(error.localizedDescription)" }
+                statusText = "Connected: \(radioState.rigName)"
+            } catch { statusText = "Rig error: \(error.localizedDescription)" }
         }
     }
 
     func disconnectRig() {
-        Task { await catController.disconnect(); radioState = await catController.state; statusText = "Rig getrennt" }
+        Task { await catController.disconnect(); radioState = await catController.state; statusText = "Rig disconnected" }
     }
 
     func setRigFrequency(_ hz: UInt64) {
         Task {
             do { try await catController.setFrequency(hz); radioState = await catController.state }
-            catch { statusText = "Frequenz-Fehler: \(error.localizedDescription)" }
+            catch { statusText = "Frequency error: \(error.localizedDescription)" }
         }
     }
 
@@ -155,7 +157,7 @@ class AppState: ObservableObject {
         let prev = usbDevices
         usbDevices = SerialPort.discoverDevices()
         for d in usbDevices.filter({ d in !prev.contains(where: { $0.path == d.path }) }) {
-            statusText = d.isDigirig ? "🔌 Digirig erkannt: \(d.path)" : "🔌 USB-Gerät: \(d.name)"
+            statusText = d.isDigirig ? "🔌 Digirig detected: \(d.path)" : "🔌 USB device: \(d.name)"
         }
     }
 
