@@ -35,12 +35,9 @@ class AppState: ObservableObject {
 
     // MARK: - JS8 State
     @Published var txMessage = TxMessage()
-    @Published var js8Mode: JS8AppMode = .standalone
-    enum JS8AppMode: String, CaseIterable { case standalone = "Standalone", network = "Netzwerk" }
 
     let settings = AppSettings()
     let audioEngine = AudioEngine()
-    let networkClient = JS8NetworkClient()
     let catController = CATController()
 
     private let ft8Modulator = FT8Modulator()
@@ -72,9 +69,6 @@ class AppState: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] s in self?.addWaterfallRow(s) }
             .store(in: &cancellables)
-        networkClient.onMessageReceived = { [weak self] msg in
-            Task { @MainActor in self?.handleNetworkMessage(msg) }
-        }
         $dxCall.sink { [weak self] _ in self?.updateTxMessages() }.store(in: &cancellables)
         $dxGrid.sink { [weak self] _ in self?.updateTxMessages() }.store(in: &cancellables)
         $dxReport.sink { [weak self] _ in self?.updateTxMessages() }.store(in: &cancellables)
@@ -328,29 +322,6 @@ class AppState: ObservableObject {
                 self?.statusText = "Gesendet"
                 if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
             }
-        }
-    }
-
-    // MARK: - JS8 Network
-
-    func connectNetwork() { networkClient.connect(host: settings.networkHost, port: settings.networkPort); statusText = "Verbinde..." }
-    func disconnectNetwork() { networkClient.disconnect(); statusText = "Getrennt" }
-    func sendNetworkMessage() {
-        guard !txMessage.text.isEmpty else { return }
-        networkClient.sendText(txMessage.text); statusText = "Gesendet (Netzwerk)"
-    }
-
-    private func handleNetworkMessage(_ msg: JS8APIMessage) {
-        switch msg.type {
-        case "RX.DIRECTED", "RX.ACTIVITY":
-            let rx = RxMessage(
-                timestamp: Date(), frequency: Double(msg.params?["FREQ"] ?? "0") ?? 0,
-                snr: Int(msg.params?["SNR"] ?? "0") ?? 0, deltaTime: 0, text: msg.value,
-                mode: .js8, js8Speed: settings.speed, from: msg.params?["FROM"], to: msg.params?["TO"]
-            )
-            rxMessages.insert(rx, at: 0)
-        case "STATION.STATUS": statusText = "Verbunden: \(msg.value)"
-        default: break
         }
     }
 
