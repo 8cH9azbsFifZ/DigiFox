@@ -12,12 +12,9 @@ struct SettingsView: View {
         return rigModels.filter { $0.displayName.localizedCaseInsensitiveContains(searchText) }
     }
 
-    private let ft8BandPresets: [(String, Double)] = [
-        ("160m", 1_840_000), ("80m", 3_573_000), ("60m", 5_357_000),
-        ("40m", 7_074_000), ("30m", 10_136_000), ("20m", 14_074_000),
-        ("17m", 18_100_000), ("15m", 21_074_000), ("12m", 24_915_000),
-        ("10m", 28_074_000), ("6m", 50_313_000), ("2m", 144_174_000),
-    ]
+    private var availableBands: [Band] {
+        BandPlan.availableBands(for: settings.digitalMode)
+    }
 
     var body: some View {
         NavigationStack {
@@ -153,26 +150,43 @@ struct SettingsView: View {
                     .disabled(settings.radioProfile == .trusdx)
                 }
 
-                Section("Frequenz") {
+                Section("Frequency") {
+                    HStack {
+                        Text("Band"); Spacer()
+                        Picker("Band", selection: Binding(
+                            get: { settings.selectedBand },
+                            set: { settings.selectBand($0) }
+                        )) {
+                            ForEach(availableBands) { band in
+                                Text(band.name).tag(band.id)
+                            }
+                        }
+                        .labelsHidden()
+                    }
                     HStack {
                         Text("Dial (Hz)"); Spacer()
                         TextField("14074000", value: $settings.dialFrequency, format: .number)
                             .multilineTextAlignment(.trailing).keyboardType(.numberPad)
                     }
-                    if settings.digitalMode == .ft8 {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 6) {
-                                ForEach(ft8BandPresets, id: \.0) { name, freq in
-                                    Button(name) { settings.dialFrequency = freq }
-                                        .buttonStyle(.bordered)
-                                        .tint(settings.dialFrequency == freq ? .blue : .gray)
-                                        .controlSize(.small)
-                                }
+                    if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: settings.digitalMode) {
+                        HStack {
+                            Text("Standard \(settings.digitalMode.name)"); Spacer()
+                            Text(Band.formatMHz(freq)).foregroundStyle(.secondary)
+                        }
+                        .font(.caption)
+                    }
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(availableBands) { band in
+                                Button(band.name) { settings.selectBand(band.id) }
+                                    .buttonStyle(.bordered)
+                                    .tint(settings.selectedBand == band.id ? .blue : .gray)
+                                    .controlSize(.small)
                             }
                         }
                     }
                     if settings.digitalMode == .js8 {
-                        Picker("Geschwindigkeit", selection: $settings.speedRaw) {
+                        Picker("Speed", selection: $settings.speedRaw) {
                             ForEach(JS8Speed.allCases) { s in Text(s.name).tag(s.rawValue) }
                         }
                     }

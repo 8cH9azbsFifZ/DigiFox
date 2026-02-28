@@ -52,12 +52,7 @@ struct MainView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     HStack(spacing: 8) {
                         // Mode Picker
-                        Picker("Modus", selection: $settings.digitalModeRaw) {
-                            Text("FT8").tag(0)
-                            Text("JS8").tag(1)
-                        }
-                        .pickerStyle(.segmented)
-                        .frame(width: 110)
+                        ModePicker(selection: $settings.digitalModeRaw)
 
                         Text(settings.callsign.isEmpty ? "–" : settings.callsign)
                             .font(.caption)
@@ -141,5 +136,34 @@ struct USBStatusBadge: View {
         if rigConnected { return .green.opacity(0.15) }
         if digirigConnected { return .orange.opacity(0.15) }
         return .clear
+    }
+}
+
+// MARK: - Mode Picker (high-contrast)
+
+struct ModePicker: View {
+    @Binding var selection: Int
+    private let modes = ["FT8", "JS8"]
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(0..<modes.count, id: \.self) { idx in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.15)) { selection = idx }
+                } label: {
+                    Text(modes[idx])
+                        .font(.system(size: 13, weight: selection == idx ? .bold : .medium))
+                        .foregroundStyle(selection == idx ? .white : .primary)
+                        .frame(width: 52, height: 28)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(selection == idx ? Color.accentColor : Color(.systemGray5))
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(2)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.systemGray6)))
     }
 }
