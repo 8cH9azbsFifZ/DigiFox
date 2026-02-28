@@ -16,7 +16,7 @@ class AppState: ObservableObject {
     @Published var waterfallData = [[Float]]()
     @Published var isReceiving = false
     @Published var isTransmitting = false
-    @Published var statusText = "Bereit"
+    @Published var statusText = "Ready"
     @Published var radioState = RadioState()
     @Published var usbDevices = [SerialDeviceInfo]()
     @Published var ioKitAvailable = false
@@ -219,7 +219,7 @@ class AppState: ObservableObject {
         audioEngine.start()
         if settings.digitalMode == .ft8 { startFT8Cycle() } else { startJS8DemodLoop() }
         isReceiving = true
-        statusText = radioState.isConnected ? "Empfange (Rig verbunden)" : "Empfange..."
+        statusText = radioState.isConnected ? "Receiving (rig connected)" : "Receiving..."
     }
 
     func stopReceiving() {
@@ -298,14 +298,14 @@ class AppState: ObservableObject {
         guard selectedTxMessage < txMessages.count else { return }
         let msgText = txMessages[selectedTxMessage]
         guard !msgText.isEmpty else { return }
-        statusText = "Sende: \(msgText)"
+        statusText = "Sending: \(msgText)"
         if settings.useHamlib { Task { try? await catController.pttOn() } }
         let ft8Msg = FT8MessagePack.parseText(msgText, myCall: settings.callsign, myGrid: settings.grid)
         ft8Modulator.baseFrequency = txFrequency
         let samples = ft8Modulator.modulate(ft8Msg)
         audioEngine.transmit(samples: samples) { [weak self] in
             Task { @MainActor in
-                self?.statusText = "Gesendet"
+                self?.statusText = "Sent"
                 if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
                 self?.advanceFT8Sequence()
             }
@@ -348,15 +348,15 @@ class AppState: ObservableObject {
 
     func transmitJS8() {
         guard !txMessage.text.isEmpty, !settings.callsign.isEmpty else {
-            statusText = settings.callsign.isEmpty ? "Rufzeichen fehlt!" : ""; return
+            statusText = settings.callsign.isEmpty ? "Callsign required!" : ""; return
         }
-        statusText = "Sende..."
+        statusText = "Sending..."
         if settings.useHamlib { Task { try? await catController.pttOn() } }
         let msg = "\(settings.callsign): \(txMessage.text)"
         let samples = js8Modulator.modulate(message: msg, frequency: txMessage.frequency, speed: settings.speed)
         audioEngine.transmit(samples: samples) { [weak self] in
             Task { @MainActor in
-                self?.statusText = "Gesendet"
+                self?.statusText = "Sent"
                 if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
             }
         }
