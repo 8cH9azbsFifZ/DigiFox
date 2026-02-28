@@ -19,6 +19,10 @@ DigiFox enables hams to use their iPhone or iPad as a digital mode interface by 
 - Compatible amateur radio transceiver with USB-C or USB interface
 - Appropriate USB-C cable or adapter
 
+## Disclaimer
+
+This entire project has been generated using various AI models and is therefore experimental in nature. Use at your own risk.
+
 ## License
 
 TBD
