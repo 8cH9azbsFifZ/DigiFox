@@ -93,13 +93,13 @@ protocol B2FTransport: AnyObject, Sendable {
 
 // MARK: - B2F Session Handler
 
-/// B2F Protokoll-Handler — vollständiger Nachrichtenaustausch.
+/// B2F protocol handler — complete message exchange.
 ///
-/// Implementiert den Ablauf wie in wl2k-go/fbb:
-/// 1. SID-Austausch + Challenge/Response Login
-/// 2. Outbound Proposals + Compressed Data (SOH/STX/EOT)
-/// 3. Inbound Proposals + Compressed Data
-/// 4. FF/FQ Terminierung
+/// Implements the flow as in wl2k-go/fbb:
+/// 1. SID exchange + challenge/response login
+/// 2. Outbound proposals + compressed data (SOH/STX/EOT)
+/// 3. Inbound proposals + compressed data
+/// 4. FF/FQ termination
 final class B2FSession {
 
     private let transport: B2FTransport
@@ -107,7 +107,7 @@ final class B2FSession {
     private let mailbox: WinlinkMailbox
     private let lzhuf = LZHUFCodec()
 
-    /// Fortschrittsinformation
+    /// Progress information
     struct Progress: Sendable {
         var phase: String
         var detail: String
@@ -125,13 +125,13 @@ final class B2FSession {
         self.transport = transport
         self.account = account
         self.mailbox = mailbox
-        Log.d("B2F", "Session erstellt für \(account.callsign)")
+        Log.d("B2F", "Session created for \(account.callsign)")
     }
 
     // MARK: - Main Protocol Flow
 
     func exchange() async throws {
-        Log.d("B2F", "=== Sitzung Start ===")
+        Log.d("B2F", "=== Session Start ===")
         updateProgress(phase: "Anmeldung", detail: "Sende SID...")
 
         // 1. Login (SID exchange + challenge/response)
@@ -147,7 +147,7 @@ final class B2FSession {
             let _ = try await handleInbound()
         }
 
-        Log.d("B2F", "=== Sitzung Ende: sent=\(progress.messagesSent) rcvd=\(progress.messagesReceived) ===")
+        Log.d("B2F", "=== Session End: sent=\(progress.messagesSent) rcvd=\(progress.messagesReceived) ===")
         updateProgress(phase: "Abgeschlossen", detail: "Sitzung beendet")
     }
 
@@ -359,7 +359,7 @@ final class B2FSession {
         for i in 0..<proposals.count {
             guard proposals[i].answer == .accept else { continue }
 
-            Log.d("B2F", "Empfange Nachricht \(proposals[i].messageId)...")
+            Log.d("B2F", "Receiving message \(proposals[i].messageId)...")
             try await readCompressed(proposal: &proposals[i])
 
             let decompressed = lzhuf.decompress(proposals[i].compressedData)
