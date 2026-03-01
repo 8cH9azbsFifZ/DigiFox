@@ -29,16 +29,28 @@ digital modes, plus Winlink email on iPhone/iPad.
 > ⚠️ **Mandatory reading before making changes.** Every new feature,
 > codec, or integration must follow these principles. When in doubt, ask.
 
-### P1 — USB audio device takes priority over built-in audio
+### P1 — Audio routing priority for digital modes
 
-All digital modes (FT8, JS8, WSPR, ARDOP, CW) **must** use an external
-USB audio device (e.g., Digirig CM108B) when one is connected. The
-iPhone's built-in microphone and speaker are never used for digital mode
-RX/TX. `AudioEngine` detects USB Audio Class devices via
+All digital modes (FT8, JS8, WSPR, ARDOP, CW) select their audio source
+according to the following priority (highest first):
+
+| Priority | Condition | Audio path | Detection |
+|----------|-----------|------------|-----------|
+| **1** | Digirig connected | USB Audio Class (CM108B soundcard) | `AVAudioSession` port type `.usbAudio` |
+| **2** | (tr)uSDX connected (no Digirig) | Serial audio over CAT (`TruSDXSerialAudio`) | IOKit USB scan, VID `0x1A86` |
+| **3** | No external device | iPhone built-in microphone / speaker | Fallback |
+
+`AudioEngine` detects USB Audio Class devices via
 `AVAudioSession.currentRoute` and routes both input and output to the USB
-device automatically. New codecs or decoders must not bypass this — they
-receive audio from the shared 12 kHz resampled buffer provided by
-`AudioEngine`, never from a self-managed audio source.
+device automatically. When a TruSDX is connected without a Digirig, audio
+is streamed over the serial CAT connection via `TruSDXSerialAudio`. When
+no external device is present, the iPhone's built-in audio hardware is
+used as fallback so that digital modes remain functional (e.g. for
+testing or acoustic coupling).
+
+New codecs or decoders must not bypass this routing — they receive audio
+from the shared 12 kHz resampled buffer provided by `AudioEngine`, never
+from a self-managed audio source.
 
 ### P2 — Prefer integrating original external implementations
 
