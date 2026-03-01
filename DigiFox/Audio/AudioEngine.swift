@@ -18,6 +18,7 @@ class AudioEngine: ObservableObject {
     private let bufferLock = NSLock()
     private var routeChangeObserver: NSObjectProtocol?
     private var externalFFTBuffer = [Float]()  // accumulator for external (TruSDX) samples
+    private var monitorPlayer: AVAudioPlayerNode?
 
     var onSpectrumUpdate: (([Float]) -> Void)?
 
@@ -147,11 +148,16 @@ class AudioEngine: ObservableObject {
         if !engine.isRunning {
             do {
                 let session = AVAudioSession.sharedInstance()
-                try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker])
+                // Use .playback to avoid requiring input node (crashes on Simulator)
+                try session.setCategory(.playback, options: [.defaultToSpeaker])
                 try session.setActive(true)
+                // Connect a dummy player to mainMixerNode before starting
+                // to ensure at least one output node exists
+                let _ = engine.mainMixerNode
                 try engine.start()
+                print("[AudioEngine] transmit: engine started in playback mode")
             } catch {
-                print("AudioEngine transmit start error: \(error)")
+                print("[AudioEngine] transmit start error: \(error)")
                 completion?()
                 return
             }
@@ -176,16 +182,28 @@ class AudioEngine: ObservableObject {
         }
 
         let player = AVAudioPlayerNode()
+        monitorPlayer = player
         engine.attach(player)
         engine.connect(player, to: engine.mainMixerNode, format: format)
         player.scheduleBuffer(buffer) { [weak self] in
             DispatchQueue.main.async {
                 self?.isTransmitting = false
+                self?.monitorPlayer = nil
                 self?.engine.detach(player)
                 completion?()
             }
         }
         player.play()
+    }
+
+    /// Stop monitor playback immediately (TX Halt)
+    func stopPlayback() {
+        if let player = monitorPlayer {
+            print("[AudioEngine] stopPlayback: stopping monitor player")
+            player.stop()
+            engine.detach(player)
+            monitorPlayer = nil
+        }
     }
 
     private func processInput(_ buffer: AVAudioPCMBuffer) {

@@ -6,9 +6,24 @@ struct QSOPanelView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            // TX Even/Odd
+            // QSO partner info (auto-filled from decoded stations)
             HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("DX Call").font(.caption2).foregroundStyle(.secondary)
+                    Text(appState.dxCall.isEmpty ? "–" : appState.dxCall)
+                        .font(.system(.subheadline, design: .monospaced))
+                        .foregroundStyle(appState.dxCall.isEmpty ? .secondary : .primary)
+                        .frame(width: 110, alignment: .leading)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("DX Grid").font(.caption2).foregroundStyle(.secondary)
+                    Text(appState.dxGrid.isEmpty ? "–" : appState.dxGrid)
+                        .font(.system(.subheadline, design: .monospaced))
+                        .foregroundStyle(appState.dxGrid.isEmpty ? .secondary : .primary)
+                        .frame(width: 70, alignment: .leading)
+                }
                 Spacer()
+                // TX Even/Odd
                 VStack(spacing: 2) {
                     Text("TX").font(.caption2).foregroundStyle(.secondary)
                     Picker("", selection: $appState.txEven) {
@@ -74,7 +89,11 @@ struct QSOPanelView: View {
 
                 // Enable TX / Halt TX
                 Button {
-                    appState.txEnabled.toggle()
+                    if appState.txEnabled {
+                        appState.haltTx()
+                    } else {
+                        appState.txEnabled = true
+                    }
                 } label: {
                     Text(appState.txEnabled ? "TX Halt" : "TX Ein")
                         .font(.subheadline).bold()

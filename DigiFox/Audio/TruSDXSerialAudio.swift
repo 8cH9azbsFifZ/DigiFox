@@ -1,6 +1,9 @@
 import Foundation
 import Combine
 import QuartzCore
+import os.log
+
+private let audioLog = Logger(subsystem: "com.digifox.app", category: "TruSDX-Audio")
 
 // MARK: - TruSDX Demuxer (testable, synchronous)
 
@@ -118,7 +121,7 @@ struct TruSDXDemuxer {
     static func sampleToByte(_ sample: Float) -> UInt8 {
         let clamped = max(-1.0, min(1.0, sample))
         var byte = UInt8(clamped * 127.0 + 128.0)
-        if byte == 0x3B { byte = 0x3C } // firmware rule: never send ';' as audio
+        if byte == 0x3B { byte = 0x3A } // ';' would be interpreted as CAT delimiter
         return byte
     }
 }
@@ -161,19 +164,19 @@ class TruSDXSerialAudio: ObservableObject {
 
     func startStreaming() {
         guard let port = serialPort else {
-            print("[TruSDX-Audio] startStreaming: no serial port attached")
+            NSLog("[TruSDX-Audio] startStreaming: no serial port attached")
             state = .error("Serial port not connected")
             return
         }
         state = .streaming
         demuxer.reset()
-        print("[TruSDX-Audio] startStreaming: sending UA1;")
+        NSLog("[TruSDX-Audio] startStreaming: sending UA1;")
         readTask = Task { [weak self] in
             do {
                 try await port.write("UA1;")
-                print("[TruSDX-Audio] startStreaming: UA1; sent OK")
+                NSLog("[TruSDX-Audio] startStreaming: UA1; sent OK")
             } catch {
-                print("[TruSDX-Audio] startStreaming: UA1; FAILED: \(error)")
+                NSLog("[TruSDX-Audio] startStreaming: UA1; FAILED: \(error)")
                 await MainActor.run { self?.state = .error("Failed to start streaming: \(error.localizedDescription)") }
                 return
             }
@@ -183,7 +186,7 @@ class TruSDXSerialAudio: ObservableObject {
                 guard let self else { break }
                 let isOpen = await port.isOpen
                 guard isOpen else {
-                    print("[TruSDX-Audio] readLoop: port closed, stopping")
+                    NSLog("[TruSDX-Audio] readLoop: port closed, stopping")
                     break
                 }
                 do {
@@ -194,21 +197,21 @@ class TruSDXSerialAudio: ObservableObject {
                         self.handleData(data)
                         // Count samples from demuxer (approximate via data size)
                         if totalReads % 500 == 0 {
-                            print("[TruSDX-Audio] readLoop: \(totalReads) reads, \(data.count) bytes last read")
+                            NSLog("[TruSDX-Audio] readLoop: \(totalReads) reads, \(data.count) bytes last read")
                         }
                     }
                 } catch {
-                    print("[TruSDX-Audio] readLoop: read error: \(error)")
+                    NSLog("[TruSDX-Audio] readLoop: read error: \(error)")
                     break
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000) // 1ms
             }
-            print("[TruSDX-Audio] readLoop: ended after \(totalReads) reads")
+            NSLog("[TruSDX-Audio] readLoop: ended after \(totalReads) reads")
         }
     }
 
     func stopStreaming() {
-        print("[TruSDX-Audio] stopStreaming")
+        NSLog("[TruSDX-Audio] stopStreaming")
         readTask?.cancel()
         readTask = nil
         guard let port = serialPort else { return }
@@ -219,40 +222,54 @@ class TruSDXSerialAudio: ObservableObject {
 
     /// Send TX audio: downsample to TX rate, encode as US blocks.
     /// Awaitable — returns only after all audio has been sent.
+    /// The caller must send TX0; before and RX; after this call.
     func sendAudio(_ samples: [Float], fromSampleRate: Double = 12000) async {
         guard let port = serialPort else {
-            print("[TruSDX-Audio] sendAudio: no serial port attached")
+            NSLog("[TruSDX-Audio] sendAudio: no serial port attached")
             return
         }
         let downsampled = Self.downsample(samples, from: fromSampleRate, to: Self.txSampleRate)
-        print("[TruSDX-Audio] sendAudio: \(samples.count) samples @ \(fromSampleRate)Hz → \(downsampled.count) samples @ \(Self.txSampleRate)Hz")
+        NSLog("[TruSDX-Audio] sendAudio: \(samples.count) samples @ \(fromSampleRate)Hz → \(downsampled.count) samples @ \(Self.txSampleRate)Hz")
 
         // Pause read loop during TX to avoid actor contention
         let wasStreaming = readTask != nil
         if wasStreaming {
-            print("[TruSDX-Audio] sendAudio: pausing readTask for TX")
+            NSLog("[TruSDX-Audio] sendAudio: pausing readTask for TX")
             readTask?.cancel()
             readTask = nil
         }
 
-        let chunkSize = 128
+        let chunkSize = 256 // FT8CN reference: 256 byte chunks
         var chunksSent = 0
         var offset = 0
         let txStart = CACurrentMediaTime()
 
+        let totalChunks = (downsampled.count + chunkSize - 1) / chunkSize
+        NSLog("[TruSDX-Audio] sendAudio: will send \(totalChunks) chunks of \(chunkSize) samples")
+
         while offset < downsampled.count {
+            // Check for cancellation (TX Halt)
+            if Task.isCancelled {
+                NSLog("[TruSDX-Audio] sendAudio: CANCELLED at chunk \(chunksSent)/\(totalChunks)")
+                break
+            }
             let end = min(offset + chunkSize, downsampled.count)
-            var payload = Data([0x3B, UInt8(ascii: "U"), UInt8(ascii: "S")]) // ;US prefix
+            // TX audio: send RAW U8 samples (no ;US framing — that's RX only)
+            // FT8CN reference: raw bytes after TX0;, 0x3B mapped to 0x3A
+            var payload = Data()
             for i in offset..<end {
                 payload.append(TruSDXDemuxer.sampleToByte(downsampled[i]))
             }
             do {
                 try await port.write(payload)
             } catch {
-                print("[TruSDX-Audio] sendAudio: write error at chunk \(chunksSent): \(error)")
+                NSLog("[TruSDX-Audio] sendAudio: write error at chunk \(chunksSent)/\(totalChunks): \(error)")
                 break
             }
             chunksSent += 1
+            if chunksSent % 50 == 0 {
+                NSLog("[TruSDX-Audio] sendAudio: progress \(chunksSent)/\(totalChunks) chunks")
+            }
             let samplesInChunk = end - offset
             offset = end
             // Pace to match TX sample rate
@@ -261,12 +278,11 @@ class TruSDXSerialAudio: ObservableObject {
         }
 
         let elapsed = CACurrentMediaTime() - txStart
-        print("[TruSDX-Audio] sendAudio: done — \(chunksSent) chunks in \(String(format: "%.2f", elapsed))s")
+        NSLog("[TruSDX-Audio] sendAudio: done — \(chunksSent) chunks in \(String(format: "%.2f", elapsed))s")
 
-        // Resume read loop after TX
+        // Do NOT resume read loop here — caller sends RX; first, then resumes
         if wasStreaming {
-            print("[TruSDX-Audio] sendAudio: resuming readTask after TX")
-            startStreaming()
+            NSLog("[TruSDX-Audio] sendAudio: read loop paused, caller must resume after RX;")
         }
     }
 

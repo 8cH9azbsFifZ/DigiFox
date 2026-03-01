@@ -1,16 +1,21 @@
 import Foundation
 import Combine
+import os.log
+
+private let logger = Logger(subsystem: "com.digifox.app", category: "AppState")
 
 enum DigitalMode: Int, CaseIterable, Identifiable {
     case ft8 = 0
     case js8 = 1
     case cw = 4
+    case wspr = 5
     var id: Int { rawValue }
     var name: String {
         switch self {
-        case .ft8: return "FT8"
-        case .js8: return "JS8Call"
-        case .cw:  return "CW"
+        case .ft8:  return "FT8"
+        case .js8:  return "JS8Call"
+        case .cw:   return "CW"
+        case .wspr: return "WSPR"
         }
     }
 }
@@ -43,6 +48,10 @@ class AppState: ObservableObject {
     // MARK: - JS8 State
     @Published var txMessage = TxMessage()
 
+    // MARK: - WSPR State
+    @Published var wsprPower: Int = 30  // dBm
+    @Published var wsprTxEnabled = false
+
     // MARK: - CW State
     @Published var cwText = ""
     @Published var cwSpeed: Int = 20
@@ -62,11 +71,13 @@ class AppState: ObservableObject {
     private let ft8Demodulator = FT8Demodulator()
     private let js8Modulator = JS8Modulator()
     private let js8Demodulator = JS8Demodulator()
+    private let wsprModulator = WSPRModulator()
     private var cancellables = Set<AnyCancellable>()
     private var demodTask: Task<Void, Never>?
     private var usbScanTask: Task<Void, Never>?
     private var cycleTask: Task<Void, Never>?
     private var rigPollTask: Task<Void, Never>?
+    private var txTask: Task<Void, Never>?
 
     init() {
         // Pre-fill DX call/grid from settings
@@ -134,6 +145,46 @@ class AppState: ObservableObject {
         guard autoSequence else { return }
         if selectedTxMessage < 4 { selectedTxMessage += 1; updateTxMessages() }
         else { txEnabled = false; statusText = "QSO complete" }
+    }
+
+    /// Immediately halt any ongoing TX — cancel task, send RX; to TruSDX
+    func haltTx() {
+        NSLog("[TX-HALT] haltTx() called — txEnabled=\(txEnabled) isTransmitting=\(isTransmitting) txTask=\(txTask != nil) cwKeying=\(cwKeying)")
+        txEnabled = false
+
+        // Stop monitor audio playback
+        audioEngine.stopPlayback()
+
+        if let task = txTask {
+            NSLog("[TX-HALT] Cancelling TX task")
+            task.cancel()
+            txTask = nil
+        }
+
+        // If TruSDX is transmitting, force RX immediately via direct POSIX write
+        // (async port.write would queue behind sendAudio chunks — too slow)
+        if isTruSDX, let port = trusdxPort, isTransmitting {
+            let fd = port.rawFD
+            if fd >= 0 {
+                NSLog("[TX-HALT] TruSDX: direct POSIX write RX; on fd=\(fd)")
+                let rx = Array(";RX;".utf8)
+                rx.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
+            } else {
+                NSLog("[TX-HALT] TruSDX: WARNING — fd invalid (\(fd)), falling back to async")
+                Task { try? await port.write(";RX;") }
+            }
+            // Resume streaming after short delay
+            Task {
+                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms for RX; to be processed
+                NSLog("[TX-HALT] TruSDX: resuming streaming")
+                trusdxAudio.startStreaming()
+            }
+            isTransmitting = false
+            statusText = "TX abgebrochen"
+        }
+
+        // CW keying
+        if cwKeying { stopCW() }
     }
 
     // MARK: - Rig Control
@@ -267,6 +318,7 @@ class AppState: ObservableObject {
             case .ft8: startFT8Cycle()
             case .js8: startJS8DemodLoop()
             case .cw:  startCWDecodeLoop()
+            case .wspr: break  // WSPR is TX-only beacon, no decode loop
             }
             print("[Mode] \(mode): freq/mode set, decode loop started")
         }
@@ -302,8 +354,10 @@ class AppState: ObservableObject {
     }
 
     func setRigFrequency(_ hz: UInt64) {
+        NSLog("[RIG] setRigFrequency: \(hz) Hz (\(String(format: "%.6f", Double(hz)/1_000_000)) MHz)")
         if isTruSDX, let port = trusdxPort {
             let cmd = String(format: "FA%011d;", hz)
+            NSLog("[RIG] TruSDX: sending \(cmd)")
             Task { try? await port.write(cmd) }
             settings.dialFrequency = Double(hz)
             radioState.frequency = hz
@@ -360,6 +414,7 @@ class AppState: ObservableObject {
         case .ft8: startFT8Cycle()
         case .js8: startJS8DemodLoop()
         case .cw:  startCWDecodeLoop()
+        case .wspr: break  // WSPR is TX-only beacon
         }
         isReceiving = true
         statusText = radioState.isConnected ? "Receiving (rig connected)" : "Receiving..."
@@ -389,7 +444,10 @@ class AppState: ObservableObject {
                 await self?.runFT8Demodulation()
                 let secAfter = Calendar.current.component(.second, from: Date())
                 let isEvenSlot = (secAfter / 15) % 2 == 0
-                if self?.txEnabled == true && isEvenSlot == self?.txEven { await self?.transmitFT8() }
+                if self?.txEnabled == true && isEvenSlot == self?.txEven {
+                    NSLog("[FT8] TX slot triggered — txEnabled=true, isEvenSlot=\(isEvenSlot), txEven=\(self?.txEven ?? false), isTransmitting=\(self?.isTransmitting ?? false)")
+                    await self?.transmitFT8()
+                }
             }
         }
     }
@@ -438,9 +496,10 @@ class AppState: ObservableObject {
     }
 
     private func transmitFT8() {
-        guard selectedTxMessage < txMessages.count else { return }
+        guard selectedTxMessage < txMessages.count else { NSLog("[FT8-TX] selectedTxMessage out of range"); return }
         let msgText = txMessages[selectedTxMessage]
-        guard !msgText.isEmpty else { return }
+        guard !msgText.isEmpty else { NSLog("[FT8-TX] empty message text"); return }
+        NSLog("[FT8-TX] transmitFT8: msg='\(msgText)' txFreq=\(txFrequency) dialFreq=\(settings.dialFrequency) isTruSDX=\(isTruSDX)")
         statusText = "Sending: \(msgText)"
         let ft8Msg = FT8MessagePack.parseText(msgText, myCall: settings.callsign, myGrid: settings.grid)
         ft8Modulator.baseFrequency = txFrequency
@@ -449,24 +508,43 @@ class AppState: ObservableObject {
         if isTruSDX, let port = trusdxPort {
             // TruSDX: send audio over serial (CAT streaming)
             isTransmitting = true
-            Task {
+            // Monitor: play FT8 tone on speaker for debugging (non-critical)
+            do {
+                NSLog("[FT8-TX] Playing monitor audio on speaker (\(samples.count) samples @ 12kHz)")
+                audioEngine.transmit(samples: samples, completion: nil)
+            } catch {
+                NSLog("[FT8-TX] Monitor playback failed (non-critical): \(error)")
+            }
+            txTask = Task {
                 do {
-                    print("[FT8-TX] TruSDX: setting USB mode (MD2;)")
+                    NSLog("[FT8-TX] TruSDX: setting USB mode (MD2;)")
                     try await port.write("MD2;")
-                    print("[FT8-TX] TruSDX: keying TX (TX0;)")
-                    try await port.write("TX0;")
-                    print("[FT8-TX] TruSDX: sending \(samples.count) audio samples")
+                    NSLog("[FT8-TX] TruSDX: keying TX (TX0;)")
+                    try await port.write(";TX0;")
+                    try await Task.sleep(nanoseconds: 50_000_000) // 50ms settling
+                    NSLog("[FT8-TX] TruSDX: sending \(samples.count) audio samples")
                     await trusdxAudio.sendAudio(samples, fromSampleRate: 12000)
-                    print("[FT8-TX] TruSDX: audio sent, going back to RX")
-                    try await port.write("RX;")
-                    print("[FT8-TX] TruSDX: TX complete")
+                    try Task.checkCancellation()
+                    NSLog("[FT8-TX] TruSDX: audio sent, going back to RX")
+                    try await port.write(";RX;")
+                    try? await Task.sleep(nanoseconds: 50_000_000) // 50ms settling
+                    NSLog("[FT8-TX] TruSDX: resuming streaming")
+                    trusdxAudio.startStreaming()
+                    NSLog("[FT8-TX] TruSDX: TX complete")
+                } catch is CancellationError {
+                    NSLog("[FT8-TX] TruSDX: CANCELLED — sending RX;")
+                    try? await port.write(";RX;")
+                    trusdxAudio.startStreaming()
                 } catch {
-                    print("[FT8-TX] TruSDX: ERROR: \(error)")
+                    NSLog("[FT8-TX] TruSDX: ERROR: \(error)")
+                    try? await port.write(";RX;")
+                    trusdxAudio.startStreaming()
                 }
                 await MainActor.run {
                     self.isTransmitting = false
-                    self.statusText = "Sent"
-                    self.advanceFT8Sequence()
+                    self.txTask = nil
+                    if !Task.isCancelled { self.advanceFT8Sequence() }
+                    self.statusText = Task.isCancelled ? "TX abgebrochen" : "Sent"
                 }
             }
         } else {
@@ -526,23 +604,38 @@ class AppState: ObservableObject {
         if isTruSDX, let port = trusdxPort {
             // TruSDX: send audio over serial (CAT streaming)
             isTransmitting = true
-            Task {
+            // Monitor: play JS8 tone on speaker for debugging (non-critical)
+            NSLog("[JS8-TX] Playing monitor audio on speaker (\(samples.count) samples @ 12kHz)")
+            audioEngine.transmit(samples: samples, completion: nil)
+            txTask = Task {
                 do {
-                    print("[JS8-TX] TruSDX: setting USB mode (MD2;)")
+                    NSLog("[JS8-TX] TruSDX: setting USB mode (MD2;)")
                     try await port.write("MD2;")
-                    print("[JS8-TX] TruSDX: keying TX (TX0;)")
-                    try await port.write("TX0;")
-                    print("[JS8-TX] TruSDX: sending \(samples.count) audio samples")
+                    NSLog("[JS8-TX] TruSDX: keying TX (TX0;)")
+                    try await port.write(";TX0;")
+                    try await Task.sleep(nanoseconds: 50_000_000)
+                    NSLog("[JS8-TX] TruSDX: sending \(samples.count) audio samples")
                     await trusdxAudio.sendAudio(samples, fromSampleRate: 12000)
-                    print("[JS8-TX] TruSDX: audio sent, going back to RX")
-                    try await port.write("RX;")
-                    print("[JS8-TX] TruSDX: TX complete")
+                    try Task.checkCancellation()
+                    NSLog("[JS8-TX] TruSDX: audio sent, going back to RX")
+                    try await port.write(";RX;")
+                    try? await Task.sleep(nanoseconds: 50_000_000)
+                    NSLog("[JS8-TX] TruSDX: resuming streaming")
+                    trusdxAudio.startStreaming()
+                    NSLog("[JS8-TX] TruSDX: TX complete")
+                } catch is CancellationError {
+                    NSLog("[JS8-TX] TruSDX: CANCELLED — sending RX;")
+                    try? await port.write(";RX;")
+                    trusdxAudio.startStreaming()
                 } catch {
-                    print("[JS8-TX] TruSDX: ERROR: \(error)")
+                    NSLog("[JS8-TX] TruSDX: ERROR: \(error)")
+                    try? await port.write(";RX;")
+                    trusdxAudio.startStreaming()
                 }
                 await MainActor.run {
                     self.isTransmitting = false
-                    self.statusText = "Sent"
+                    self.txTask = nil
+                    self.statusText = Task.isCancelled ? "TX abgebrochen" : "Sent"
                 }
             }
         } else {
@@ -550,6 +643,70 @@ class AppState: ObservableObject {
             audioEngine.transmit(samples: samples) { [weak self] in
                 Task { @MainActor in
                     self?.statusText = "Sent"
+                    if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
+                }
+            }
+        }
+    }
+
+    // MARK: - WSPR TX
+
+    func transmitWSPR() {
+        guard !settings.callsign.isEmpty, !settings.grid.isEmpty else {
+            statusText = settings.callsign.isEmpty ? "Callsign required!" : "Grid required!"
+            return
+        }
+        let msg = WSPRMessage(
+            callsign: settings.callsign,
+            grid: String(settings.grid.prefix(4)),
+            power: wsprPower
+        )
+        NSLog("[WSPR-TX] transmitWSPR: call='\(msg.callsign)' grid='\(msg.grid)' power=\(msg.power)dBm dialFreq=\(settings.dialFrequency)")
+        statusText = "WSPR TX: \(msg.displayText)"
+        let samples = wsprModulator.modulate(msg)
+        NSLog("[WSPR-TX] Generated \(samples.count) samples (~\(String(format: "%.1f", Double(samples.count)/12000))s)")
+
+        if isTruSDX, let port = trusdxPort {
+            isTransmitting = true
+            // Monitor: play WSPR tone on speaker for debugging
+            NSLog("[WSPR-TX] Playing monitor audio on speaker")
+            audioEngine.transmit(samples: samples, completion: nil)
+            txTask = Task {
+                do {
+                    NSLog("[WSPR-TX] TruSDX: setting USB mode (MD2;)")
+                    try await port.write("MD2;")
+                    NSLog("[WSPR-TX] TruSDX: keying TX (TX0;)")
+                    try await port.write(";TX0;")
+                    try await Task.sleep(nanoseconds: 50_000_000) // 50ms settling
+                    NSLog("[WSPR-TX] TruSDX: sending \(samples.count) audio samples (~110s)")
+                    await trusdxAudio.sendAudio(samples, fromSampleRate: 12000)
+                    try Task.checkCancellation()
+                    NSLog("[WSPR-TX] TruSDX: audio sent, going back to RX")
+                    try await port.write(";RX;")
+                    try? await Task.sleep(nanoseconds: 50_000_000)
+                    NSLog("[WSPR-TX] TruSDX: resuming streaming")
+                    trusdxAudio.startStreaming()
+                    NSLog("[WSPR-TX] TruSDX: TX complete")
+                } catch is CancellationError {
+                    NSLog("[WSPR-TX] TruSDX: CANCELLED — sending RX;")
+                    try? await port.write(";RX;")
+                    trusdxAudio.startStreaming()
+                } catch {
+                    NSLog("[WSPR-TX] TruSDX: ERROR: \(error)")
+                    try? await port.write(";RX;")
+                    trusdxAudio.startStreaming()
+                }
+                await MainActor.run {
+                    self.isTransmitting = false
+                    self.txTask = nil
+                    self.statusText = Task.isCancelled ? "TX abgebrochen" : "WSPR Sent"
+                }
+            }
+        } else {
+            if settings.useHamlib { Task { try? await catController.pttOn() } }
+            audioEngine.transmit(samples: samples) { [weak self] in
+                Task { @MainActor in
+                    self?.statusText = "WSPR Sent"
                     if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
                 }
             }
@@ -627,6 +784,7 @@ class AppState: ObservableObject {
         if cwLog.count > 50 { cwLog.removeLast() }
         cwText = ""
         cwKeying = true
+        isTransmitting = true
 
         if isTruSDX, let port = trusdxPort {
             // TruSDX: direct POSIX writes for zero-latency CW keying
@@ -634,32 +792,33 @@ class AppState: ObservableObject {
             guard fd >= 0 else { statusText = "Serial port not open"; cwKeying = false; return }
 
             // Pause read loop during CW TX to avoid contention
-            print("[CW-TX] TruSDX: pausing audio streaming for CW")
+            NSLog("[CW-TX] TruSDX: pausing audio streaming for CW")
             trusdxAudio.stopStreaming()
 
             // Set CW mode synchronously before keying starts
-            print("[CW-TX] TruSDX: setting CW mode (MD3;) fd=\(fd)")
+            NSLog("[CW-TX] TruSDX: setting CW mode (MD3;) fd=\(fd)")
             let md3 = Array("MD3;".utf8)
             md3.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
             Thread.sleep(forTimeInterval: 0.05) // 50ms for mode switch to take effect
 
             // Direct POSIX write — no actor, no Task, no await, ~microseconds
             let tx0 = Array("TX0;".utf8)
-            let rx  = Array("RX;".utf8)
+            let rx  = Array(";RX;".utf8)
             let keyDown: () -> Void = {
-                print("[CW-TX] KEY DOWN")
+                NSLog("[CW-TX] KEY DOWN")
                 tx0.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
             }
             let keyUp: () -> Void = {
-                print("[CW-TX] KEY UP")
+                NSLog("[CW-TX] KEY UP")
                 rx.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
             }
 
-            print("[CW-TX] TruSDX: starting keyer, \(text) @ \(speed) WPM")
+            NSLog("[CW-TX] TruSDX: starting keyer, \(text) @ \(speed) WPM")
             morseKeyer.key(text: text, wpm: speed, keyDown: keyDown, keyUp: keyUp) { [weak self] in
-                print("[CW-TX] TruSDX: keying complete, resuming streaming")
+                NSLog("[CW-TX] TruSDX: keying complete, resuming streaming")
                 self?.trusdxAudio.startStreaming()
                 self?.cwKeying = false
+                self?.isTransmitting = false
                 self?.statusText = "CW gesendet"
             }
         } else {
@@ -674,6 +833,7 @@ class AppState: ObservableObject {
                 await MainActor.run {
                     self.morseKeyer.key(text: text, wpm: speed, keyDown: keyDown, keyUp: keyUp) { [weak self] in
                         self?.cwKeying = false
+                        self?.isTransmitting = false
                         self?.statusText = "CW gesendet"
                     }
                 }
@@ -687,17 +847,18 @@ class AppState: ObservableObject {
             // Direct POSIX write for immediate stop
             let fd = port.rawFD
             if fd >= 0 {
-                print("[CW-TX] TruSDX: STOP — sending RX;")
-                let rx = Array("RX;".utf8)
+                NSLog("[CW-TX] TruSDX: STOP — sending RX;")
+                let rx = Array(";RX;".utf8)
                 rx.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
             }
             // Resume streaming
-            print("[CW-TX] TruSDX: resuming streaming after stop")
+            NSLog("[CW-TX] TruSDX: resuming streaming after stop")
             trusdxAudio.startStreaming()
         } else {
             Task { try? await catController.pttOff() }
         }
         cwKeying = false
+        isTransmitting = false
         statusText = "CW gestoppt"
     }
 
