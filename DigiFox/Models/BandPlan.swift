@@ -130,6 +130,25 @@ struct BandPlan {
         "70cm": 432_050_000,
     ]
 
+    // MARK: - WSPR Standard Dial Frequencies (USB)
+
+    /// Standard WSPR dial frequencies per band (Hz).
+    /// WSPR signals are transmitted in a ~200 Hz window centered ~1500 Hz above dial.
+    static let wsprFrequencies: [String: Double] = [
+        "160m":   1_836_600,
+        "80m":    3_568_600,
+        "60m":    5_287_200,
+        "40m":    7_038_600,
+        "30m":   10_138_700,
+        "20m":   14_095_600,
+        "17m":   18_104_600,
+        "15m":   21_094_600,
+        "12m":   24_924_600,
+        "10m":   28_124_600,
+        "6m":    50_293_000,
+        "2m":   144_489_000,
+    ]
+
     // MARK: - Combined Data
 
     /// All bands with their digital mode frequencies
@@ -157,6 +176,11 @@ struct BandPlan {
         cwFrequencies[bandId]
     }
 
+    /// Get WSPR frequency for a band
+    static func wsprFrequency(for bandId: String) -> Double? {
+        wsprFrequencies[bandId]
+    }
+
     /// Find which band a frequency belongs to
     static func band(for frequencyHz: Double) -> Band? {
         allBands.first { frequencyHz >= $0.lowerHz && frequencyHz <= $0.upperHz }
@@ -168,6 +192,7 @@ struct BandPlan {
         case .ft8:  return ft8Frequencies[band]
         case .js8:  return js8Frequencies[band]
         case .cw:   return cwFrequencies[band]
+        case .wspr: return wsprFrequencies[band]
         }
     }
 
@@ -178,6 +203,7 @@ struct BandPlan {
             case .ft8:  return ft8Frequencies[band.id] != nil
             case .js8:  return js8Frequencies[band.id] != nil
             case .cw:   return cwFrequencies[band.id] != nil
+            case .wspr: return wsprFrequencies[band.id] != nil
             }
         }
     }

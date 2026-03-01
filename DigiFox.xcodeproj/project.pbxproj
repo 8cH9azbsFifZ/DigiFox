@@ -16,6 +16,10 @@
 		AA11BB22CC33DD44EE55FF04 /* resampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF03 /* resampler.cpp */; };
 		AA11BB22CC33DD44EE55FF06 /* ggmorse_c_api.mm in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */; };
 		AA11BB22CC33DD44EE55FF08 /* GGMorseDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */; };
+		WSPR0001A00000000001 /* WSPRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000001 /* WSPRView.swift */; };
+		WSPR0001A00000000002 /* WSPRModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000002 /* WSPRModulator.swift */; };
+		WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000003 /* WSPRMessagePack.swift */; };
+		WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000004 /* WSPRProtocol.swift */; };
 		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
 		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
 		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
@@ -122,6 +126,10 @@
 		B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MorseKeyShape.swift"; path = "DigiFox/Views/CW/MorseKeyShape.swift"; sourceTree = SOURCE_ROOT; };
 		D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CWWaterfallView.swift"; path = "DigiFox/Views/CW/CWWaterfallView.swift"; sourceTree = SOURCE_ROOT; };
 		C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8Icon.swift"; path = "DigiFox/Views/JS8/JS8Icon.swift"; sourceTree = SOURCE_ROOT; };
+		WSPR0001B00000000001 /* WSPRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WSPRView.swift"; path = "DigiFox/Views/WSPR/WSPRView.swift"; sourceTree = SOURCE_ROOT; };
+		WSPR0001B00000000002 /* WSPRModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRModulator.swift; sourceTree = "<group>"; };
+		WSPR0001B00000000003 /* WSPRMessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRMessagePack.swift; sourceTree = "<group>"; };
+		WSPR0001B00000000004 /* WSPRProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRProtocol.swift; sourceTree = "<group>"; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
 		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
@@ -240,6 +248,7 @@
 			children = (
 				3162F0A739A1503D79C5C77C /* FT8 */,
 				F3C3A79EE0AB64B4B1FA781A /* JS8 */,
+				WSPR0001C00000000002 /* WSPR */,
 			
 				582CA28724C94084AF5A423F /* CW */,);
 			path = Codec;
@@ -289,6 +298,7 @@
 				D6BDE5B4F829D7E61279FCDE /* FT8 */,
 				6458CC06F3E6FB57D79D5340 /* JS8 */,
 				380B32B34CDD352AAAEDC231 /* CW */,
+				WSPR0001C00000000001 /* WSPR */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -354,6 +364,24 @@
 				AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */,
 			);
 			path = CW;
+			sourceTree = "<group>";
+		};
+		WSPR0001C00000000001 /* WSPR */ = {
+			isa = PBXGroup;
+			children = (
+				WSPR0001B00000000001 /* WSPRView.swift */,
+			);
+			path = WSPR;
+			sourceTree = "<group>";
+		};
+		WSPR0001C00000000002 /* WSPR */ = {
+			isa = PBXGroup;
+			children = (
+				WSPR0001B00000000002 /* WSPRModulator.swift */,
+				WSPR0001B00000000003 /* WSPRMessagePack.swift */,
+				WSPR0001B00000000004 /* WSPRProtocol.swift */,
+			);
+			path = WSPR;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -488,7 +516,11 @@
 				AA11BB22CC33DD44EE55FF02 /* ggmorse.cpp in Sources */,
 				AA11BB22CC33DD44EE55FF04 /* resampler.cpp in Sources */,
 				AA11BB22CC33DD44EE55FF06 /* ggmorse_c_api.mm in Sources */,
-				AA11BB22CC33DD44EE55FF08 /* GGMorseDecoder.swift in Sources */,);
+				AA11BB22CC33DD44EE55FF08 /* GGMorseDecoder.swift in Sources */,
+				WSPR0001A00000000001 /* WSPRView.swift in Sources */,
+				WSPR0001A00000000002 /* WSPRModulator.swift in Sources */,
+				WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */,
+				WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -506,7 +538,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -551,7 +583,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -20,6 +20,10 @@ struct ContentView: View {
                 .tabItem { Label("CW", systemImage: "dot.radiowaves.right") }
                 .tag(4)
 
+            WSPRView()
+                .tabItem { Label("WSPR", systemImage: "wave.3.right") }
+                .tag(5)
+
             ActivityView()
                 .tabItem { Label("Aktivität", systemImage: "antenna.radiowaves.left.and.right") }
                 .tag(2)
@@ -49,11 +53,12 @@ struct StatusToolbar: ToolbarContent {
                     .font(.caption)
                     .foregroundStyle(settings.callsign.isEmpty ? .red : .green)
 
-                USBStatusBadge(
+                TransceiverStatusBadge(
                     ioKitAvailable: appState.ioKitAvailable,
                     deviceCount: appState.usbDevices.count,
                     digirigConnected: appState.digirigConnected,
-                    rigConnected: appState.radioState.isConnected
+                    rigConnected: appState.radioState.isConnected,
+                    isTransmitting: appState.isTransmitting
                 )
             }
         }
@@ -133,13 +138,14 @@ struct ActivityView: View {
     }
 }
 
-// MARK: - USB Status Badge
+// MARK: - Transceiver Status Badge
 
-struct USBStatusBadge: View {
+struct TransceiverStatusBadge: View {
     let ioKitAvailable: Bool
     let deviceCount: Int
     let digirigConnected: Bool
     let rigConnected: Bool
+    var isTransmitting: Bool = false
 
     var body: some View {
         HStack(spacing: 3) {
@@ -163,6 +169,7 @@ struct USBStatusBadge: View {
     }
 
     private var iconColor: Color {
+        if isTransmitting { return .red }
         if !ioKitAvailable { return .red }
         if rigConnected { return .green }
         if digirigConnected { return .green }

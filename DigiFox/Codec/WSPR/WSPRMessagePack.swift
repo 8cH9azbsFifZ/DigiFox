@@ -28,15 +28,17 @@ enum WSPRMessagePack {
     static func encodeCallsign(_ call: String) -> UInt32 {
         var c = Array(call.uppercased())
 
-        // Pad/align to 6 characters with digit at position 2
-        while c.count < 6 { c.insert(" ", at: 0) }
+        // Standard WSPR callsign normalization:
+        // If 2nd char is a digit (e.g. K1JT), prepend space so digit lands at index 2
+        if c.count >= 2 && c[1].isNumber {
+            c.insert(" ", at: 0)
+        }
+        // Right-pad to 6 characters
+        while c.count < 6 { c.append(" ") }
         if c.count > 6 { c = Array(c.prefix(6)) }
 
-        // If 3rd char is not digit, left-pad with space
-        if c.count >= 3 && !c[2].isNumber {
-            c.insert(" ", at: 0)
-            if c.count > 6 { c = Array(c.prefix(6)) }
-        }
+        // Safety: if 3rd char still not digit, treat as 0
+        let digit2: UInt32 = c[2].isNumber ? UInt32(c[2].asciiValue! - 48) : 0
 
         func charVal(_ ch: Character) -> UInt32 {
             if ch == " " { return 0 }
@@ -47,7 +49,7 @@ enum WSPRMessagePack {
 
         let n1 = charVal(c[0])
         let n2 = charVal(c[1])
-        let n3 = UInt32(c[2].asciiValue! - 48)  // must be digit 0-9
+        let n3 = digit2
         let n4 = charVal(c[3])
         let n5 = charVal(c[4])
         let n6 = charVal(c[5])
