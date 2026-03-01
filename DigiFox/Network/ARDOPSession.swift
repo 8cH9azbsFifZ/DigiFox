@@ -1,24 +1,24 @@
-/// ARDOP ARQ Session Management — Verbindungsschicht über dem Physical Layer.
+/// ARDOP ARQ Session Management — connection layer above the physical layer.
 ///
-/// Implementiert das ARQ (Automatic Repeat Request) Protokoll für zuverlässige
-/// Datenübertragung über ARDOP. Verwaltet Connection Setup, Handshaking,
-/// Retransmission und adaptive Modulationswahl basierend auf Kanalqualität.
+/// Implements the ARQ (Automatic Repeat Request) protocol for reliable
+/// data transmission over ARDOP. Manages connection setup, handshaking,
+/// retransmission and adaptive modulation selection based on channel quality.
 ///
-/// Wichtige Korrekturen vs. älterer Version:
-/// - Timeout-Enforcement für Connection- und Idle-Timeouts
-/// - Bandwidth-Constraint: Modulation nur innerhalb der verhandelten Bandwidth
-/// - DISCACK-Antwort auf DISC (ARDOP Spec Compliance)
-/// - Frame-Typ bleibt pro Frame konstant (kein Re-Modulation bei NAK)
-/// - Sequenz-Validierung bei ACK
+/// Key fixes vs. older version:
+/// - Timeout enforcement for connection and idle timeouts
+/// - Bandwidth constraint: modulation only within the negotiated bandwidth
+/// - DISCACK response to DISC (ARDOP spec compliance)
+/// - Frame type stays constant per frame (no re-modulation on NAK)
+/// - Sequence validation on ACK
 ///
-/// Referenz: https://github.com/pflarue/ardop (ARDOP Spezifikation)
-/// Referenz: https://github.com/la5nta/wl2k-go/tree/master/transport/ardop
+/// Reference: https://github.com/pflarue/ardop (ARDOP specification)
+/// Reference: https://github.com/la5nta/wl2k-go/tree/master/transport/ardop
 
 import Foundation
 
 // MARK: - ARQ Session State Machine
 
-/// Zustand der ARDOP ARQ-Sitzung
+/// State of the ARDOP ARQ session
 enum ARDOPSessionState: String, Sendable {
     case disconnected = "Getrennt"
     case listening = "Empfangsbereit"
@@ -30,7 +30,7 @@ enum ARDOPSessionState: String, Sendable {
     case failed = "Fehlgeschlagen"
 }
 
-/// ARQ Frame für die Sitzungsverwaltung
+/// ARQ frame for session management
 struct ARQFrame: Sendable {
     enum FrameKind: Sendable {
         case conReq(callsign: String, targetCallsign: String, bandwidth: ARDOPBandwidth)
@@ -57,14 +57,14 @@ struct ARQFrame: Sendable {
     }
 }
 
-/// Kanalqualitätsmetrik für adaptive Modulation
+/// Channel quality metric for adaptive modulation
 struct ChannelQuality: Sendable {
     var snr: Double = 0.0
     var frameErrorRate: Double = 0.0
     var throughput: Double = 0.0
     var lastUpdate: Date = Date()
 
-    /// Empfohlener Frame-Typ basierend auf Kanalqualität
+    /// Recommended frame type based on channel quality
     var recommendedFrameType: ARDOPFrameType {
         if snr > 20 { return .qam16_2000_100 }
         if snr > 15 { return .psk8_2000_100 }
@@ -77,7 +77,7 @@ struct ChannelQuality: Sendable {
 
 // MARK: - ARQ Session Actor
 
-/// Thread-sicherer ARDOP ARQ Session Manager.
+/// Thread-safe ARDOP ARQ session manager.
 actor ARDOPSession {
 
     // MARK: - Configuration
@@ -129,14 +129,14 @@ actor ARDOPSession {
         self.connectionTimeout = timeout
         self.idleTimeout = idleTimeout
         self.maxRetries = maxRetries
-        Log.d("ARQ", "Session erstellt: call=\(callsign) bw=\(bandwidth) timeout=\(timeout)s")
+        Log.d("ARQ", "Session created: call=\(callsign) bw=\(bandwidth) timeout=\(timeout)s")
     }
 
     // MARK: - Connection Management
 
     func connect(to targetCallsign: String) {
         guard state == .disconnected || state == .listening else {
-            Log.d("ARQ", "connect: ungültiger Zustand \(state)")
+            Log.d("ARQ", "connect: invalid state \(state)")
             return
         }
         remoteCallsign = targetCallsign
@@ -144,18 +144,18 @@ actor ARDOPSession {
         connectionStartTime = Date()
         setState(.connecting)
         sendConnectRequest(to: targetCallsign)
-        Log.d("ARQ", "Verbindungsaufbau zu \(targetCallsign) gestartet")
+        Log.d("ARQ", "Connection to \(targetCallsign) started")
     }
 
     func listen() {
         guard state == .disconnected else { return }
         setState(.listening)
-        Log.d("ARQ", "Empfangsbereit")
+        Log.d("ARQ", "Listening")
     }
 
     func disconnect() {
         guard state != .disconnected else { return }
-        Log.d("ARQ", "Disconnect angefordert (state=\(state))")
+        Log.d("ARQ", "Disconnect requested (state=\(state))")
         setState(.disconnecting)
         onTransmitControl?(.disc)
         cleanupSession()
@@ -165,10 +165,10 @@ actor ARDOPSession {
 
     func send(data: Data) {
         guard state == .connected else {
-            Log.d("ARQ", "send: nicht verbunden (state=\(state))")
+            Log.d("ARQ", "send: not connected (state=\(state))")
             return
         }
-        Log.d("ARQ", "Sende \(data.count) bytes in TX-Queue")
+        Log.d("ARQ", "Enqueuing \(data.count) bytes in TX queue")
         txQueue.append(data)
         sendNextDataFrame()
     }
@@ -184,13 +184,13 @@ actor ARDOPSession {
 
     // MARK: - Timeout Check
 
-    /// Prüft auf Connection- und Idle-Timeouts. Sollte regelmäßig aufgerufen werden.
+    /// Checks for connection and idle timeouts. Should be called periodically.
     func checkTimeouts() {
         let now = Date()
 
         if state == .connecting, let start = connectionStartTime {
             if now.timeIntervalSince(start) > connectionTimeout {
-                Log.d("ARQ", "Connection-Timeout nach \(connectionTimeout)s")
+                Log.d("ARQ", "Connection timeout after \(connectionTimeout)s")
                 setState(.failed)
                 cleanupSession()
                 return
@@ -199,7 +199,7 @@ actor ARDOPSession {
 
         if (state == .connected || state == .sendingData || state == .receivingData) {
             if now.timeIntervalSince(lastActivityTime) > idleTimeout {
-                Log.d("ARQ", "Idle-Timeout nach \(idleTimeout)s")
+                Log.d("ARQ", "Idle timeout after \(idleTimeout)s")
                 disconnect()
             }
         }
@@ -218,7 +218,7 @@ actor ARDOPSession {
         case .disc:
             handleDisconnect()
         case .discAck:
-            Log.d("ARQ", "DISCACK empfangen")
+            Log.d("ARQ", "DISCACK received")
             cleanupSession()
         case .data(let payload, let seq):
             handleDataFrame(payload: payload, seq: seq, snr: frame.snr)
@@ -253,11 +253,11 @@ actor ARDOPSession {
 
     private func handleConReq(from callsign: String, target: String, bandwidth: ARDOPBandwidth) {
         guard state == .listening else {
-            Log.d("ARQ", "ConReq ignoriert (state=\(state))")
+            Log.d("ARQ", "ConReq ignored (state=\(state))")
             return
         }
         guard target.uppercased() == myCallsign.uppercased() else {
-            Log.d("ARQ", "ConReq ignoriert (target=\(target), my=\(myCallsign))")
+            Log.d("ARQ", "ConReq ignored (target=\(target), my=\(myCallsign))")
             return
         }
 
@@ -265,7 +265,7 @@ actor ARDOPSession {
         // Negotiate bandwidth: use minimum of requested and our max
         sessionBandwidth = bandwidth.rawValue < maxBandwidth.rawValue ? bandwidth : maxBandwidth
         currentFrameType = initialFrameType(for: sessionBandwidth)
-        Log.d("ARQ", "ConReq akzeptiert: from=\(callsign) bw=\(sessionBandwidth)")
+        Log.d("ARQ", "ConReq accepted: from=\(callsign) bw=\(sessionBandwidth)")
 
         setState(.connected)
 
@@ -282,12 +282,12 @@ actor ARDOPSession {
         lastAckedSequence = -1
         pendingFrames.removeAll()
         connectionStartTime = nil
-        Log.d("ARQ", "Verbunden mit \(callsign) (bw=\(bandwidth))")
+        Log.d("ARQ", "Connected to \(callsign) (bw=\(bandwidth))")
         setState(.connected)
     }
 
     private func handleDisconnect() {
-        Log.d("ARQ", "DISC empfangen — sende DISCACK")
+        Log.d("ARQ", "DISC received — sending DISCACK")
         // ARDOP spec: respond to DISC with DISCACK
         onTransmitControl?(.discAck)
         cleanupSession()
@@ -311,7 +311,7 @@ actor ARDOPSession {
 
         // Validate sequence number
         guard seq >= 0, seq <= txSequence else {
-            Log.d("ARQ", "ACK mit ungültiger Sequenz \(seq) (txSeq=\(txSequence))")
+            Log.d("ARQ", "ACK with invalid sequence \(seq) (txSeq=\(txSequence))")
             return
         }
 
@@ -332,7 +332,7 @@ actor ARDOPSession {
         guard state == .connected || state == .sendingData else { return }
 
         guard let idx = pendingFrames.firstIndex(where: { $0.seq == seq }) else {
-            Log.d("ARQ", "NAK für unbekannte Sequenz \(seq)")
+            Log.d("ARQ", "NAK for unknown sequence \(seq)")
             return
         }
 
@@ -340,7 +340,7 @@ actor ARDOPSession {
         Log.d("ARQ", "NAK: seq=\(seq) retry=\(pendingFrames[idx].retries)/\(maxRetries)")
 
         if pendingFrames[idx].retries >= maxRetries {
-            Log.d("ARQ", "Max Retries erreicht — Session Failed")
+            Log.d("ARQ", "Max retries reached — session failed")
             setState(.failed)
             return
         }
@@ -353,12 +353,12 @@ actor ARDOPSession {
     }
 
     private func handlePing(from callsign: String) {
-        Log.d("ARQ", "Ping von \(callsign)")
+        Log.d("ARQ", "Ping from \(callsign)")
         onTransmitControl?(.ack)
     }
 
     private func handleBreak() {
-        Log.d("ARQ", "BREAK empfangen — Sendewarteschlange geleert")
+        Log.d("ARQ", "BREAK received — TX queue cleared")
         txQueue.removeAll()
         pendingFrames.removeAll()
         setState(.connected)

@@ -69,17 +69,17 @@ final class WSPRModulator {
 
     // MARK: - Interleaving
 
-    /// Bit-reversal interleaver: reorder 162 coded bits
+    /// Bit-reversal interleaver: source[i] → dest[bit_reverse(i)] with zero-padding to 256
     private func interleave(_ bits: [UInt8]) -> [UInt8] {
+        var source = [UInt8](repeating: 0, count: 256)
+        for i in 0..<min(bits.count, 256) {
+            source[i] = bits[i]
+        }
         var result = [UInt8](repeating: 0, count: 162)
-        var j = 0
         for i in 0..<256 {
             let rev = WSPRProtocol.interleaveIndex(i)
             if rev < 162 {
-                if j < bits.count {
-                    result[rev] = bits[j]
-                    j += 1
-                }
+                result[rev] = source[i]
             }
         }
         return result

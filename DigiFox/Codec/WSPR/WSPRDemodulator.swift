@@ -211,19 +211,15 @@ final class WSPRDemodulator {
 
     // MARK: - De-interleaving
 
-    /// Reverse the bit-reversal interleaver
+    /// Reverse the bit-reversal interleaver (WSJT-X compatible)
+    /// Interleave: source[i] → dest[bit_reverse(i)], padded to 256
+    /// Deinterleave: for each i, if bit_reverse(i) < 162, source[i] = interleaved[bit_reverse(i)]
     private func deinterleave(_ bits: [Float]) -> [Float] {
-        // Build forward map: source position j → destination interleaveIndex(j)
-        // For deinterleave: output[j] = input[interleaveIndex(j)]
         var result = [Float](repeating: 0, count: 162)
-        var j = 0
         for i in 0..<256 {
             let rev = WSPRProtocol.interleaveIndex(i)
-            if rev < 162 {
-                if j < 162 {
-                    result[j] = bits[rev]
-                    j += 1
-                }
+            if rev < 162 && i < 162 {
+                result[i] = bits[rev]
             }
         }
         return result
