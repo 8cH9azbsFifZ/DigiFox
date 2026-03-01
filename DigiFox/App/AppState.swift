@@ -72,6 +72,7 @@ class AppState: ObservableObject {
     private let js8Modulator = JS8Modulator()
     private let js8Demodulator = JS8Demodulator()
     private let wsprModulator = WSPRModulator()
+    private let wsprDemodulator = WSPRDemodulator()
     private var cancellables = Set<AnyCancellable>()
     private var demodTask: Task<Void, Never>?
     private var usbScanTask: Task<Void, Never>?
@@ -318,7 +319,7 @@ class AppState: ObservableObject {
             case .ft8: startFT8Cycle()
             case .js8: startJS8DemodLoop()
             case .cw:  startCWDecodeLoop()
-            case .wspr: break  // WSPR is TX-only beacon, no decode loop
+            case .wspr: startWSPRCycle()
             }
             print("[Mode] \(mode): freq/mode set, decode loop started")
         }
@@ -414,7 +415,7 @@ class AppState: ObservableObject {
         case .ft8: startFT8Cycle()
         case .js8: startJS8DemodLoop()
         case .cw:  startCWDecodeLoop()
-        case .wspr: break  // WSPR is TX-only beacon
+        case .wspr: startWSPRCycle()
         }
         isReceiving = true
         statusText = radioState.isConnected ? "Receiving (rig connected)" : "Receiving..."
@@ -645,6 +646,72 @@ class AppState: ObservableObject {
                     self?.statusText = "Sent"
                     if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
                 }
+            }
+        }
+    }
+
+    // MARK: - WSPR Cycle (RX + TX)
+
+    private func startWSPRCycle() {
+        cycleTask = Task { [weak self] in
+            while !Task.isCancelled {
+                // WSPR uses 2-minute windows aligned to even minutes
+                let now = Date()
+                let calendar = Calendar.current
+                let minute = calendar.component(.minute, from: now)
+                let second = calendar.component(.second, from: now)
+                let nano = calendar.component(.nanosecond, from: now)
+
+                let secondInWindow = Double(second) + Double(nano) / 1_000_000_000
+                let isEvenMinute = minute % 2 == 0
+                let waitTime: Double
+                if isEvenMinute {
+                    // Wait until end of current 2-minute window + 0.5s margin
+                    waitTime = 120.0 - Double(second) - Double(nano) / 1_000_000_000 + 0.5
+                } else {
+                    // Wait until next even minute
+                    waitTime = 60.0 - secondInWindow + 0.5
+                }
+                try? await Task.sleep(nanoseconds: UInt64(max(1.0, waitTime) * 1_000_000_000))
+
+                // Run WSPR demodulation on collected audio
+                await self?.runWSPRDemodulation()
+
+                // TX if enabled (WSPR TX happens at even minute boundaries)
+                if self?.wsprTxEnabled == true {
+                    await self?.transmitWSPR()
+                }
+            }
+        }
+    }
+
+    private func runWSPRDemodulation() {
+        let neededSamples = WSPRProtocol.frameSamples  // ~1.3M samples for 110.6s
+        let samples = audioEngine.getBufferedSamples()
+        guard samples.count >= neededSamples / 2 else {
+            NSLog("[WSPR-RX] Insufficient audio: \(samples.count) samples (need ~\(neededSamples))")
+            return
+        }
+        NSLog("[WSPR-RX] Demodulating \(samples.count) samples")
+        Task.detached { [weak self, demodulator = self.wsprDemodulator] in
+            let results = demodulator.demodulate(samples)
+            await MainActor.run {
+                for r in results {
+                    let text = "\(r.message.callsign) \(r.message.grid) \(r.message.power)dBm"
+                    let msg = RxMessage(
+                        timestamp: Date(), frequency: r.frequency, snr: Int(r.snr),
+                        deltaTime: r.deltaTime, text: text,
+                        mode: .wspr,
+                        wsprMessage: r.message
+                    )
+                    self?.rxMessages.insert(msg, at: 0)
+                    if (self?.rxMessages.count ?? 0) > 200 { self?.rxMessages.removeLast() }
+                    NSLog("[WSPR-RX] Decoded: \(text) SNR=\(r.snr)dB f=\(String(format: "%.1f", r.frequency))Hz")
+                }
+                if results.isEmpty {
+                    NSLog("[WSPR-RX] No decodes this cycle")
+                }
+                self?.statusText = results.isEmpty ? "WSPR: kein Decode" : "WSPR: \(results.count) Decode(s)"
             }
         }
     }

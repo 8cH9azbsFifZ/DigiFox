@@ -20,6 +20,7 @@
 		WSPR0001A00000000002 /* WSPRModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000002 /* WSPRModulator.swift */; };
 		WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000003 /* WSPRMessagePack.swift */; };
 		WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000004 /* WSPRProtocol.swift */; };
+		WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000005 /* WSPRDemodulator.swift */; };
 		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
 		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
 		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
@@ -130,6 +131,7 @@
 		WSPR0001B00000000002 /* WSPRModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRModulator.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000003 /* WSPRMessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRMessagePack.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000004 /* WSPRProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRProtocol.swift; sourceTree = "<group>"; };
+		WSPR0001B00000000005 /* WSPRDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRDemodulator.swift; sourceTree = "<group>"; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
 		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
@@ -380,6 +382,7 @@
 				WSPR0001B00000000002 /* WSPRModulator.swift */,
 				WSPR0001B00000000003 /* WSPRMessagePack.swift */,
 				WSPR0001B00000000004 /* WSPRProtocol.swift */,
+				WSPR0001B00000000005 /* WSPRDemodulator.swift */,
 			);
 			path = WSPR;
 			sourceTree = "<group>";
@@ -520,7 +523,8 @@
 				WSPR0001A00000000001 /* WSPRView.swift in Sources */,
 				WSPR0001A00000000002 /* WSPRModulator.swift in Sources */,
 				WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */,
-				WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */,);
+				WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */,
+				WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
