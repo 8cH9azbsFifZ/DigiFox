@@ -27,6 +27,7 @@ ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */ = {isa = PBXBuildFile; file
 ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000004 /* ARDOPReedSolomon.swift */; };
 ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000005 /* ARDOPModulator.swift */; };
 ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000006 /* ARDOPDemodulator.swift */; };
+LZHC01A00000000000000000 /* lzhuf.c in Sources */ = {isa = PBXBuildFile; fileRef = LZHC01B00000000000000000 /* lzhuf.c */; };
 WNLK0001A00000000001 /* WinlinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WNLK0001B00000000001 /* WinlinkView.swift */; };
 		LZHF01A00000000000000000 /* LZHUFCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = LZHF01B00000000000000000 /* LZHUFCodec.swift */; };
 		WACT01A00000000000000000 /* WinlinkAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = WACT01B00000000000000000 /* WinlinkAccount.swift */; };
@@ -163,6 +164,8 @@ ARDP0001B00000000003 /* ARDOPCRC.swift */ = {isa = PBXFileReference; lastKnownFi
 ARDP0001B00000000004 /* ARDOPReedSolomon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPReedSolomon.swift; sourceTree = "<group>"; };
 ARDP0001B00000000005 /* ARDOPModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPModulator.swift; sourceTree = "<group>"; };
 ARDP0001B00000000006 /* ARDOPDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPDemodulator.swift; sourceTree = "<group>"; };
+LZHC01B00000000000000000 /* lzhuf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lzhuf.c; sourceTree = "<group>"; };
+LZHH01B00000000000000000 /* lzhuf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lzhuf.h; sourceTree = "<group>"; };
 		LZHF01B00000000000000000 /* LZHUFCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LZHUFCodec.swift"; path = "DigiFox/Codec/ARDOP/LZHUFCodec.swift"; sourceTree = SOURCE_ROOT; };
 		WACT01B00000000000000000 /* WinlinkAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkAccount.swift"; path = "DigiFox/Models/WinlinkAccount.swift"; sourceTree = SOURCE_ROOT; };
 		WMSG01B00000000000000000 /* WinlinkMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkMessage.swift"; path = "DigiFox/Models/WinlinkMessage.swift"; sourceTree = SOURCE_ROOT; };
@@ -456,6 +459,8 @@ ARDP0001B00000000003 /* ARDOPCRC.swift */,
 ARDP0001B00000000004 /* ARDOPReedSolomon.swift */,
 ARDP0001B00000000005 /* ARDOPModulator.swift */,
 ARDP0001B00000000006 /* ARDOPDemodulator.swift */,
+LZHC01B00000000000000000 /* lzhuf.c */,
+LZHH01B00000000000000000 /* lzhuf.h */,
 );
 path = ARDOP;
 sourceTree = "<group>";
@@ -641,6 +646,7 @@ ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */,
 ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */,
 ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */,
 ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */,
+LZHC01A00000000000000000 /* lzhuf.c in Sources */,
 WNLK0001A00000000001 /* WinlinkView.swift in Sources */,
 				LZHF01A00000000000000000 /* LZHUFCodec.swift in Sources */,
 				WACT01A00000000000000000 /* WinlinkAccount.swift in Sources */,
