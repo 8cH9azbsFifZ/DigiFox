@@ -20,6 +20,9 @@ struct RxMessage: Identifiable, Equatable {
     var to: String?
     var isDirected: Bool { to != nil }
 
+    // WSPR-specific
+    var wsprMessage: WSPRMessage?
+
     static func == (lhs: RxMessage, rhs: RxMessage) -> Bool { lhs.id == rhs.id }
 }
 
