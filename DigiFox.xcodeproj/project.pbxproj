@@ -717,7 +717,7 @@
 				CODE_SIGN_ENTITLEMENTS = DigiFox/DigiFox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = C28S8EFBAD;
 				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
@@ -762,7 +762,7 @@
 				CODE_SIGN_ENTITLEMENTS = DigiFox/DigiFox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = C28S8EFBAD;
 				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
