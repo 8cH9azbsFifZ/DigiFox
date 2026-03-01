@@ -48,9 +48,12 @@ enum FT8CostasSync {
         // Sync block offsets within the 79-symbol frame
         let syncOffsets = [0, 36, 72]
 
+        // Parallel sync search across time offsets
+        let lock = NSLock()
         var candidates = [Candidate]()
 
-        for t in 0...maxTime {
+        DispatchQueue.concurrentPerform(iterations: maxTime + 1) { t in
+            var localCandidates = [Candidate]()
             for f in minFreq..<maxF {
                 var score: Double = 0
                 var energy: Double = 0
@@ -65,7 +68,6 @@ enum FT8CostasSync {
                         let signalPower = Double(spectrogram[row][bin])
                         score += signalPower
 
-                        // Compute noise estimate from non-signal bins
                         for b in 0..<8 where b != tone {
                             let nb = f + b
                             if nb < freqBins {
@@ -75,13 +77,12 @@ enum FT8CostasSync {
                     }
                 }
 
-                // Normalize: signal / (noise + epsilon)
                 let noiseAvg = energy / Double(3 * 7 * 7 + 1)
                 let normalized = score / (noiseAvg + 1e-10)
 
-                if normalized > 4.0 {  // threshold
+                if normalized > 4.0 {
                     let freqHz = Double(f) * FT8Protocol.toneSpacing
-                    candidates.append(Candidate(
+                    localCandidates.append(Candidate(
                         timeOffset: t * FT8Protocol.symbolSamples,
                         freqBin: f,
                         freqHz: freqHz,
@@ -89,9 +90,13 @@ enum FT8CostasSync {
                     ))
                 }
             }
+            if !localCandidates.isEmpty {
+                lock.lock()
+                candidates.append(contentsOf: localCandidates)
+                lock.unlock()
+            }
         }
 
-        // Sort descending by score, return top candidates
         candidates.sort(by: >)
         return Array(candidates.prefix(maxCandidates))
     }
@@ -121,22 +126,22 @@ enum FT8CostasSync {
         var window = [Float](repeating: 0, count: fftSize)
         vDSP_hann_window(&window, vDSP_Length(fftSize), Int32(vDSP_HANN_NORM))
 
-        var result = [[Float]]()
-        result.reserveCapacity(numSlices)
+        // Parallel FFT computation across time slices
+        let resultPtr = UnsafeMutablePointer<[Float]>.allocate(capacity: numSlices)
+        resultPtr.initialize(repeating: [Float](), count: numSlices)
+        defer { resultPtr.deinitialize(count: numSlices); resultPtr.deallocate() }
 
-        var real = [Float](repeating: 0, count: halfFFT)
-        var imag = [Float](repeating: 0, count: halfFFT)
-
-        for slice in 0..<numSlices {
+        DispatchQueue.concurrentPerform(iterations: numSlices) { slice in
             let offset = slice * hop
-            guard offset + fftSize <= samples.count else { break }
+            guard offset + fftSize <= samples.count else { return }
 
-            // Apply window
             var windowed = [Float](repeating: 0, count: fftSize)
             vDSP_vmul(Array(samples[offset..<(offset + fftSize)]), 1,
                       window, 1, &windowed, 1, vDSP_Length(fftSize))
 
-            // Pack for FFT & compute
+            var real = [Float](repeating: 0, count: halfFFT)
+            var imag = [Float](repeating: 0, count: halfFFT)
+
             real.withUnsafeMutableBufferPointer { realBuf in
                 imag.withUnsafeMutableBufferPointer { imagBuf in
                     windowed.withUnsafeBufferPointer { buf in
@@ -145,13 +150,11 @@ enum FT8CostasSync {
                             vDSP_ctoz(complexBuf, 2, &split, 1, vDSP_Length(halfFFT))
                         }
                     }
-
                     var split = DSPSplitComplex(realp: realBuf.baseAddress!, imagp: imagBuf.baseAddress!)
                     vDSP_fft_zrip(fftSetup, &split, 1, log2n, FFTDirection(FFT_FORWARD))
                 }
             }
 
-            // Magnitude squared
             var magnitudes = [Float](repeating: 0, count: halfFFT)
             real.withUnsafeMutableBufferPointer { realBuf in
                 imag.withUnsafeMutableBufferPointer { imagBuf in
@@ -160,14 +163,13 @@ enum FT8CostasSync {
                 }
             }
 
-            // Convert to dB scale
             var one: Float = 1e-10
             vDSP_vsadd(magnitudes, 1, &one, &magnitudes, 1, vDSP_Length(halfFFT))
 
-            result.append(magnitudes)
+            resultPtr[slice] = magnitudes
         }
 
-        return result
+        return (0..<numSlices).map { resultPtr[$0] }.filter { !$0.isEmpty }
     }
 
     // MARK: - Fine Frequency Estimation

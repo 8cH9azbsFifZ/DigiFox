@@ -23,12 +23,22 @@ class FFTProcessor {
     func magnitudeSpectrum(_ input: [Float]) -> [Float] {
         var windowed = [Float](repeating: 0, count: size)
         let count = min(input.count, size)
-        for i in 0..<count { windowed[i] = input[i] * window[i] }
+        vDSP_vmul(input, 1, window, 1, &windowed, 1, vDSP_Length(count))
 
         let halfN = size / 2
         var real = [Float](repeating: 0, count: halfN)
         var imag = [Float](repeating: 0, count: halfN)
-        for i in 0..<halfN { real[i] = windowed[2 * i]; imag[i] = windowed[2 * i + 1] }
+
+        real.withUnsafeMutableBufferPointer { realBuf in
+            imag.withUnsafeMutableBufferPointer { imagBuf in
+                windowed.withUnsafeBufferPointer { buf in
+                    buf.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: halfN) { complexBuf in
+                        var split = DSPSplitComplex(realp: realBuf.baseAddress!, imagp: imagBuf.baseAddress!)
+                        vDSP_ctoz(complexBuf, 2, &split, 1, vDSP_Length(halfN))
+                    }
+                }
+            }
+        }
 
         var split = DSPSplitComplex(realp: &real, imagp: &imag)
         vDSP_fft_zrip(fftSetup, &split, 1, log2n, FFTDirection(FFT_FORWARD))
@@ -52,12 +62,17 @@ class FFTProcessor {
     }
 
     func spectrogram(_ samples: [Float], hopSize: Int) -> [[Float]] {
-        var result = [[Float]]()
-        var offset = 0
-        while offset + size <= samples.count {
-            result.append(magnitudeSpectrum(Array(samples[offset..<(offset + size)])))
-            offset += hopSize
+        let count = max(0, (samples.count - size) / hopSize + 1)
+        guard count > 0 else { return [] }
+
+        let resultPtr = UnsafeMutablePointer<[Float]>.allocate(capacity: count)
+        resultPtr.initialize(repeating: [Float](), count: count)
+        defer { resultPtr.deinitialize(count: count); resultPtr.deallocate() }
+
+        DispatchQueue.concurrentPerform(iterations: count) { i in
+            let offset = i * hopSize
+            resultPtr[i] = self.magnitudeSpectrum(Array(samples[offset..<(offset + self.size)]))
         }
-        return result
+        return (0..<count).map { resultPtr[$0] }
     }
 }

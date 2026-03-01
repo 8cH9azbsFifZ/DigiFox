@@ -50,41 +50,52 @@ final class WSPRDemodulator {
             minBin: minBin, maxBin: maxBin
         )
 
-        var decoded = [DecodedMessage]()
-        var usedKeys = Set<Int>()
+        // Parallel candidate decoding
+        struct IndexedDecode {
+            let index: Int
+            let key: Int
+            let message: DecodedMessage
+        }
+        let lock = NSLock()
+        var parallelResults = [IndexedDecode]()
 
-        for candidate in candidates {
+        DispatchQueue.concurrentPerform(iterations: candidates.count) { idx in
+            let candidate = candidates[idx]
             let key = candidate.timeBin * 10000 + candidate.freqBin
-            if usedKeys.contains(key) { continue }
 
-            // Extract soft symbols for 162 channel symbols
-            guard let softBits = extractSoftBits(
+            guard let softBits = self.extractSoftBits(
                 spectrogram: spec,
                 timeBin: candidate.timeBin,
                 freqBin: candidate.freqBin,
                 freqBins: halfFFT
-            ) else { continue }
+            ) else { return }
 
-            // De-interleave
-            let deinterleaved = deinterleave(softBits)
-
-            // Viterbi decode
-            guard let messageBits = viterbiDecode(deinterleaved) else { continue }
-
-            // Unpack
+            let deinterleaved = self.deinterleave(softBits)
+            guard let messageBits = self.viterbiDecode(deinterleaved) else { return }
             let msg = WSPRMessagePack.unpack(messageBits)
+            guard !msg.callsign.isEmpty, msg.callsign != "?????" else { return }
 
-            // Basic validation: callsign should not be empty/invalid
-            guard !msg.callsign.isEmpty, msg.callsign != "?????" else { continue }
-
-            let snr = estimateSNR(spectrogram: spec, candidate: candidate, freqBins: halfFFT)
+            let snr = self.estimateSNR(spectrogram: spec, candidate: candidate, freqBins: halfFFT)
             let freqHz = Double(candidate.freqBin) * binSpacing
             let timeOffset = Double(candidate.timeBin) * WSPRProtocol.symbolDuration
 
-            decoded.append(DecodedMessage(
+            let result = DecodedMessage(
                 message: msg, snr: snr, frequency: freqHz, deltaTime: timeOffset
-            ))
-            usedKeys.insert(key)
+            )
+            lock.lock()
+            parallelResults.append(IndexedDecode(index: idx, key: key, message: result))
+            lock.unlock()
+        }
+
+        // Deduplicate preserving priority order (lower index = higher score)
+        parallelResults.sort { $0.index < $1.index }
+        var decoded = [DecodedMessage]()
+        var usedKeys = Set<Int>()
+        for r in parallelResults {
+            if !usedKeys.contains(r.key) {
+                decoded.append(r.message)
+                usedKeys.insert(r.key)
+            }
         }
 
         return decoded
@@ -114,9 +125,12 @@ final class WSPRDemodulator {
 
         guard maxTime >= 0, maxBin > minBin else { return [] }
 
+        // Parallel sync search across time offsets
+        let lock = NSLock()
         var candidates = [SyncCandidate]()
 
-        for t in 0...maxTime {
+        DispatchQueue.concurrentPerform(iterations: maxTime + 1) { t in
+            var localCandidates = [SyncCandidate]()
             for f in minBin..<maxBin {
                 var correlation: Double = 0
                 var energy: Double = 0
@@ -125,7 +139,6 @@ final class WSPRDemodulator {
                     let row = t + i
                     guard row < spectrogram.count else { continue }
 
-                    // Read power in the 4 tone bins
                     var tonePower = [Double](repeating: 0, count: 4)
                     for tone in 0..<4 {
                         let bin = f + tone
@@ -136,8 +149,6 @@ final class WSPRDemodulator {
 
                     let totalPower = tonePower.reduce(0, +) + 1e-10
 
-                    // For sync=1: signal should be in tones 1 or 3
-                    // For sync=0: signal should be in tones 0 or 2
                     let syncBit = syncVec[i]
                     let syncPower = tonePower[syncBit] + tonePower[syncBit + 2]
                     let otherPower = totalPower - syncPower
@@ -148,8 +159,13 @@ final class WSPRDemodulator {
 
                 let normalized = correlation / Double(symbolCount)
                 if normalized > syncThreshold / Double(symbolCount) * 10 {
-                    candidates.append(SyncCandidate(timeBin: t, freqBin: f, score: normalized))
+                    localCandidates.append(SyncCandidate(timeBin: t, freqBin: f, score: normalized))
                 }
+            }
+            if !localCandidates.isEmpty {
+                lock.lock()
+                candidates.append(contentsOf: localCandidates)
+                lock.unlock()
             }
         }
 
@@ -372,19 +388,21 @@ final class WSPRDemodulator {
         var window = [Float](repeating: 0, count: fftSize)
         vDSP_hann_window(&window, vDSP_Length(fftSize), Int32(vDSP_HANN_NORM))
 
-        var result = [[Float]]()
-        result.reserveCapacity(numSlices)
+        // Parallel FFT computation across time slices
+        let resultPtr = UnsafeMutablePointer<[Float]>.allocate(capacity: numSlices)
+        resultPtr.initialize(repeating: [Float](), count: numSlices)
+        defer { resultPtr.deinitialize(count: numSlices); resultPtr.deallocate() }
 
-        var real = [Float](repeating: 0, count: halfFFT)
-        var imag = [Float](repeating: 0, count: halfFFT)
-
-        for slice in 0..<numSlices {
+        DispatchQueue.concurrentPerform(iterations: numSlices) { slice in
             let offset = slice * hop
-            guard offset + fftSize <= samples.count else { break }
+            guard offset + fftSize <= samples.count else { return }
 
             var windowed = [Float](repeating: 0, count: fftSize)
             vDSP_vmul(Array(samples[offset..<(offset + fftSize)]), 1,
                       window, 1, &windowed, 1, vDSP_Length(fftSize))
+
+            var real = [Float](repeating: 0, count: halfFFT)
+            var imag = [Float](repeating: 0, count: halfFFT)
 
             real.withUnsafeMutableBufferPointer { realBuf in
                 imag.withUnsafeMutableBufferPointer { imagBuf in
@@ -409,9 +427,9 @@ final class WSPRDemodulator {
 
             var one: Float = 1e-10
             vDSP_vsadd(magnitudes, 1, &one, &magnitudes, 1, vDSP_Length(halfFFT))
-            result.append(magnitudes)
+            resultPtr[slice] = magnitudes
         }
 
-        return result
+        return (0..<numSlices).map { resultPtr[$0] }.filter { !$0.isEmpty }
     }
 }

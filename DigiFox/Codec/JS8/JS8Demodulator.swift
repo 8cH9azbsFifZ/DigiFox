@@ -14,21 +14,30 @@ class JS8Demodulator {
         let nSymbols = samples.count / nsps
         guard nSymbols >= JS8Protocol.symbolCount else { return [] }
 
-        // Compute spectrogram
-        var spectrogram = [[Float]]()
-        for i in 0..<nSymbols {
+        // Parallel spectrogram computation
+        let specPtr = UnsafeMutablePointer<[Float]>.allocate(capacity: nSymbols)
+        specPtr.initialize(repeating: [Float](), count: nSymbols)
+        defer { specPtr.deinitialize(count: nSymbols); specPtr.deallocate() }
+
+        DispatchQueue.concurrentPerform(iterations: nSymbols) { i in
             let start = i * nsps
             let end = min(start + nsps, samples.count)
-            spectrogram.append(fft.magnitudeSpectrum(Array(samples[start..<end])))
+            specPtr[i] = self.fft.magnitudeSpectrum(Array(samples[start..<end]))
         }
+        let spectrogram = (0..<nSymbols).map { specPtr[$0] }
 
         // Find signals via Costas correlation
         let candidates = JS8CostasSync.correlate(spectrum: spectrogram, toneSpacing: ts, freqRange: freqRange)
 
+        // Parallel candidate decoding
+        let lock = NSLock()
         var results = [DemodResult]()
-        for c in candidates {
-            if let r = demodCandidate(spectrogram: spectrogram, t0: c.timeOffset, freq: c.freqOffset, ts: ts, nsps: nsps) {
+        DispatchQueue.concurrentPerform(iterations: candidates.count) { idx in
+            let c = candidates[idx]
+            if let r = self.demodCandidate(spectrogram: spectrogram, t0: c.timeOffset, freq: c.freqOffset, ts: ts, nsps: nsps) {
+                lock.lock()
                 results.append(r)
+                lock.unlock()
             }
         }
         return results

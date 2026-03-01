@@ -149,6 +149,19 @@ struct BandPlan {
         "2m":   144_489_000,
     ]
 
+    /// Winlink ARDOP frequencies per band.
+    /// Reference: https://winlink.org, https://github.com/la5nta/pat
+    static let winlinkFrequencies: [String: Double] = [
+        "80m":    3_587_000,
+        "40m":    7_083_500,
+        "30m":   10_144_400,
+        "20m":   14_108_500,
+        "17m":   18_113_000,
+        "15m":   21_101_500,
+        "12m":   24_925_500,
+        "10m":   28_118_500,
+    ]
+
     // MARK: - Combined Data
 
     /// All bands with their digital mode frequencies
@@ -193,6 +206,7 @@ struct BandPlan {
         case .js8:  return js8Frequencies[band]
         case .cw:   return cwFrequencies[band]
         case .wspr: return wsprFrequencies[band]
+        case .winlink: return winlinkFrequencies[band]
         }
     }
 
@@ -200,10 +214,11 @@ struct BandPlan {
     static func availableBands(for mode: DigitalMode) -> [Band] {
         allBands.filter { band in
             switch mode {
-            case .ft8:  return ft8Frequencies[band.id] != nil
-            case .js8:  return js8Frequencies[band.id] != nil
-            case .cw:   return cwFrequencies[band.id] != nil
-            case .wspr: return wsprFrequencies[band.id] != nil
+            case .ft8:     return ft8Frequencies[band.id] != nil
+            case .js8:     return js8Frequencies[band.id] != nil
+            case .cw:      return cwFrequencies[band.id] != nil
+            case .wspr:    return wsprFrequencies[band.id] != nil
+            case .winlink: return winlinkFrequencies[band.id] != nil
             }
         }
     }
