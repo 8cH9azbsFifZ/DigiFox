@@ -113,33 +113,57 @@ class AudioEngine: ObservableObject {
         do {
             let session = AVAudioSession.sharedInstance()
 
-            // Deactivate first to ensure clean route switch
+            // Stop any existing engine and deactivate session for clean route switch
+            engine.stop()
             try? session.setActive(false, options: .notifyOthersOnDeactivation)
 
-            // Check for USB audio first — if present, don't use defaultToSpeaker
-            let hasUSB = (session.availableInputs ?? []).contains { $0.portType == .usbAudio }
-            let options: AVAudioSession.CategoryOptions = hasUSB ? [] : [.defaultToSpeaker]
-            try session.setCategory(.playAndRecord, mode: .measurement, options: options)
+            // Log ALL available inputs for debugging
+            let allInputs = session.availableInputs ?? []
+            Log.d("Audio", "Available inputs (\(allInputs.count)):")
+            for input in allInputs {
+                Log.d("Audio", "  • '\(input.portName)' type=\(input.portType.rawValue) uid=\(input.uid)")
+            }
+
+            // Find USB audio device — check portType first, then fallback to name matching
+            let usbInput = allInputs.first(where: { $0.portType == .usbAudio })
+                ?? allInputs.first(where: {
+                    let name = $0.portName.lowercased()
+                    return name.contains("usb") || name.contains("digirig") || name.contains("cm108")
+                })
+
+            let hasUSB = usbInput != nil
+            let catOptions: AVAudioSession.CategoryOptions = hasUSB ? [] : [.defaultToSpeaker]
+            try session.setCategory(.playAndRecord, mode: .measurement, options: catOptions)
 
             // Set preferred input BEFORE activating the session
-            if let usbInput = (session.availableInputs ?? []).first(where: { $0.portType == .usbAudio }) {
+            if let usbInput = usbInput {
                 try session.setPreferredInput(usbInput)
-                Log.d("Audio", "USB preferred input set: \(usbInput.portName)")
+                Log.d("Audio", "✅ USB preferred input set: '\(usbInput.portName)' (type=\(usbInput.portType.rawValue))")
             } else {
-                Log.d("Audio", "No USB audio device found, using built-in mic/speaker")
+                Log.d("Audio", "⚠️ No USB audio device found — using built-in mic/speaker")
             }
 
             try session.setPreferredSampleRate(12000.0)
             try session.setActive(true)
 
-            // Log actual route after activation
+            // Verify route after activation — retry if USB didn't take
+            if let usbInput = usbInput {
+                let activeInput = session.currentRoute.inputs.first
+                if activeInput?.uid != usbInput.uid {
+                    Log.d("Audio", "⚠️ USB route didn't take (got '\(activeInput?.portName ?? "none")'), retrying...")
+                    try session.setPreferredInput(usbInput)
+                }
+            }
+
+            // Log actual active route
             let inputs = session.currentRoute.inputs.map { "\($0.portName) (\($0.portType.rawValue))" }
             let outputs = session.currentRoute.outputs.map { "\($0.portName) (\($0.portType.rawValue))" }
             Log.d("Audio", "Active route — IN: \(inputs.joined(separator: ", ")) | OUT: \(outputs.joined(separator: ", "))")
+            Log.d("Audio", "Session sampleRate=\(session.sampleRate)")
 
             updateUSBStatus()
 
-            // Reset engine to pick up new route
+            // Create fresh engine to pick up the new route
             engine = AVAudioEngine()
 
             let inputNode = engine.inputNode
@@ -149,7 +173,7 @@ class AudioEngine: ObservableObject {
                 return
             }
             let actualRate = format.sampleRate
-            Log.d("Audio", "start: hardware sampleRate=\(actualRate), channels=\(format.channelCount), resampling to 12000")
+            Log.d("Audio", "Engine input: sampleRate=\(actualRate), ch=\(format.channelCount)")
             inputRate = actualRate
             DispatchQueue.main.async { self.hardwareSampleRate = actualRate }
             inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
@@ -157,6 +181,7 @@ class AudioEngine: ObservableObject {
             }
             try engine.start()
             DispatchQueue.main.async { self.isRunning = true }
+            Log.d("Audio", "✅ Audio engine running (USB=\(hasUSB))")
         } catch {
             Log.d("Audio-ERROR", "\(error)")
         }
