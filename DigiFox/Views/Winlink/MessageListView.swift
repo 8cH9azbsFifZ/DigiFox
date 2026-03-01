@@ -1,7 +1,7 @@
-/// Winlink Nachrichten-Übersicht und Detailansicht.
+/// Winlink message overview and detail view.
 ///
-/// Zeigt Inbox, Outbox, Sent und Archiv mit Nachrichten an.
-/// Ermöglicht Lesen, Antworten, Archivieren und Löschen.
+/// Displays Inbox, Outbox, Sent and Archive with messages.
+/// Supports reading, replying, archiving and deleting.
 
 import SwiftUI
 
@@ -18,7 +18,7 @@ struct MessageListView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // MARK: - Ordner-Tabs
+                // MARK: - Folder Tabs
                 Picker("Ordner", selection: $selectedFolder) {
                     ForEach(WinlinkFolder.allCases, id: \.self) { folder in
                         Label(folder.rawValue, systemImage: folder.systemImage)
@@ -29,7 +29,7 @@ struct MessageListView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 4)
 
-                // MARK: - Nachrichtenliste
+                // MARK: - Message List
                 if messages.isEmpty {
                     VStack(spacing: 12) {
                         Spacer()
@@ -216,7 +216,7 @@ struct MessageDetailView: View {
                         .padding(.horizontal)
                         .textSelection(.enabled)
 
-                    // MARK: - Anhänge
+                    // MARK: - Attachments
                     if !message.attachments.isEmpty {
                         Divider()
                         Section {

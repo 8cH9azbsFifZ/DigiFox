@@ -1,17 +1,17 @@
 import SwiftUI
 
-/// Winlink E-Mail über Kurzwelle — Hauptansicht.
+/// Winlink email over HF — main view.
 ///
-/// Bietet Zugang zu allen Winlink-Funktionen:
-/// - Posteingang / Postausgang
-/// - Nachrichten verfassen
-/// - ARDOP-Verbindung zu RMS-Gateways
-/// - Telnet-Fallback (Internet)
-/// - RMS-Gateway-Verzeichnis
-/// - P2P-Modus (Direkt)
-/// - Positionsberichte
+/// Provides access to all Winlink features:
+/// - Inbox / Outbox
+/// - Compose messages
+/// - ARDOP connection to RMS gateways
+/// - Telnet fallback (Internet)
+/// - RMS gateway directory
+/// - P2P mode (direct)
+/// - Position reports
 ///
-/// Open Source Referenzen:
+/// Open Source References:
 ///   - ARDOP TNC: https://github.com/pflarue/ardop
 ///   - Pat Winlink Client: https://github.com/la5nta/pat (Go, MIT License)
 ///   - WSJT-X: https://wsjt.sourceforge.io (Dr. Joe Taylor, K1JT)

@@ -1,26 +1,26 @@
-/// Winlink Telnet-Transport — Internet-Fallback über TCP.
+/// Winlink Telnet transport — Internet fallback via TCP.
 ///
-/// Ermöglicht Winlink-Zugang über das Internet als Alternative zum HF-Zugang.
-/// Verbindet sich mit Winlink CMS (Common Message Server) über Telnet.
+/// Provides Winlink access over the Internet as an alternative to HF access.
+/// Connects to Winlink CMS (Common Message Server) via Telnet.
 ///
-/// Standard CMS-Server:
+/// Default CMS servers:
 /// - server.winlink.org:8772 (Telnet)
 /// - cms.winlink.org:8772 (Backup)
 ///
-/// Referenz: https://github.com/la5nta/wl2k-go/tree/master/transport/telnet
+/// Reference: https://github.com/la5nta/wl2k-go/tree/master/transport/telnet
 
 import Foundation
 import Network
 
 // MARK: - Telnet Transport
 
-/// Winlink CMS Telnet-Verbindung.
+/// Winlink CMS Telnet connection.
 ///
-/// Implementiert das B2FTransport-Protokoll über TCP/IP.
-/// Wird als Internet-Fallback verwendet wenn kein HF-Zugang möglich ist.
+/// Implements the B2FTransport protocol over TCP/IP.
+/// Used as an Internet fallback when no HF access is available.
 final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 
-    /// Standard Winlink CMS Server
+    /// Default Winlink CMS server
     static let defaultServers: [(host: String, port: UInt16)] = [
         ("server.winlink.org", 8772),
         ("cms.winlink.org", 8772),
@@ -31,9 +31,9 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
     private var connection: NWConnection?
     private let queue = DispatchQueue(label: "com.digifox.winlink.telnet")
 
-    /// Timeout für Verbindungsaufbau
+    /// Timeout for establishing connection
     let connectTimeout: TimeInterval
-    /// Timeout für einzelne Lese-/Schreiboperationen
+    /// Timeout for individual read/write operations
     let ioTimeout: TimeInterval
 
     private(set) var isConnected: Bool = false
@@ -53,9 +53,9 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 
     // MARK: - Connection
 
-    /// Verbindung zum CMS-Server herstellen.
+    /// Establish connection to the CMS server.
     func connect() async throws {
-        Log.d("Telnet", "Verbinde zu \(host):\(port)...")
+        Log.d("Telnet", "Connecting to \(host):\(port)...")
         let endpoint = NWEndpoint.hostPort(
             host: NWEndpoint.Host(host),
             port: NWEndpoint.Port(rawValue: port)!
@@ -71,7 +71,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
                 switch state {
                 case .ready:
                     self?.isConnected = true
-                    Log.d("Telnet", "Verbunden mit \(self?.host ?? "?"):\(self?.port ?? 0)")
+                    Log.d("Telnet", "Connected to \(self?.host ?? "?"):\(self?.port ?? 0)")
                     continuation.resume()
                 case .failed(let error):
                     self?.isConnected = false
@@ -93,9 +93,9 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
         }
     }
 
-    /// Verbindung trennen.
+    /// Disconnect.
     func disconnect() {
-        Log.d("Telnet", "Disconnect von \(host):\(port)")
+        Log.d("Telnet", "Disconnect from \(host):\(port)")
         connection?.cancel()
         connection = nil
         isConnected = false
@@ -104,14 +104,14 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 
     // MARK: - B2FTransport Protocol
 
-    /// Eine Textzeile senden (mit CRLF).
+    /// Send a text line (with CRLF).
     func sendLine(_ line: String) async throws {
         Log.d("Telnet", "TX: \(line)")
         let data = Data((line + "\r").utf8)  // B2F uses CR only, not CRLF
         try await sendData(data)
     }
 
-    /// Eine Textzeile empfangen (bis CR oder LF).
+    /// Receive a text line (until CR or LF).
     func receiveLine() async throws -> String {
         while true {
             // Check for CR or LF in buffer
@@ -139,7 +139,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
         }
     }
 
-    /// Binärdaten senden.
+    /// Send binary data.
     func sendData(_ data: Data) async throws {
         guard let connection = connection, isConnected else {
             throw WinlinkError.connectionFailed("Nicht verbunden")
@@ -156,7 +156,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
         }
     }
 
-    /// Exakt `count` Bytes empfangen.
+    /// Receive exactly `count` bytes.
     func receiveData(count: Int) async throws -> Data {
         while receiveBuffer.count < count {
             let chunk = try await readFromNetwork()
@@ -203,8 +203,8 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 // MARK: - Convenience
 
 extension WinlinkTelnet {
-    /// Verbindet sich mit dem besten verfügbaren CMS-Server.
-    /// Probiert alle Server der Reihe nach durch.
+    /// Connects to the best available CMS server.
+    /// Tries all servers in order.
     static func connectToBestServer(timeout: TimeInterval = 15) async throws -> WinlinkTelnet {
         for server in defaultServers {
             let telnet = WinlinkTelnet(host: server.host, port: server.port, connectTimeout: timeout)

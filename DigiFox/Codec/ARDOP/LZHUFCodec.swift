@@ -1,10 +1,10 @@
-/// LZHUF-Kompression für das Winlink B2F-Protokoll.
+/// LZHUF compression for the Winlink B2F protocol.
 ///
-/// LZHUF (Lempel-Ziv Huffman) ist der Kompressionsstandard für Winlink-Nachrichten.
-/// Diese Implementierung folgt exakt der Referenzimplementierung in
+/// LZHUF (Lempel-Ziv Huffman) is the compression standard for Winlink messages.
+/// This implementation follows the reference implementation exactly in
 /// https://github.com/la5nta/wl2k-go/blob/master/lzhuf/lzhuf.go
 ///
-/// Wichtige Parameter (müssen mit wl2k-go übereinstimmen):
+/// Important parameters (must match wl2k-go):
 ///   N = 2048 (Sliding Window)
 ///   F = 60 (Lookahead)
 ///   Threshold = 2
@@ -116,7 +116,7 @@ final class LZHUFCodec {
 
     // MARK: - Public API
 
-    /// Komprimiert Daten mit LZHUF (kompatibel mit wl2k-go/lzhuf).
+    /// Compresses data using LZHUF (compatible with wl2k-go/lzhuf).
     func compress(_ data: Data) -> Data {
         guard !data.isEmpty else { return Data([0, 0, 0, 0]) }
         Log.d("LZHUF", "compress: \(data.count) bytes input")
@@ -138,7 +138,7 @@ final class LZHUFCodec {
         return outputData
     }
 
-    /// Dekomprimiert LZHUF-Daten (kompatibel mit wl2k-go/lzhuf).
+    /// Decompresses LZHUF data (compatible with wl2k-go/lzhuf).
     func decompress(_ data: Data) -> Data {
         guard data.count >= 4 else { return Data() }
 

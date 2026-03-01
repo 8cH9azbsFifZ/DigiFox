@@ -1,12 +1,12 @@
-/// CMS Gateway API — Abfrage verfügbarer Winlink RMS-Gateways.
+/// CMS Gateway API — Query available Winlink RMS gateways.
 ///
-/// Verwendet die offizielle Winlink CMS API um aktive RMS-Gateways
-/// in der Nähe zu finden, inklusive Frequenzen und Betriebsmodi.
+/// Uses the official Winlink CMS API to find active RMS gateways
+/// nearby, including frequencies and operating modes.
 ///
-/// API-Endpunkt: https://api.winlink.org/gateway/listing
+/// API endpoint: https://api.winlink.org/gateway/listing
 ///
-/// Referenz: https://github.com/la5nta/pat (gateway directory)
-/// Referenz: https://api.winlink.org (CMS API Dokumentation)
+/// Reference: https://github.com/la5nta/pat (gateway directory)
+/// Reference: https://api.winlink.org (CMS API documentation)
 
 import Foundation
 import CoreLocation
@@ -15,32 +15,32 @@ import CoreLocation
 
 /// Ein Winlink RMS-Gateway (Radio Message Server)
 struct RMSGateway: Identifiable, Codable, Sendable {
-    /// Gateway-Rufzeichen
+    /// Gateway callsign
     let callsign: String
-    /// Frequenz in Hz
+    /// Frequency in Hz
     let frequency: Double
-    /// Betriebsmodus (ARDOP, VARA, Pactor, etc.)
+    /// Operating mode (ARDOP, VARA, Pactor, etc.)
     let mode: String
-    /// Gateway-Standort
+    /// Gateway location
     let latitude: Double
     let longitude: Double
-    /// Grid-Locator
+    /// Grid locator
     let gridSquare: String
-    /// Letzte Aktualisierung
+    /// Last update
     let lastUpdate: Date?
-    /// Service-Code (PUBLIC, EMCOM, etc.)
+    /// Service code (PUBLIC, EMCOM, etc.)
     let serviceCode: String?
-    /// Entfernung zum eigenen Standort in km (wird berechnet)
+    /// Distance to own location in km (calculated)
     var distanceKm: Double?
 
     var id: String { "\(callsign)-\(Int(frequency))" }
 
-    /// Frequenz formatiert als MHz
+    /// Frequency formatted as MHz
     var frequencyMHz: String {
         String(format: "%.4f MHz", frequency / 1_000_000)
     }
 
-    /// Band-Bezeichnung basierend auf Frequenz
+    /// Band designation based on frequency
     var band: String {
         switch frequency {
         case 1_800_000..<2_000_000: return "160m"
@@ -59,7 +59,7 @@ struct RMSGateway: Identifiable, Codable, Sendable {
 
 // MARK: - CMS API Response
 
-/// API-Antwort des CMS Gateway Listing
+/// API response of the CMS Gateway Listing
 private struct CMSGatewayResponse: Codable {
     let GatewayList: [CMSGatewayEntry]?
 
@@ -77,36 +77,36 @@ private struct CMSGatewayResponse: Codable {
 
 // MARK: - CMS Gateway API
 
-/// API-Client für die Winlink CMS Gateway-Datenbank.
+/// API client for the Winlink CMS gateway database.
 ///
-/// Ermöglicht die Suche nach verfügbaren RMS-Gateways nach:
-/// - Entfernung zum eigenen Standort
-/// - Band / Frequenzbereich
-/// - Betriebsmodus (ARDOP, VARA, etc.)
+/// Enables searching for available RMS gateways by:
+/// - Distance to own location
+/// - Band / frequency range
+/// - Operating mode (ARDOP, VARA, etc.)
 final class CMSGatewayAPI {
 
-    /// CMS API Basis-URL
+    /// CMS API base URL
     static let baseURL = "https://api.winlink.org"
 
-    /// API-Key (öffentlich für Gateway-Listing)
+    /// API key (public for gateway listing)
     private let apiKey = "EMCOMM"
 
-    /// Cache für Gateway-Liste
+    /// Cache for gateway list
     private var cachedGateways: [RMSGateway] = []
     private var cacheDate: Date?
-    private let cacheTimeout: TimeInterval = 3600 // 1 Stunde
+    private let cacheTimeout: TimeInterval = 3600 // 1 hour
 
     static let shared = CMSGatewayAPI()
     private init() {}
 
     // MARK: - Public API
 
-    /// Alle ARDOP-fähigen Gateways abrufen.
+    /// Fetch all ARDOP-capable gateways.
     func fetchARDOPGateways() async throws -> [RMSGateway] {
         return try await fetchGateways(mode: "ARDOP")
     }
 
-    /// Gateways nach Modus filtern.
+    /// Filter gateways by mode.
     func fetchGateways(mode: String? = nil) async throws -> [RMSGateway] {
         // Check cache
         if let cacheDate = cacheDate,
@@ -122,7 +122,7 @@ final class CMSGatewayAPI {
         return gateways
     }
 
-    /// Nächste Gateways zum angegebenen Standort.
+    /// Nearest gateways to the specified location.
     func nearestGateways(
         latitude: Double,
         longitude: Double,
@@ -134,7 +134,7 @@ final class CMSGatewayAPI {
 
         let myLocation = CLLocation(latitude: latitude, longitude: longitude)
 
-        // Berechne Entfernungen
+        // Calculate distances
         gateways = gateways.map { gw in
             var gateway = gw
             let gwLocation = CLLocation(latitude: gw.latitude, longitude: gw.longitude)
@@ -142,7 +142,7 @@ final class CMSGatewayAPI {
             return gateway
         }
 
-        // Filtere und sortiere nach Entfernung
+        // Filter and sort by distance
         return gateways
             .filter { ($0.distanceKm ?? Double.infinity) <= maxDistanceKm }
             .sorted { ($0.distanceKm ?? Double.infinity) < ($1.distanceKm ?? Double.infinity) }
@@ -150,13 +150,13 @@ final class CMSGatewayAPI {
             .map { $0 }
     }
 
-    /// Gateways für ein bestimmtes Band.
+    /// Gateways for a specific band.
     func gatewaysForBand(_ bandId: String, mode: String = "ARDOP") async throws -> [RMSGateway] {
         let gateways = try await fetchGateways(mode: mode)
         return gateways.filter { $0.band == bandId }
     }
 
-    /// Cache leeren.
+    /// Clear cache.
     func clearCache() {
         cachedGateways.removeAll()
         cacheDate = nil

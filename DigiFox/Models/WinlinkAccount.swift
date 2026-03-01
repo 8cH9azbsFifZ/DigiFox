@@ -1,7 +1,7 @@
-/// Winlink-Account-Verwaltung.
+/// Winlink account management.
 ///
-/// Verwaltet Callsign, Passwort und Kontoinformationen für Winlink-Zugang.
-/// Das Passwort wird im iOS Keychain gespeichert.
+/// Manages callsign, password and account information for Winlink access.
+/// The password is stored in the iOS Keychain.
 ///
 /// Referenz: https://winlink.org/user, https://github.com/la5nta/pat
 
@@ -9,28 +9,28 @@ import Foundation
 import Security
 import CryptoKit
 
-/// Winlink-Kontodaten
+/// Winlink account data
 struct WinlinkAccount: Codable, Equatable {
-    /// Amateurfunk-Rufzeichen (z.B. "DL1ABC")
+    /// Amateur radio callsign (e.g. "DL1ABC")
     var callsign: String
-    /// Winlink-Passwort (wird separat im Keychain gespeichert)
+    /// Winlink password (stored separately in the Keychain)
     var password: String
-    /// Taktisches Rufzeichen (optional, z.B. "NOTFALL1")
+    /// Tactical callsign (optional, e.g. "EMERG1")
     var tacticalCallsign: String?
-    /// Grid-Locator (z.B. "JN48ab")
+    /// Grid locator (e.g. "JN48ab")
     var gridLocator: String?
-    /// E-Mail-Adresse für Winlink (callsign@winlink.org)
+    /// Email address for Winlink (callsign@winlink.org)
     var winlinkEmail: String {
         "\(callsign.uppercased())@winlink.org"
     }
 
-    /// Ob das Konto vollständig konfiguriert ist
+    /// Whether the account is fully configured
     var isConfigured: Bool {
         !callsign.isEmpty && !password.isEmpty
     }
 }
 
-/// Sichere Speicherung der Winlink-Zugangsdaten im iOS Keychain.
+/// Secure storage of Winlink credentials in the iOS Keychain.
 final class WinlinkAccountManager {
 
     static let shared = WinlinkAccountManager()
@@ -42,7 +42,7 @@ final class WinlinkAccountManager {
 
     // MARK: - Account CRUD
 
-    /// Speichert oder aktualisiert das Winlink-Konto.
+    /// Saves or updates the Winlink account.
     func saveAccount(_ account: WinlinkAccount) throws {
         // Save password to Keychain
         try saveToKeychain(key: "\(account.callsign)_password", value: account.password)
@@ -52,7 +52,7 @@ final class WinlinkAccountManager {
         UserDefaults.standard.set(data, forKey: accountKey)
     }
 
-    /// Lädt das gespeicherte Winlink-Konto.
+    /// Loads the saved Winlink account.
     func loadAccount() -> WinlinkAccount? {
         guard let data = UserDefaults.standard.data(forKey: accountKey),
               var account = try? JSONDecoder().decode(WinlinkAccount.self, from: data) else {
@@ -67,7 +67,7 @@ final class WinlinkAccountManager {
         return account
     }
 
-    /// Löscht das Winlink-Konto und Passwort.
+    /// Deletes the Winlink account and password.
     func deleteAccount() {
         if let account = loadAccount() {
             deleteFromKeychain(key: "\(account.callsign)_password")
@@ -77,8 +77,8 @@ final class WinlinkAccountManager {
 
     // MARK: - Winlink Challenge/Response
 
-    /// Berechnet die Winlink-Challenge-Response für die Authentifizierung.
-    /// Verwendet MD5(challenge + password) — wie in Pat/wl2k-go.
+    /// Computes the Winlink challenge-response for authentication.
+    /// Uses MD5(challenge + password) — as in Pat/wl2k-go.
     func challengeResponse(challenge: String, password: String) -> String {
         let input = challenge + password
         let digest = Insecure.MD5.hash(data: Data(input.utf8))
@@ -144,7 +144,7 @@ final class WinlinkAccountManager {
     }
 }
 
-/// Winlink-spezifische Fehler
+/// Winlink-specific errors
 enum WinlinkError: Error, LocalizedError {
     case keychainError(OSStatus)
     case notConfigured
