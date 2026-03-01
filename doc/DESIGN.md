@@ -60,6 +60,24 @@ All codec and audio processing operates at 12,000 Hz. `AudioEngine`
 resamples from whatever the USB hardware provides. New codecs must not
 introduce a different sample rate.
 
+### P3a — Sample rate conversion at device boundary
+
+Different hardware devices deliver audio at different native sample rates
+(see section 7.2). Resampling to the canonical 12 kHz **must** happen at
+the device boundary — inside `AudioEngine` (for USB audio) or
+`TruSDXSerialAudio` (for serial audio) — before samples reach any codec.
+Codecs never resample themselves; they always receive 12 kHz.
+
+When integrating a new audio source or ported codec that assumes a
+different sample rate, ensure conversion is handled at the boundary layer,
+not inside the codec. This keeps codecs device-agnostic.
+
+| Device | RX native rate | TX native rate | Resampling method |
+|--------|---------------|---------------|-------------------|
+| **Digirig** (USB audio) | 48,000 Hz | 48,000 Hz | `vDSP_vlint` in `AudioEngine` |
+| **(tr)uSDX** (serial audio) | 7,825 Hz | 11,520 Hz | Linear interpolation in `TruSDXSerialAudio` |
+| **Built-in mic** (not used for digital modes) | 48,000 Hz | — | N/A (see P1) |
+
 ### P4 — Codec symmetry
 
 FT8 and JS8 have mirrored file structures. Changes to shared concepts
@@ -416,18 +434,55 @@ TX: Modulator generates samples at 12 kHz
   → USB Audio output (upsampled by CoreAudio)
 ```
 
-**TruSDX special case:** Serial audio streaming at ~7825 Hz, resampled
-to 12 kHz via `TruSDXSerialAudio.swift`.
+**TruSDX special case:** Serial audio streaming at ~7825 Hz RX / 11520 Hz TX,
+resampled to/from 12 kHz via `TruSDXSerialAudio.swift` (linear interpolation).
+See [TruSDX CAT Protocol Reference](trusdx-cat-reference.md) for serial audio
+framing details and [Digirig Reference](digirig-reference.md) for USB audio
+class details.
+
+**Codec sample rate expectations — all hardcoded to 12 kHz:**
+
+| Codec | Constant | Symbol samples | Notes |
+|-------|----------|---------------|-------|
+| FT8 | `FT8Protocol.sampleRate` | 1,920 (0.16 s) | |
+| JS8 | `JS8Protocol.sampleRate` | 1,920 / 1,280 / 640 / 3,840 / 7,680 (by speed) | 5 speed modes |
+| WSPR | `WSPRProtocol.sampleRate` | 8,192 (~0.683 s) | Tone spacing = 12000/8192 ≈ 1.4648 Hz |
+| ARDOP | `ARDOPProtocol.sampleRate` | varies by frame type | |
+| CW | `GGMorseDecoder.sampleRate` | configurable | Only codec accepting variable rate (default 12 kHz) |
 
 ### 7.3 CAT Control
 
 `CATController` (actor) → `HamlibRig` (Swift wrapper) → Hamlib C library
 
+**Hamlib** — the Ham Radio Control Libraries — provides a standardized API for
+controlling ~400 amateur radio transceivers. DigiFox uses a pre-built static
+library vendored as `Frameworks/Hamlib.xcframework` (device + simulator slices).
+
+- **Reference:** <https://hamlib.github.io/> (source: <https://github.com/Hamlib/Hamlib>)
+- **License:** LGPL-2.1
+- **iOS stubs:** `HamlibStubs/hamlib_missing.c` provides missing POSIX symbols (FIFO, timing, snapshot, backend registration)
+
 Supports frequency, mode (USB/LSB/CW/AM/FM/DATA), PTT, and CW keying.
 Default rig model: FT-817 (model 1020). PTT via RTS line on Digirig.
 
+**Default baud rates** are set per radio profile in `RadioProfile.defaultBaudRate`
+and can be overridden by the user in settings. `HamlibRig.defaultBaudRate(for:)`
+queries Hamlib capabilities (`serial_rate_max`) for any given model ID.
+
+| Profile | Default baud rate | Source | Notes |
+|---------|------------------|--------|-------|
+| **Digirig** | 38,400 | `RadioProfile.digirig` | Default for FT-817; user selects rig model, baud auto-updates |
+| **(tr)uSDX** | 115,200 | `RadioProfile.trusdx` | Required for `CAT_STREAMING` audio; fixed, not user-configurable |
+
+When the user selects a rig model in Digirig mode, `SettingsView` calls
+`HamlibRig.defaultBaudRate(for: modelId)` to auto-set the appropriate rate.
+
 For zero-latency CW keying, `SerialPort.rawFD` exposes the file
 descriptor for direct POSIX writes, bypassing the actor isolation.
+
+**Protocol references:**
+- [TruSDX CAT Protocol Reference](trusdx-cat-reference.md)
+- [Digirig Reference](digirig-reference.md)
 
 ---
 
