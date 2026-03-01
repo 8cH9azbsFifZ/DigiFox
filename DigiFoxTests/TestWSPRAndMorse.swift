@@ -24,16 +24,15 @@ enum WSPRMessagePack {
         if c.count > 6 { c = Array(c.prefix(6)) }
         let digit2: UInt32 = c[2].isNumber ? UInt32(c[2].asciiValue! - 48) : 0
 
-        func charVal(_ ch: Character) -> UInt32 {
-            if ch == " " { return 0 }
-            if ch >= "A" && ch <= "Z" { return UInt32(ch.asciiValue! - 65 + 1) }
-            if ch >= "0" && ch <= "9" { return UInt32(ch.asciiValue! - 48 + 27) }
-            return 0
+        func charn(_ ch: Character) -> UInt32 {
+            if ch >= "0" && ch <= "9" { return UInt32(ch.asciiValue! - 48) }
+            if ch >= "A" && ch <= "Z" { return UInt32(ch.asciiValue! - 65 + 10) }
+            return 36
         }
 
-        let n1 = charVal(c[0]); let n2 = charVal(c[1])
+        let n1 = charn(c[0]); let n2 = charn(c[1])
         let n3 = digit2
-        let n4 = charVal(c[3]); let n5 = charVal(c[4]); let n6 = charVal(c[5])
+        let n4 = charn(c[3]) - 10; let n5 = charn(c[4]) - 10; let n6 = charn(c[5]) - 10
         var n = n1; n = n * 36 + n2; n = n * 10 + n3
         n = n * 27 + n4; n = n * 27 + n5; n = n * 27 + n6
         return n
@@ -41,10 +40,13 @@ enum WSPRMessagePack {
 
     static func decodeCallsign(_ n: UInt32) -> String {
         var val = n
-        func valToChar(_ v: UInt32, space: Bool = true) -> Character {
-            if v == 0 && space { return " " }
-            if v >= 1 && v <= 26 { return Character(UnicodeScalar(64 + v)!) }
-            if v >= 27 && v <= 36 { return Character(UnicodeScalar(48 + v - 27)!) }
+        func valToChar(_ v: UInt32) -> Character {
+            if v <= 9 { return Character(UnicodeScalar(48 + v)!) }
+            if v >= 10 && v <= 35 { return Character(UnicodeScalar(65 + v - 10)!) }
+            return " "
+        }
+        func valToSuffix(_ v: UInt32) -> Character {
+            if v <= 25 { return Character(UnicodeScalar(65 + v)!) }
             return " "
         }
         let n6 = val % 27; val /= 27; let n5 = val % 27; val /= 27
@@ -52,7 +54,7 @@ enum WSPRMessagePack {
         let n2 = val % 36; val /= 36; let n1 = val
         return String([valToChar(n1), valToChar(n2),
                        Character(UnicodeScalar(48 + n3)!),
-                       valToChar(n4), valToChar(n5), valToChar(n6)])
+                       valToSuffix(n4), valToSuffix(n5), valToSuffix(n6)])
             .trimmingCharacters(in: .whitespaces)
     }
 
@@ -63,11 +65,11 @@ enum WSPRMessagePack {
               g[2] >= "0" && g[2] <= "9", g[3] >= "0" && g[3] <= "9" else { return 32400 }
         let lon = Int(g[0].asciiValue! - 65) * 10 + Int(g[2].asciiValue! - 48)
         let lat = Int(g[1].asciiValue! - 65) * 10 + Int(g[3].asciiValue! - 48)
-        return lon * 180 + lat
+        return (179 - lon) * 180 + lat
     }
 
     static func decodeGrid(_ n: Int) -> String {
-        let lat = n % 180; let lon = n / 180
+        let lat = n % 180; let lon = 179 - n / 180
         return String([Character(UnicodeScalar(65 + lon / 10)!),
                        Character(UnicodeScalar(65 + lat / 10)!),
                        Character(UnicodeScalar(48 + lon % 10)!),
@@ -165,10 +167,12 @@ func convolutionalEncode(_ messageBits: [UInt8]) -> [UInt8] {
 }
 
 func interleave(_ bits: [UInt8]) -> [UInt8] {
-    var result = [UInt8](repeating: 0, count: 162); var j = 0
+    var source = [UInt8](repeating: 0, count: 256)
+    for i in 0..<min(bits.count, 256) { source[i] = bits[i] }
+    var result = [UInt8](repeating: 0, count: 162)
     for i in 0..<256 {
         let rev = WSPRProtocol.interleaveIndex(i)
-        if rev < 162 { if j < bits.count { result[rev] = bits[j]; j += 1 } }
+        if rev < 162 { result[rev] = source[i] }
     }
     return result
 }
@@ -216,6 +220,18 @@ print()
 // ---- WSPR Callsign Encoding ----
 print("▸ WSPR Callsign Encoding")
 
+test("WSJT-X ref: K1JT → 259055063") {
+    try assertEqual(WSPRMessagePack.encodeCallsign("K1JT"), UInt32(259055063))
+}
+
+test("WSJT-X ref: DL1ABC → 96269582") {
+    try assertEqual(WSPRMessagePack.encodeCallsign("DL1ABC"), UInt32(96269582))
+}
+
+test("WSJT-X ref: W1AW → 261410543") {
+    try assertEqual(WSPRMessagePack.encodeCallsign("W1AW"), UInt32(261410543))
+}
+
 test("Round-trip: DL1ABC") {
     let e = WSPRMessagePack.encodeCallsign("DL1ABC")
     let d = WSPRMessagePack.decodeCallsign(e)
@@ -255,6 +271,18 @@ test("Round-trip: JA1ABC") {
 // ---- WSPR Grid Encoding ----
 print()
 print("▸ WSPR Grid Encoding")
+
+test("WSJT-X ref: FN20 → 22990") {
+    try assertEqual(WSPRMessagePack.encodeGrid("FN20"), 22990)
+}
+
+test("WSJT-X ref: JO31 → 15621") {
+    try assertEqual(WSPRMessagePack.encodeGrid("JO31"), 15621)
+}
+
+test("WSJT-X ref: CM87 → 27307") {
+    try assertEqual(WSPRMessagePack.encodeGrid("CM87"), 27307)
+}
 
 let grids = ["JO31", "FN31", "AA00", "RR99", "IO91", "CM87"]
 for grid in grids {

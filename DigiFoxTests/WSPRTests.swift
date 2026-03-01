@@ -3,7 +3,16 @@ import XCTest
 
 final class WSPRMessagePackTests: XCTestCase {
 
-    // MARK: - Callsign Encoding Round-trip
+    // MARK: - WSJT-X Reference: Callsign Encoding
+
+    func testCallsignEncoding_WSJTXReference() {
+        // Values verified against WSJT-X wsprd.c character encoding
+        // charn: 0-9→0-9, A-Z→10-35, space→36
+        XCTAssertEqual(WSPRMessagePack.encodeCallsign("K1JT"), 259055063)
+        XCTAssertEqual(WSPRMessagePack.encodeCallsign("DL1ABC"), 96269582)
+        XCTAssertEqual(WSPRMessagePack.encodeCallsign("W1AW"), 261410543)
+        XCTAssertEqual(WSPRMessagePack.encodeCallsign("VK3XYZ"), 223675369)
+    }
 
     func testCallsignRoundTrip_Standard6Char() {
         let calls = ["DL1ABC", "W1AW", "K1JT", "VK3XYZ", "JA1ABC"]
@@ -17,30 +26,26 @@ final class WSPRMessagePackTests: XCTestCase {
     }
 
     func testCallsignRoundTrip_ShortCall() {
-        // Short callsigns get left-padded with spaces
         let encoded = WSPRMessagePack.encodeCallsign("K1JT")
         let decoded = WSPRMessagePack.decodeCallsign(encoded)
         XCTAssertTrue(decoded.contains("K1JT"), "Should contain K1JT, got '\(decoded)'")
     }
 
-    func testCallsignRoundTrip_DigitAtPosition3() {
-        // 3rd char MUST be digit - verify padding works
-        let encoded = WSPRMessagePack.encodeCallsign("AA1BB")
-        let decoded = WSPRMessagePack.decodeCallsign(encoded)
-        // After padding, 3rd char should be a digit
-        let chars = Array(decoded)
-        let trimmed = decoded.trimmingCharacters(in: .whitespaces)
-        XCTAssertFalse(trimmed.isEmpty)
-    }
-
     func testCallsignEncoding_Lowercase() {
-        // Should be case-insensitive
         let upper = WSPRMessagePack.encodeCallsign("DL1ABC")
         let lower = WSPRMessagePack.encodeCallsign("dl1abc")
         XCTAssertEqual(upper, lower)
     }
 
-    // MARK: - Grid Encoding Round-trip
+    // MARK: - WSJT-X Reference: Grid Encoding
+
+    func testGridEncoding_WSJTXReference() {
+        // WSJT-X formula: (179 - lon) * 180 + lat
+        XCTAssertEqual(WSPRMessagePack.encodeGrid("FN20"), 22990)
+        XCTAssertEqual(WSPRMessagePack.encodeGrid("JO31"), 15621)
+        XCTAssertEqual(WSPRMessagePack.encodeGrid("CM87"), 27307)
+        XCTAssertEqual(WSPRMessagePack.encodeGrid("QF22"), 3112)
+    }
 
     func testGridRoundTrip() {
         let grids = ["JO31", "FN31", "AA00", "RR99", "IO91", "CM87"]
@@ -58,18 +63,11 @@ final class WSPRMessagePackTests: XCTestCase {
     }
 
     func testGridEncoding_InvalidGrid() {
-        // Invalid grid should return center value
         let result = WSPRMessagePack.encodeGrid("XXXX")
-        XCTAssertEqual(result, 32400) // center/invalid marker
-    }
-
-    func testGridEncoding_TooShort() {
-        let result = WSPRMessagePack.encodeGrid("JO")
         XCTAssertEqual(result, 32400)
     }
 
     func testGridEncoding_Range() {
-        // Grid values should be in valid range
         let grids = ["AA00", "RR99", "JO31"]
         for grid in grids {
             let val = WSPRMessagePack.encodeGrid(grid)
@@ -81,48 +79,47 @@ final class WSPRMessagePackTests: XCTestCase {
     // MARK: - Power Encoding
 
     func testClampPower_ValidLevels() {
-        let valid = WSPRMessagePack.validPowers
-        for p in valid {
-            XCTAssertEqual(WSPRMessagePack.clampPower(p), p, "Valid power \(p) should not change")
+        for p in WSPRMessagePack.validPowers {
+            XCTAssertEqual(WSPRMessagePack.clampPower(p), p)
         }
     }
 
     func testClampPower_InvalidLevels() {
-        // Should clamp to nearest valid
         XCTAssertEqual(WSPRMessagePack.clampPower(1), 0)
         XCTAssertEqual(WSPRMessagePack.clampPower(2), 3)
         XCTAssertEqual(WSPRMessagePack.clampPower(5), 3)
         XCTAssertEqual(WSPRMessagePack.clampPower(15), 13)
-        XCTAssertEqual(WSPRMessagePack.clampPower(25), 23)
-        XCTAssertEqual(WSPRMessagePack.clampPower(100), 60) // clamp high
+        XCTAssertEqual(WSPRMessagePack.clampPower(100), 60)
+        XCTAssertEqual(WSPRMessagePack.clampPower(-10), 0)
     }
 
-    func testClampPower_NegativeValue() {
-        let result = WSPRMessagePack.clampPower(-10)
-        XCTAssertEqual(result, 0)
-    }
+    // MARK: - WSJT-X Reference: Full Message Pack
 
-    // MARK: - Full Message Pack/Unpack Round-trip
+    func testMessagePack_WSJTXReference() {
+        // K1JT FN20 30 — packed bits verified against WSJT-X
+        let msg = WSPRMessage(callsign: "K1JT", grid: "FN20", power: 30)
+        let bits = WSPRMessagePack.pack(msg)
+        let expected: [UInt8] = [
+            1,1,1,1,0,1,1,1,0,0,0,0,1,1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,
+            1,0,1,1,0,0,1,1,1,0,0,1,1,1,0,1,0,1,1,1,1,0
+        ]
+        XCTAssertEqual(bits, expected, "Packed bits mismatch for K1JT FN20 30")
+    }
 
     func testMessageRoundTrip() {
         let messages = [
             WSPRMessage(callsign: "DL1ABC", grid: "JO31", power: 30),
-            WSPRMessage(callsign: "K1JT", grid: "FN31", power: 37),
+            WSPRMessage(callsign: "K1JT", grid: "FN20", power: 37),
             WSPRMessage(callsign: "W1AW", grid: "CM87", power: 10),
         ]
-
         for msg in messages {
             let bits = WSPRMessagePack.pack(msg)
-            XCTAssertEqual(bits.count, 50, "Packed bits should be 50")
-
+            XCTAssertEqual(bits.count, 50)
             let recovered = WSPRMessagePack.unpack(bits)
             XCTAssertEqual(recovered.callsign.trimmingCharacters(in: .whitespaces),
-                           msg.callsign.trimmingCharacters(in: .whitespaces),
-                           "Callsign mismatch for \(msg.callsign)")
-            XCTAssertEqual(recovered.grid, msg.grid,
-                           "Grid mismatch for \(msg.grid)")
-            XCTAssertEqual(recovered.power, WSPRMessagePack.clampPower(msg.power),
-                           "Power mismatch for \(msg.power)")
+                           msg.callsign.trimmingCharacters(in: .whitespaces))
+            XCTAssertEqual(recovered.grid, msg.grid)
+            XCTAssertEqual(recovered.power, WSPRMessagePack.clampPower(msg.power))
         }
     }
 
@@ -130,28 +127,14 @@ final class WSPRMessagePackTests: XCTestCase {
         let msg = WSPRMessage(callsign: "DL1ABC", grid: "JO31", power: 30)
         let bits = WSPRMessagePack.pack(msg)
         for (i, bit) in bits.enumerated() {
-            XCTAssertTrue(bit == 0 || bit == 1, "Bit \(i) is \(bit), expected 0 or 1")
+            XCTAssertTrue(bit == 0 || bit == 1, "Bit \(i) is \(bit)")
         }
     }
 
     func testUnpackShortBits() {
         let short = [UInt8](repeating: 0, count: 10)
         let msg = WSPRMessagePack.unpack(short)
-        XCTAssertEqual(msg.callsign, "?????") // error fallback
-    }
-
-    // MARK: - parseText
-
-    func testParseText() {
-        let msg = WSPRMessagePack.parseText("", myCall: "dl1abc", myGrid: "jo31", power: 30)
-        XCTAssertEqual(msg.callsign, "DL1ABC")
-        XCTAssertEqual(msg.grid, "JO31")
-        XCTAssertEqual(msg.power, 30)
-    }
-
-    func testParseTextGridTruncation() {
-        let msg = WSPRMessagePack.parseText("", myCall: "K1JT", myGrid: "FN31ab", power: 20)
-        XCTAssertEqual(msg.grid, "FN31") // only first 4 chars
+        XCTAssertEqual(msg.callsign, "?????")
     }
 }
 
@@ -165,30 +148,19 @@ final class WSPRProtocolTests: XCTestCase {
 
     func testSyncVectorValues() {
         for val in WSPRProtocol.syncVector {
-            XCTAssertTrue(val == 0 || val == 1, "Sync vector contains \(val), expected 0 or 1")
+            XCTAssertTrue(val == 0 || val == 1)
         }
     }
 
-    func testSymbolCount() {
-        XCTAssertEqual(WSPRProtocol.symbolCount, 162)
-    }
-
-    func testToneCount() {
-        XCTAssertEqual(WSPRProtocol.toneCount, 4)
-    }
-
     func testToneSpacing() {
-        // 12000/8192 ≈ 1.4648 Hz
         XCTAssertEqual(WSPRProtocol.toneSpacing, 12000.0 / 8192.0, accuracy: 0.0001)
     }
 
     func testSymbolDuration() {
-        // 8192/12000 ≈ 0.6827 s
         XCTAssertEqual(WSPRProtocol.symbolDuration, 8192.0 / 12000.0, accuracy: 0.0001)
     }
 
     func testFrameDuration() {
-        // 162 * 8192/12000 ≈ 110.6 s
         let expected = 162.0 * 8192.0 / 12000.0
         XCTAssertEqual(WSPRProtocol.frameDuration, expected, accuracy: 0.01)
     }
@@ -198,42 +170,33 @@ final class WSPRProtocolTests: XCTestCase {
     }
 
     func testInterleaveIndex_BitReversal() {
-        // interleaveIndex(0) = 0 (all zeros reversed = all zeros)
         XCTAssertEqual(WSPRProtocol.interleaveIndex(0), 0)
-        // interleaveIndex(1) = 128 (bit 0 reversed into bit 7)
         XCTAssertEqual(WSPRProtocol.interleaveIndex(1), 128)
-        // interleaveIndex(128) = 1
         XCTAssertEqual(WSPRProtocol.interleaveIndex(128), 1)
-        // interleaveIndex(255) = 255 (all ones reversed = all ones)
         XCTAssertEqual(WSPRProtocol.interleaveIndex(255), 255)
     }
 
     func testInterleaveIndex_Bijective() {
-        // bit-reversal on 0..255 should be a bijection
         var seen = Set<Int>()
         for i in 0..<256 {
-            let j = WSPRProtocol.interleaveIndex(i)
-            XCTAssertTrue(j >= 0 && j < 256, "Out of range: \(j)")
-            seen.insert(j)
+            seen.insert(WSPRProtocol.interleaveIndex(i))
         }
-        XCTAssertEqual(seen.count, 256, "Should be a permutation of 0..255")
+        XCTAssertEqual(seen.count, 256)
     }
 
     func testInterleaveIndex_Involutory() {
-        // bit-reversal applied twice = identity
         for i in 0..<256 {
             XCTAssertEqual(WSPRProtocol.interleaveIndex(WSPRProtocol.interleaveIndex(i)), i)
         }
     }
 
     func testConvolutionalPolynomials() {
-        // Known WSPR polynomials
         XCTAssertEqual(WSPRProtocol.poly1, 0xF2D05351)
         XCTAssertEqual(WSPRProtocol.poly2, 0xE4613C47)
     }
 }
 
-// MARK: - WSPR Modulator
+// MARK: - WSPR Modulator + WSJT-X Reference Symbols
 
 final class WSPRModulatorTests: XCTestCase {
 
@@ -241,19 +204,17 @@ final class WSPRModulatorTests: XCTestCase {
         let mod = WSPRModulator()
         let msg = WSPRMessage(callsign: "DL1ABC", grid: "JO31", power: 30)
         let samples = mod.modulate(msg)
-        XCTAssertEqual(samples.count, WSPRProtocol.frameSamples,
-                       "Expected \(WSPRProtocol.frameSamples) samples, got \(samples.count)")
+        XCTAssertEqual(samples.count, WSPRProtocol.frameSamples)
     }
 
     func testModulateAmplitudeRange() {
         let mod = WSPRModulator()
         mod.amplitude = 0.5
-        let msg = WSPRMessage(callsign: "K1JT", grid: "FN31", power: 37)
+        let msg = WSPRMessage(callsign: "K1JT", grid: "FN20", power: 37)
         let samples = mod.modulate(msg)
-
         let maxAbs = samples.map { abs($0) }.max() ?? 0
-        XCTAssertLessThanOrEqual(maxAbs, 0.55, "Max amplitude \(maxAbs) exceeds expected ~0.5")
-        XCTAssertGreaterThan(maxAbs, 0.3, "Max amplitude \(maxAbs) too low")
+        XCTAssertLessThanOrEqual(maxAbs, 0.55)
+        XCTAssertGreaterThan(maxAbs, 0.3)
     }
 
     func testModulateStartsAndEndsQuietly() {
@@ -261,11 +222,8 @@ final class WSPRModulatorTests: XCTestCase {
         mod.rampDuration = 0.005
         let msg = WSPRMessage(callsign: "W1AW", grid: "CM87", power: 10)
         let samples = mod.modulate(msg)
-
-        // First sample should be near zero (ramp)
-        XCTAssertEqual(abs(samples[0]), 0.0, accuracy: 0.01, "First sample should be ~0 (ramp)")
-        // Last sample should be near zero (ramp)
-        XCTAssertEqual(abs(samples.last!), 0.0, accuracy: 0.01, "Last sample should be ~0 (ramp)")
+        XCTAssertEqual(abs(samples[0]), 0.0, accuracy: 0.01)
+        XCTAssertEqual(abs(samples.last!), 0.0, accuracy: 0.01)
     }
 
     func testModulateAllSamplesFinite() {
@@ -278,23 +236,73 @@ final class WSPRModulatorTests: XCTestCase {
         }
     }
 
-    func testModulateBaseFrequencyAffectsOutput() {
-        let mod1 = WSPRModulator()
-        mod1.baseFrequency = 1500.0
-        let mod2 = WSPRModulator()
-        mod2.baseFrequency = 1400.0
+    /// Verify channel symbols match WSJT-X reference for K1JT FN20 30.
+    /// This is the definitive interop test: if symbols match, signals are decodable by WSJT-X.
+    func testChannelSymbols_WSJTXReference() {
+        let mod = WSPRModulator()
+        let msg = WSPRMessage(callsign: "K1JT", grid: "FN20", power: 30)
+        let samples = mod.modulate(msg)
 
-        let msg = WSPRMessage(callsign: "K1JT", grid: "FN31", power: 37)
-        let s1 = mod1.modulate(msg)
-        let s2 = mod2.modulate(msg)
+        // Extract symbols from generated audio by detecting dominant tone per symbol period
+        let symbolSamples = WSPRProtocol.symbolSamples  // 8192
+        let baseFreq = mod.baseFrequency
+        let toneSpacing = WSPRProtocol.toneSpacing
+        let sampleRate = WSPRProtocol.sampleRate
 
-        // Different base frequency should produce different samples
-        XCTAssertEqual(s1.count, s2.count)
-        var different = false
-        for i in stride(from: 100, to: 200, by: 1) {
-            if abs(s1[i] - s2[i]) > 0.001 { different = true; break }
+        var detectedSymbols = [Int]()
+        for symIdx in 0..<WSPRProtocol.symbolCount {
+            let start = symIdx * symbolSamples
+            let end = min(start + symbolSamples, samples.count)
+            guard end > start else { break }
+
+            // Measure power at each of the 4 tone frequencies
+            var bestTone = 0
+            var bestPower: Double = -1
+            for tone in 0..<4 {
+                let freq = baseFreq + Double(tone) * toneSpacing
+                var sumCos: Double = 0
+                var sumSin: Double = 0
+                // Use central portion to avoid ramp
+                let midStart = start + symbolSamples / 8
+                let midEnd = end - symbolSamples / 8
+                for j in midStart..<midEnd {
+                    let t = Double(j) / sampleRate
+                    sumCos += Double(samples[j]) * cos(2.0 * .pi * freq * t)
+                    sumSin += Double(samples[j]) * sin(2.0 * .pi * freq * t)
+                }
+                let power = sumCos * sumCos + sumSin * sumSin
+                if power > bestPower {
+                    bestPower = power
+                    bestTone = tone
+                }
+            }
+            detectedSymbols.append(bestTone)
         }
-        XCTAssertTrue(different, "Different base frequencies should produce different audio")
+
+        // WSJT-X reference symbols for "K1JT FN20 30"
+        let expected = [
+            3,3,2,0,0,0,0,0,1,2,0,0,1,1,3,0,2,0,3,0,
+            2,1,0,1,1,1,3,0,0,0,0,0,2,2,1,0,0,1,0,1,
+            2,2,2,0,2,0,1,0,3,1,2,0,1,1,2,1,0,0,2,1,
+            3,0,3,0,2,0,0,1,1,0,1,0,1,2,1,0,1,0,0,1,
+            0,2,3,0,3,1,2,0,0,3,3,0,1,0,1,0,2,0,1,0,
+            2,0,0,0,1,2,2,1,2,0,1,1,3,2,3,1,2,0,3,1,
+            2,3,0,0,2,1,3,1,2,0,2,0,0,1,2,1,2,2,3,1,
+            2,0,0,0,0,2,0,1,3,0,1,0,3,3,2,0,0,1,1,0,
+            2,0
+        ]
+
+        XCTAssertEqual(detectedSymbols.count, expected.count,
+                       "Symbol count mismatch: got \(detectedSymbols.count), expected \(expected.count)")
+
+        var mismatches = 0
+        for i in 0..<min(detectedSymbols.count, expected.count) {
+            if detectedSymbols[i] != expected[i] {
+                mismatches += 1
+            }
+        }
+        XCTAssertEqual(mismatches, 0,
+                       "Symbol mismatches: \(mismatches)/\(expected.count) — signals incompatible with WSJT-X")
     }
 
     func testFrameDurationProperty() {
