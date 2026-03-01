@@ -214,36 +214,32 @@ class AudioEngine: ObservableObject {
             return
         }
 
-        // Ensure engine is running for playback
-        if !engine.isRunning {
-            do {
-                let session = AVAudioSession.sharedInstance()
-                let hasUSB = (session.availableInputs ?? []).contains { $0.portType == .usbAudio }
-                let options: AVAudioSession.CategoryOptions = hasUSB ? [] : [.defaultToSpeaker]
-                try session.setCategory(.playAndRecord, mode: .measurement, options: options)
-                selectUSBAudioInput()
-                try session.setActive(true)
-                // Connect a dummy player to mainMixerNode before starting
-                // to ensure at least one output node exists
-                let _ = engine.mainMixerNode
-                try engine.start()
-                Log.d("Audio", "transmit: engine started in playback mode")
-            } catch {
-                Log.d("Audio", "transmit start error: \(error)")
-                completion?()
-                return
-            }
-        }
-
         DispatchQueue.main.async { self.isTransmitting = true }
 
-        // Use the engine's output format for the player connection
-        let mixerFormat = engine.mainMixerNode.outputFormat(forBus: 0)
-        let outputRate = mixerFormat.sampleRate > 0 ? mixerFormat.sampleRate : 12000.0
-        let outputChannels = mixerFormat.channelCount > 0 ? mixerFormat.channelCount : 1
-        Log.d("Audio", "transmit: \(samples.count) samples at 12kHz, mixer at \(outputRate)Hz ch=\(outputChannels)")
+        // Stop engine to avoid "player disconnected" crash from async IO pauses
+        engine.stop()
 
-        // Resample TX audio from 12 kHz to engine output rate if needed
+        do {
+            let session = AVAudioSession.sharedInstance()
+            let hasUSB = (session.availableInputs ?? []).contains { $0.portType == .usbAudio }
+            let options: AVAudioSession.CategoryOptions = hasUSB ? [] : [.defaultToSpeaker]
+            try session.setCategory(.playAndRecord, mode: .measurement, options: options)
+            selectUSBAudioInput()
+            try session.setActive(true)
+        } catch {
+            Log.d("Audio", "transmit session error: \(error)")
+            DispatchQueue.main.async { self.isTransmitting = false }
+            completion?()
+            return
+        }
+
+        // Get mixer format while engine is stopped (topology is still valid)
+        let mixerFormat = engine.mainMixerNode.outputFormat(forBus: 0)
+        let outputRate = mixerFormat.sampleRate > 0 ? mixerFormat.sampleRate : 48000.0
+        let outputChannels = mixerFormat.channelCount > 0 ? mixerFormat.channelCount : 1
+        Log.d("Audio", "transmit: \(samples.count) samples at 12kHz → \(outputRate)Hz ch=\(outputChannels)")
+
+        // Resample TX audio from 12 kHz to engine output rate
         let txSamples: [Float]
         if abs(outputRate - 12000.0) > 1.0 {
             let ratio = outputRate / 12000.0
@@ -262,7 +258,6 @@ class AudioEngine: ObservableObject {
             txSamples = samples
         }
 
-        // Use the mixer's own format to avoid format mismatch crashes
         let format = mixerFormat
         let count = AVAudioFrameCount(txSamples.count)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: count) else {
@@ -272,7 +267,6 @@ class AudioEngine: ObservableObject {
             return
         }
         buffer.frameLength = count
-        // Fill channel 0; if stereo, channel 1 gets the same data
         for ch in 0..<Int(outputChannels) {
             if let cd = buffer.floatChannelData?[ch] {
                 txSamples.withUnsafeBufferPointer { src in
@@ -281,6 +275,7 @@ class AudioEngine: ObservableObject {
             }
         }
 
+        // Attach player while engine is stopped — no race with IO unit pauses
         let player = AVAudioPlayerNode()
         monitorPlayer = player
         engine.attach(player)
@@ -293,16 +288,19 @@ class AudioEngine: ObservableObject {
                 completion?()
             }
         }
-        // Guard against crash if engine stopped between schedule and play
-        guard engine.isRunning else {
-            Log.d("Audio", "transmit: engine stopped before play, aborting")
+
+        // Start engine then play — player is guaranteed connected
+        do {
+            try engine.start()
+            player.play()
+            Log.d("Audio", "transmit: playing")
+        } catch {
+            Log.d("Audio", "transmit engine start error: \(error)")
             engine.detach(player)
             monitorPlayer = nil
             DispatchQueue.main.async { self.isTransmitting = false }
             completion?()
-            return
         }
-        player.play()
     }
 
     /// Stop monitor playback immediately (TX Halt)
