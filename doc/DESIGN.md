@@ -11,19 +11,79 @@ digital modes, plus Winlink email on iPhone/iPad.
 
 ## Table of Contents
 
-1. [Architecture Overview](#1-architecture-overview)
-2. [Module Map](#2-module-map)
-3. [Signal Processing Pipeline](#3-signal-processing-pipeline)
-4. [External Dependencies & Integrated Sources](#4-external-dependencies--integrated-sources)
-5. [Codec Details](#5-codec-details)
-6. [Hardware Integration](#6-hardware-integration)
-7. [Winlink / ARDOP Networking](#7-winlink--ardop-networking)
-8. [Build System](#8-build-system)
-9. [Conventions](#9-conventions)
+1. [Design Principles](#1-design-principles)
+2. [Architecture Overview](#2-architecture-overview)
+3. [Module Map](#3-module-map)
+4. [Signal Processing Pipeline](#4-signal-processing-pipeline)
+5. [External Dependencies & Integrated Sources](#5-external-dependencies--integrated-sources)
+6. [Codec Details](#6-codec-details)
+7. [Hardware Integration](#7-hardware-integration)
+8. [Winlink / ARDOP Networking](#8-winlink--ardop-networking)
+9. [Build System](#9-build-system)
+10. [Conventions](#10-conventions)
 
 ---
 
-## 1. Architecture Overview
+## 1. Design Principles
+
+> ⚠️ **Mandatory reading before making changes.** Every new feature,
+> codec, or integration must follow these principles. When in doubt, ask.
+
+### P1 — USB audio device takes priority over built-in audio
+
+All digital modes (FT8, JS8, WSPR, ARDOP, CW) **must** use an external
+USB audio device (e.g., Digirig CM108B) when one is connected. The
+iPhone's built-in microphone and speaker are never used for digital mode
+RX/TX. `AudioEngine` detects USB Audio Class devices via
+`AVAudioSession.currentRoute` and routes both input and output to the USB
+device automatically. New codecs or decoders must not bypass this — they
+receive audio from the shared 12 kHz resampled buffer provided by
+`AudioEngine`, never from a self-managed audio source.
+
+### P2 — Prefer integrating original external implementations
+
+When a well-tested, openly licensed reference implementation exists for
+a protocol, algorithm, or codec, **integrate it directly** (as vendored C
+source, xcframework, or wrapped library) rather than reimplementing it in
+Swift from scratch. Reimplementation is acceptable only when:
+
+- The original cannot be compiled for iOS (architecture/API constraints)
+- The original has an incompatible license
+- Only a small, self-contained algorithm is needed (e.g., a CRC polynomial)
+
+When reimplementing, the ported code **must** reference the exact source
+file and version it was ported from (see section 5, "External Dependencies").
+
+### P3 — Fixed 12 kHz sample rate
+
+All codec and audio processing operates at 12,000 Hz. `AudioEngine`
+resamples from whatever the USB hardware provides. New codecs must not
+introduce a different sample rate.
+
+### P4 — Codec symmetry
+
+FT8 and JS8 have mirrored file structures. Changes to shared concepts
+(LDPC, CRC, Costas sync) in one codec likely need analogous changes in the
+other. New digital modes should follow the same file naming pattern:
+`<Mode>Protocol.swift`, `<Mode>Modulator.swift`, `<Mode>Demodulator.swift`, etc.
+
+### P5 — Document every external source
+
+Every externally sourced algorithm, table, constant, or library must be
+recorded in section 5 ("External Dependencies & Integrated Sources") of
+this document with: origin repo/URL, license, what was integrated, and
+which DigiFox file contains it. This enables future updates and license
+compliance.
+
+### P6 — Actor isolation for hardware access
+
+All hardware I/O (serial ports, rig control, ARQ sessions) uses Swift
+`actor` isolation for thread safety. New hardware integrations must follow
+this pattern.
+
+---
+
+## 2. Architecture Overview
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -53,7 +113,7 @@ User action → `AppState` → Message pack → Modulator → Audio samples →
 
 ---
 
-## 2. Module Map
+## 3. Module Map
 
 ```
 DigiFox/
@@ -120,7 +180,7 @@ DigiFox/
 
 ---
 
-## 3. Signal Processing Pipeline
+## 4. Signal Processing Pipeline
 
 All codecs operate at a fixed **12 kHz sample rate**. The `AudioEngine`
 resamples from whatever the USB hardware provides (typically 48 kHz) down
@@ -169,13 +229,13 @@ TX: Text → Morse timing → Rig CW keying via Hamlib (or direct serial)
 
 ---
 
-## 4. External Dependencies & Integrated Sources
+## 5. External Dependencies & Integrated Sources
 
 > ⚠️ **This section must be kept current.** Every externally sourced algorithm,
 > table, or library used in DigiFox is listed here so future work can trace
 > origins, check for updates, and respect licenses.
 
-### 4.1 Vendored Libraries
+### 5.1 Vendored Libraries
 
 | Library | Location | Origin | License | Purpose |
 |---------|----------|--------|---------|---------|
@@ -184,7 +244,7 @@ TX: Text → Morse timing → Rig CW keying via Hamlib (or direct serial)
 | **ft8_lib** | `vendor/ft8_lib/` | [github.com/kgoba/ft8_lib](https://github.com/kgoba/ft8_lib) | MIT | FT8 LDPC decoder, CRC-14, constants |
 | **ggmorse** | `vendor/ggmorse/` | [github.com/ggerganov/ggmorse](https://github.com/ggerganov/ggmorse) | MIT | CW/Morse audio decoder |
 
-### 4.2 Ported / Adapted Algorithms
+### 5.2 Ported / Adapted Algorithms
 
 These are algorithms reimplemented in Swift from external reference
 implementations. The original sources are noted so updates can be tracked.
@@ -210,7 +270,7 @@ implementations. The original sources are noted so updates can be tracked.
 | **CW decoder** | `Codec/CW/GGMorseDecoder.swift` + C files | ggmorse | MIT | Bandpass → envelope → Kalman timing → Morse decode |
 | **Morse table** | `Codec/CW/morse_table.c` | VE3NEA Morse Expert | — | ITU-R M.1677 compliant character weights |
 
-### 4.3 Critical Constants & Tables (with origin)
+### 5.3 Critical Constants & Tables (with origin)
 
 | Constant | Value | Source | Used in |
 |----------|-------|--------|---------|
@@ -225,7 +285,7 @@ implementations. The original sources are noted so updates can be tracked.
 | CRC-14 polynomial | 0x2757 | ft8_lib | `FT8CRC.swift`, `JS8CRC.swift` |
 | CRC-16 polynomial | 0x1021 | ARDOP spec | `ARDOPCRC.swift` |
 
-### 4.4 iOS Private / System Frameworks
+### 5.4 iOS Private / System Frameworks
 
 | Framework | Usage | Notes |
 |-----------|-------|-------|
@@ -237,7 +297,7 @@ implementations. The original sources are noted so updates can be tracked.
 | **Security** | Keychain for Winlink credentials | Standard public API |
 | **CryptoKit** | MD5 for Winlink challenge/response | Standard public API |
 
-### 4.5 Bridging Header
+### 5.5 Bridging Header
 
 `DigiFox-Bridging-Header.h` imports:
 ```c
@@ -251,9 +311,9 @@ implementations. The original sources are noted so updates can be tracked.
 
 ---
 
-## 5. Codec Details
+## 6. Codec Details
 
-### 5.1 FT8
+### 6.1 FT8
 
 | Parameter | Value |
 |-----------|-------|
@@ -271,7 +331,7 @@ implementations. The original sources are noted so updates can be tracked.
 `FT8Demodulator.swift`, `FT8CostasSync.swift`, `FT8CRC.swift`,
 `FT8LDPC.swift`, `FT8MessagePack.swift`
 
-### 5.2 JS8
+### 6.2 JS8
 
 Mirrors FT8 codec structure with different message packing and multiple
 speed modes. Same LDPC(174,91) and CRC-14.
@@ -287,7 +347,7 @@ speed modes. Same LDPC(174,91) and CRC-14.
 **Files:** `JS8Protocol.swift`, `JS8Modulator.swift`, `JS8Demodulator.swift`,
 `JS8CostasSync.swift`, `JS8CRC.swift`, `JS8LDPC.swift`, `PackMessage.swift`
 
-### 5.3 WSPR
+### 6.3 WSPR
 
 | Parameter | Value |
 |-----------|-------|
@@ -303,7 +363,7 @@ speed modes. Same LDPC(174,91) and CRC-14.
 **Files:** `WSPRProtocol.swift`, `WSPRModulator.swift`,
 `WSPRDemodulator.swift`, `WSPRMessagePack.swift`
 
-### 5.4 ARDOP
+### 6.4 ARDOP
 
 | Parameter | Value |
 |-----------|-------|
@@ -320,7 +380,7 @@ speed modes. Same LDPC(174,91) and CRC-14.
 `ARDOPDemodulator.swift`, `ARDOPFrameType.swift`, `ARDOPReedSolomon.swift`,
 `ARDOPCRC.swift`, `LZHUFCodec.swift`
 
-### 5.5 CW
+### 6.5 CW
 
 | Parameter | Value |
 |-----------|-------|
@@ -333,16 +393,16 @@ speed modes. Same LDPC(174,91) and CRC-14.
 
 ---
 
-## 6. Hardware Integration
+## 7. Hardware Integration
 
-### 6.1 Supported Devices
+### 7.1 Supported Devices
 
 | Device | VID | PID | Detection | Connection |
 |--------|-----|-----|-----------|------------|
 | **Digirig Mobile** | `0x10C4` (Silicon Labs) | `0xEA60` (CP2102) | Auto via IOKit USB scan | USB-C: audio (CM108B) + serial (CP2102) |
 | **(tr)uSDX** | `0x1A86` (QinHeng) | CH340/CH341 | Auto via IOKit USB scan | USB-C: serial audio + CAT over single serial |
 
-### 6.2 Audio Path
+### 7.2 Audio Path
 
 ```
 USB Audio Device (48 kHz typically)
@@ -359,7 +419,7 @@ TX: Modulator generates samples at 12 kHz
 **TruSDX special case:** Serial audio streaming at ~7825 Hz, resampled
 to 12 kHz via `TruSDXSerialAudio.swift`.
 
-### 6.3 CAT Control
+### 7.3 CAT Control
 
 `CATController` (actor) → `HamlibRig` (Swift wrapper) → Hamlib C library
 
@@ -371,9 +431,9 @@ descriptor for direct POSIX writes, bypassing the actor isolation.
 
 ---
 
-## 7. Winlink / ARDOP Networking
+## 8. Winlink / ARDOP Networking
 
-### 7.1 Protocol Stack
+### 8.1 Protocol Stack
 
 ```
 ┌─────────────────────────────┐
@@ -392,13 +452,13 @@ descriptor for direct POSIX writes, bypassing the actor isolation.
 └─────────────────────────────┘
 ```
 
-### 7.2 Connection Modes
+### 8.2 Connection Modes
 
 - **Telnet (Internet):** TCP to `server.winlink.org:8772`, fallback `cms.winlink.org:8772`
 - **ARDOP (HF):** ARQ session to RMS gateway via ARDOP modem
 - **P2P (Direct):** Station-to-station without gateway, ARDOP ARQ + B2F
 
-### 7.3 B2F Protocol Flow
+### 8.3 B2F Protocol Flow
 
 1. SID exchange (`[DigiFox-1.0-B2FHIM$]`)
 2. Challenge/response login (MD5)
@@ -408,7 +468,7 @@ descriptor for direct POSIX writes, bypassing the actor isolation.
 
 ---
 
-## 8. Build System
+## 9. Build System
 
 **XcodeGen** generates the Xcode project from `project.yml`.
 
@@ -424,7 +484,7 @@ xcodebuild -project DigiFox.xcodeproj -scheme DigiFox -sdk iphoneos build
 
 ---
 
-## 9. Conventions
+## 10. Conventions
 
 - **Language:** Swift 5.9, iOS 17+
 - **UI:** SwiftUI + Combine + async/await
