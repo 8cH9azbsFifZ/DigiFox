@@ -19,7 +19,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
     /// Default baud rate for CAT serial
     var defaultBaudRate: Int {
         switch self {
-        case .digirig: return 9600
+        case .digirig: return 38400     // Default for FT-817 (user can change)
         case .trusdx:  return 115200    // Required for CAT_STREAMING audio
         }
     }
