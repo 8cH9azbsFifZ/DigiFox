@@ -39,7 +39,7 @@ final class FT8Demodulator {
         }
 
         let freqBins = spec[0].count
-        let binSpacing = FT8Protocol.sampleRate / Double(FT8Protocol.symbolSamples * 2)
+        let binSpacing = FT8Protocol.sampleRate / Double(FT8Protocol.symbolSamples)
         let minBin = max(0, Int(minFrequency / binSpacing))
         let maxBin = min(freqBins - 8, Int(maxFrequency / binSpacing))
         Log.d("FT8-Demod", "spectrogram: \(spec.count)×\(freqBins), binSpacing=\(String(format: "%.2f", binSpacing))Hz, search \(minBin)..\(maxBin) bins")
