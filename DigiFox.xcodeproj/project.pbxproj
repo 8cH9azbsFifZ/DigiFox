@@ -9,6 +9,13 @@
 /* Begin PBXBuildFile section */
 		064254843EF46811A0F64A1C /* QSOPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */; };
 		98BAAD4DDFF444E3E7195165 /* CWView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5721BEC64C1746861BAF08C0 /* CWView.swift */; };
+		B1C2D3E4F5A6B7C8D9E0F1A2 /* MorseKeyShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C2 /* CWWaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */; };
+		C2D3E4F5A6B7C8D9E0F1A2B3 /* JS8Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */; };
+		AA11BB22CC33DD44EE55FF02 /* ggmorse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF01 /* ggmorse.cpp */; };
+		AA11BB22CC33DD44EE55FF04 /* resampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF03 /* resampler.cpp */; };
+		AA11BB22CC33DD44EE55FF06 /* ggmorse_c_api.mm in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */; };
+		AA11BB22CC33DD44EE55FF08 /* GGMorseDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */; };
 		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
 		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
 		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
@@ -37,6 +44,7 @@
 		DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */; };
 		E409D68845E8DB65BF6A02CD /* HamlibRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48778C5CEC1F377AD721046 /* HamlibRig.swift */; };
 		E7CCC16F41B3BF38F3AFB2C9 /* FT8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529893966F36D4348C07DF45 /* FT8Modulator.swift */; };
+				A1B2C3D4E5F67890ABCD1235 /* TruSDXSerialAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */; };
 		E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B57730840D19777B21EEDA5 /* AudioEngine.swift */; };
 		FAEB95B767BE19E8293239E5 /* JS8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD4C25E26B814B10704A659 /* JS8LDPC.swift */; };
 		FDF44DC5CB1DEFB68997677F /* hamlib_missing.c in Sources */ = {isa = PBXBuildFile; fileRef = A03C34181F0E5CFD42AD650F /* hamlib_missing.c */; };
@@ -82,6 +90,7 @@
 		994344ED8663AD082F19E5F0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9974C4B72639154796AEA187 /* DigiFox.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DigiFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IOKitUSBSerial.m; sourceTree = "<group>"; };
+				A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TruSDXSerialAudio.swift; sourceTree = "<group>"; };
 		9B57730840D19777B21EEDA5 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
 		9E5BB22A1B82163851B452FC /* SerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialPort.swift; sourceTree = "<group>"; };
 		A03C34181F0E5CFD42AD650F /* hamlib_missing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hamlib_missing.c; sourceTree = "<group>"; };
@@ -110,6 +119,9 @@
 		1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8FrequencyView.swift"; path = "DigiFox/Views/JS8/JS8FrequencyView.swift"; sourceTree = SOURCE_ROOT; };
 		BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8MessageListView.swift"; path = "DigiFox/Views/JS8/JS8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
 		5721BEC64C1746861BAF08C0 /* CWView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CWView.swift"; path = "DigiFox/Views/CW/CWView.swift"; sourceTree = SOURCE_ROOT; };
+		B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MorseKeyShape.swift"; path = "DigiFox/Views/CW/MorseKeyShape.swift"; sourceTree = SOURCE_ROOT; };
+		D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CWWaterfallView.swift"; path = "DigiFox/Views/CW/CWWaterfallView.swift"; sourceTree = SOURCE_ROOT; };
+		C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8Icon.swift"; path = "DigiFox/Views/JS8/JS8Icon.swift"; sourceTree = SOURCE_ROOT; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
 		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
@@ -134,6 +146,11 @@
 		A2569AA4DE6F4CEE921224EE /* simd_detect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = simd_detect.c; sourceTree = "<group>"; };
 		A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = simd_detect.h; sourceTree = "<group>"; };
 		8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWDecoder.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF01 /* ggmorse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "ggmorse.cpp"; path = "vendor/ggmorse/ggmorse.cpp"; sourceTree = SOURCE_ROOT; };
+		AA11BB22CC33DD44EE55FF03 /* resampler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "resampler.cpp"; path = "vendor/ggmorse/resampler.cpp"; sourceTree = SOURCE_ROOT; };
+		AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ggmorse_c_api.mm; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGMorseDecoder.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ggmorse_c_api.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -176,6 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				9B57730840D19777B21EEDA5 /* AudioEngine.swift */,
+				A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */,
 				7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */,
 			);
 			path = Audio;
@@ -193,6 +211,7 @@
 			isa = PBXGroup;
 			children = (
 				192E563AD496F876A00BCCC6 /* TransmitView.swift */,
+				C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */,
 			);
 			path = JS8;
 			sourceTree = "<group>";
@@ -248,6 +267,8 @@
 			isa = PBXGroup;
 			children = (
 				5721BEC64C1746861BAF08C0 /* CWView.swift */,
+				B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */,
 			);
 			path = CW;
 			sourceTree = "<group>";
@@ -328,6 +349,9 @@
 				A2569AA4DE6F4CEE921224EE /* simd_detect.c */,
 				A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */,
 				8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */,
+				AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */,
+				AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */,
+				AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */,
 			);
 			path = CW;
 			sourceTree = "<group>";
@@ -442,6 +466,9 @@
 				7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */,
 				E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */,
 				98BAAD4DDFF444E3E7195165 /* CWView.swift in Sources */,
+				B1C2D3E4F5A6B7C8D9E0F1A2 /* MorseKeyShape.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C2 /* CWWaterfallView.swift in Sources */,
+				C2D3E4F5A6B7C8D9E0F1A2B3 /* JS8Icon.swift in Sources */,
 							CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */,
 				C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */,
 				895AA7806CBE4034873A908F /* cw_decoder.c in Sources */,
@@ -456,7 +483,12 @@
 				E2AD17D58F154912ADF38F8C /* multipass_avg.c in Sources */,
 				EB62927D3F374271BA782020 /* simd_detect.c in Sources */,
 				3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */,
-);
+
+				A1B2C3D4E5F67890ABCD1235 /* TruSDXSerialAudio.swift in Sources */,
+				AA11BB22CC33DD44EE55FF02 /* ggmorse.cpp in Sources */,
+				AA11BB22CC33DD44EE55FF04 /* resampler.cpp in Sources */,
+				AA11BB22CC33DD44EE55FF06 /* ggmorse_c_api.mm in Sources */,
+				AA11BB22CC33DD44EE55FF08 /* GGMorseDecoder.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -484,15 +516,18 @@
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
@@ -526,15 +561,18 @@
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
@@ -606,15 +644,18 @@
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
@@ -693,15 +734,18 @@
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
+"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";

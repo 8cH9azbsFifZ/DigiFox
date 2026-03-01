@@ -6,28 +6,9 @@ struct QSOPanelView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            // QSO partner info
+            // TX Even/Odd
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("DX Call").font(.caption2).foregroundStyle(.secondary)
-                    TextField("Rufzeichen", text: $appState.dxCall)
-                        .font(.system(.subheadline, design: .monospaced))
-                        .textFieldStyle(.roundedBorder)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.characters)
-                        .frame(width: 110)
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("DX Grid").font(.caption2).foregroundStyle(.secondary)
-                    TextField("Grid", text: $appState.dxGrid)
-                        .font(.system(.subheadline, design: .monospaced))
-                        .textFieldStyle(.roundedBorder)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.characters)
-                        .frame(width: 70)
-                }
                 Spacer()
-                // TX Even/Odd
                 VStack(spacing: 2) {
                     Text("TX").font(.caption2).foregroundStyle(.secondary)
                     Picker("", selection: $appState.txEven) {

@@ -59,6 +59,9 @@ actor SerialPort {
     private var port: IOKitUSBSerial?
     private let queue = DispatchQueue(label: "serial.port.io", qos: .userInitiated)
 
+    /// Stored fd for nonisolated access (CW keying). Updated on open/close.
+    nonisolated(unsafe) private(set) var rawFD: Int32 = -1
+
     /// Whether running in the iOS Simulator (IOKit works via macOS host)
     static var isSimulator: Bool {
         #if targetEnvironment(simulator)
@@ -142,6 +145,7 @@ actor SerialPort {
         do {
             let p = try IOKitUSBSerial(path: path, baudRate: baudRate)
             port = p
+            rawFD = p.fileDescriptor
         } catch {
             throw SerialPortError.openFailed(error.localizedDescription)
         }
@@ -159,6 +163,7 @@ actor SerialPort {
     func close() {
         port?.close()
         port = nil
+        rawFD = -1
     }
 
     /// Write raw data

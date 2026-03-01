@@ -303,6 +303,10 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
     return _fd >= 0;
 }
 
+- (int)fileDescriptor {
+    return _fd;
+}
+
 - (NSInteger)writeData:(NSData *)data error:(NSError **)error {
     if (_fd < 0) {
         if (error) {

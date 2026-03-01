@@ -4,16 +4,17 @@
 
 # DigiFox
 
-iOS app for digital amateur radio modes (**FT8** and **JS8Call**) with USB-C connection to transceivers.
+iOS app for digital amateur radio modes (**FT8**, **JS8Call**, **CW**) with USB-C connection to transceivers.
 
 ## Features
 
 - **FT8** — WSJT-X compatible encoding/decoding, 15-second cycles, auto-sequencing, band activity display, QSO log
-- **JS8Call** — Free-text messaging with variable speed (Normal/Fast/Turbo/Slow/Ultra), network client mode
-- **Mode switching** between FT8 and JS8Call via segmented control in the UI
+- **JS8Call** — Free-text messaging with variable speed (Normal/Fast/Turbo/Slow/Ultra)
+- **CW** — Morse code TX (keyer) and RX (decoder) with real-time waterfall display
+- **Mode switching** between FT8, JS8Call, and CW via tab bar
 - **CAT control** via Hamlib (~400 rig models), Digirig auto-detection
-- **USB audio** via AVAudioEngine (12 kHz, 8-FSK)
-- **Waterfall display** in real-time
+- **USB audio** via AVAudioEngine (12 kHz, 8-FSK) or TruSDX serial audio
+- **Waterfall display** in real-time (bandwidth-adapted, monochrome for CW)
 - SwiftUI for iPhone and iPad, iOS 17+
 
 ## Supported Hardware
@@ -39,16 +40,15 @@ Standard USB audio interface + separate CAT serial connection to any Hamlib-supp
 ```
 DigiFox/
 ├── App/           DigiFoxApp, AppState (unified), ContentView
-├── Audio/         AudioEngine, FFTProcessor, USBAudioManager, TruSDXSerialAudio
+├── Audio/         AudioEngine, FFTProcessor, TruSDXSerialAudio
 ├── Codec/
 │   ├── FT8/       FT8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, MessagePack
-│   └── JS8/       JS8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, PackMessage
+│   ├── JS8/       JS8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, PackMessage
+│   └── CW/        GGMorseDecoder (ggmorse wrapper), MorseKeyer
 ├── CAT/           CATController (Kenwood TS-480 direct protocol)
-├── Serial/        CATController (Hamlib), HamlibRig, SerialPort, USBSerialPort, IOKitUSBSerial
+├── Serial/        CATController (Hamlib), HamlibRig, SerialPort, IOKitUSBSerial
 ├── Models/        RadioProfile, Station, Settings
-├── ViewModels/    RadioViewModel
-├── Network/       JS8NetworkClient, JS8APIMessage
-└── Views/         Shared + FT8/ + JS8/ mode-specific Views, WaterfallView
+└── Views/         FT8/ + JS8/ + CW/ mode-specific Views, WaterfallView
 ```
 
 ## Setup
@@ -66,6 +66,15 @@ DigiFox/
 ## Disclaimer
 
 This project was generated with the assistance of various AI models and is experimental in nature. Use at your own risk.
+
+## Acknowledgements
+
+DigiFox builds on the work of several open-source projects:
+
+- **[ggmorse](https://github.com/ggerganov/ggmorse)** by Georgi Gerganov — CW/Morse code decoder with automatic pitch and speed detection (MIT license)
+- **[WSJT-X](https://wsjt.sourceforge.io/)** by Joe Taylor (K1JT) et al. — FT8 protocol design and reference implementation (GPL v3). DigiFox contains a clean-room Swift port of the FT8 modulator/demodulator.
+- **[JS8Call](http://js8call.com/)** by Jordan Sherer (KN4CRD) — JS8 protocol design and reference implementation (GPL v3). DigiFox contains a clean-room Swift port of the JS8 modulator/demodulator.
+- **[Hamlib](https://hamlib.github.io/)** — CAT control library supporting ~400 transceiver models (LGPL)
 
 ## License
 

@@ -78,7 +78,9 @@ struct FT8MainView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                WaterfallView(data: appState.waterfallData)
+                WaterfallView(data: appState.waterfallData,
+                             sampleRate: appState.audioEngine.effectiveSampleRate,
+                             loFreq: 0, hiFreq: 3000)
                     .frame(height: 120)
                 ClockView()
                 FT8FrequencyView()
@@ -104,7 +106,9 @@ struct JS8MainView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                WaterfallView(data: appState.waterfallData)
+                WaterfallView(data: appState.waterfallData,
+                             sampleRate: appState.audioEngine.effectiveSampleRate,
+                             loFreq: 0, hiFreq: 3000)
                     .frame(height: 120)
                 JS8FrequencyView()
                 Divider()

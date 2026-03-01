@@ -54,7 +54,9 @@ class AppState: ObservableObject {
     let audioEngine = AudioEngine()
     let catController = CATController()
     let morseKeyer = MorseKeyer()
-    private let cwDecoder = CWDecoder()
+    private var cwDecoder: GGMorseDecoder
+    let trusdxAudio = TruSDXSerialAudio()
+    private var trusdxPort: SerialPort?
 
     private let ft8Modulator = FT8Modulator()
     private let ft8Demodulator = FT8Demodulator()
@@ -67,6 +69,11 @@ class AppState: ObservableObject {
     private var rigPollTask: Task<Void, Never>?
 
     init() {
+        // Pre-fill DX call/grid from settings
+        dxCall = settings.callsign
+        dxGrid = settings.grid
+        // Initial CW decoder (ggmorse) at default rate
+        cwDecoder = GGMorseDecoder(sampleRate: 12000)
         setupBindings()
         #if targetEnvironment(simulator)
         ioKitAvailable = true
@@ -79,7 +86,6 @@ class AppState: ObservableObject {
     }
 
     private func setupBindings() {
-        audioEngine.$isRunning.assign(to: &$isReceiving)
         audioEngine.$isTransmitting.assign(to: &$isTransmitting)
         audioEngine.$spectrumData
             .filter { !$0.isEmpty }
@@ -149,39 +155,120 @@ class AppState: ObservableObject {
                 }
 
                 guard let dev = device else { statusText = "No USB serial device found"; return }
-                try await catController.connect(modelId: modelId, path: dev.path, baudRate: baudRate)
 
-                // FT8 and JS8Call require USB mode
-                try await catController.setMode("USB")
+                if isTruSDX {
+                    // TruSDX: open separate SerialPort for audio streaming
+                    print("[Connect] TruSDX: opening port \(dev.path) @ \(baudRate)")
+                    let port = SerialPort()
+                    try await port.open(path: dev.path, baudRate: UInt(baudRate))
+                    trusdxPort = port
+                    trusdxAudio.attach(to: port)
+                    print("[Connect] TruSDX: port opened, rawFD=\(port.rawFD)")
 
-                // Set dial frequency for current band/mode
-                if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: settings.digitalMode) {
-                    try await catController.setFrequency(UInt64(freq))
+                    // Send initial CAT commands directly
+                    try await port.write("ID;")   // verify connection
+                    let rigMode = settings.digitalMode == .cw ? "MD3;" : "MD2;"
+                    print("[Connect] TruSDX: sending \(rigMode)")
+                    try await port.write(rigMode)
+                    if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: settings.digitalMode) {
+                        let freqCmd = String(format: "FA%011d;", Int(freq))
+                        print("[Connect] TruSDX: sending \(freqCmd)")
+                        try await port.write(freqCmd)
+                    }
+
+                    // Wire RX audio to decoders (BEFORE starting stream to avoid race)
+                    let upsampledRate = 12000.0
+                    trusdxAudio.onAudioReceived = { [weak self] samples in
+                        guard let self else { return }
+                        let upsampled = TruSDXSerialAudio.upsample(samples, to: upsampledRate)
+                        self.audioEngine.feedExternalSamples(upsampled, sampleRate: upsampledRate)
+                    }
+
+                    // Start audio streaming
+                    print("[Connect] TruSDX: starting audio streaming")
+                    trusdxAudio.startStreaming()
+
+                    radioState.isConnected = true
+                    radioState.rigName = "(tr)uSDX"
+                    statusText = "Connected: (tr)uSDX (Serial)"
+                } else {
+                    try await catController.connect(modelId: modelId, path: dev.path, baudRate: baudRate)
+
+                    // FT8 and JS8Call require USB mode
+                    try await catController.setMode("USB")
+
+                    // Set dial frequency for current band/mode
+                    if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: settings.digitalMode) {
+                        try await catController.setFrequency(UInt64(freq))
+                    }
+
+                    radioState = await catController.state
+                    statusText = "Connected: \(radioState.rigName) (USB)"
+                    startRigPolling()
                 }
-
-                radioState = await catController.state
-                let displayName = settings.radioProfile == .trusdx ? "(tr)uSDX" : radioState.rigName
-                statusText = "Connected: \(displayName) (USB)"
-                startRigPolling()
             } catch { statusText = "Rig error: \(error.localizedDescription)" }
         }
     }
 
     func disconnectRig() {
         rigPollTask?.cancel(); rigPollTask = nil
-        Task { await catController.disconnect(); radioState = await catController.state; statusText = "Rig disconnected" }
+        if isTruSDX {
+            trusdxAudio.stopStreaming()
+            trusdxAudio.detach()
+            Task { await trusdxPort?.close() }
+            trusdxPort = nil
+            radioState = RadioState()
+            statusText = "Rig disconnected"
+        } else {
+            Task { await catController.disconnect(); radioState = await catController.state; statusText = "Rig disconnected" }
+        }
     }
 
-    /// Switch digital mode: update dial frequency and send to rig if connected
+    /// Switch digital mode: update dial frequency, rig mode, and restart decode loop.
+    /// Always ensures rig frequency and mode match the selected tab.
     func switchMode(_ mode: DigitalMode) {
-        guard settings.digitalMode != mode else { return }
+        let modeChanged = settings.digitalMode != mode
         settings.digitalMode = mode
+
+        if modeChanged {
+            // Stop current decode/demod task
+            demodTask?.cancel(); demodTask = nil
+            cycleTask?.cancel(); cycleTask = nil
+            cwDecoding = false
+        }
+
+        // Always set rig frequency and mode when connected
         if radioState.isConnected {
             if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: mode) {
                 setRigFrequency(UInt64(freq))
             }
-            let rigMode = mode == .cw ? "CW" : "USB"
-            Task { try? await catController.setMode(rigMode) }
+            if isTruSDX, let port = trusdxPort {
+                let modeCmd = mode == .cw ? "MD3;" : "MD2;"
+                Task {
+                    // Stop streaming, change mode, restart streaming
+                    print("[Mode] TruSDX: stop streaming → \(modeCmd) → restart streaming")
+                    self.trusdxAudio.stopStreaming()
+                    try? await Task.sleep(nanoseconds: 50_000_000) // 50ms settle
+                    try? await port.write(modeCmd)
+                    try? await Task.sleep(nanoseconds: 50_000_000)
+                    self.trusdxAudio.startStreaming()
+                }
+            } else {
+                let rigMode = mode == .cw ? "CW" : "USB"
+                Task { try? await catController.setMode(rigMode) }
+            }
+        }
+
+        // Start appropriate decode loop (restart if mode changed, ensure running if not)
+        if isReceiving && (modeChanged || demodTask == nil && cycleTask == nil) {
+            demodTask?.cancel(); demodTask = nil
+            cycleTask?.cancel(); cycleTask = nil
+            switch mode {
+            case .ft8: startFT8Cycle()
+            case .js8: startJS8DemodLoop()
+            case .cw:  startCWDecodeLoop()
+            }
+            print("[Mode] \(mode): freq/mode set, decode loop started")
         }
     }
 
@@ -215,13 +302,20 @@ class AppState: ObservableObject {
     }
 
     func setRigFrequency(_ hz: UInt64) {
-        Task {
-            do {
-                try await catController.setFrequency(hz)
-                settings.dialFrequency = Double(hz)
-                radioState.frequency = hz
+        if isTruSDX, let port = trusdxPort {
+            let cmd = String(format: "FA%011d;", hz)
+            Task { try? await port.write(cmd) }
+            settings.dialFrequency = Double(hz)
+            radioState.frequency = hz
+        } else {
+            Task {
+                do {
+                    try await catController.setFrequency(hz)
+                    settings.dialFrequency = Double(hz)
+                    radioState.frequency = hz
+                }
+                catch { statusText = "Frequency error: \(error.localizedDescription)" }
             }
-            catch { statusText = "Frequency error: \(error.localizedDescription)" }
         }
     }
 
@@ -237,6 +331,7 @@ class AppState: ObservableObject {
 
     var digirigConnected: Bool { usbDevices.contains { $0.isDigirig } }
     var trusdxConnected: Bool { usbDevices.contains { $0.isTruSDX } }
+    var isTruSDX: Bool { settings.radioProfile == .trusdx }
     var hasCompatibleDevice: Bool {
         switch settings.radioProfile {
         case .trusdx: return trusdxConnected || !usbDevices.isEmpty
@@ -258,7 +353,9 @@ class AppState: ObservableObject {
 
     func startReceiving() {
         if settings.useHamlib && !radioState.isConnected && hasCompatibleDevice { connectRig() }
-        audioEngine.start()
+        if !isTruSDX {
+            audioEngine.start()
+        }
         switch settings.digitalMode {
         case .ft8: startFT8Cycle()
         case .js8: startJS8DemodLoop()
@@ -269,7 +366,7 @@ class AppState: ObservableObject {
     }
 
     func stopReceiving() {
-        audioEngine.stop()
+        if !isTruSDX { audioEngine.stop() }
         demodTask?.cancel(); demodTask = nil
         cycleTask?.cancel(); cycleTask = nil
         rigPollTask?.cancel(); rigPollTask = nil
@@ -345,15 +442,41 @@ class AppState: ObservableObject {
         let msgText = txMessages[selectedTxMessage]
         guard !msgText.isEmpty else { return }
         statusText = "Sending: \(msgText)"
-        if settings.useHamlib { Task { try? await catController.pttOn() } }
         let ft8Msg = FT8MessagePack.parseText(msgText, myCall: settings.callsign, myGrid: settings.grid)
         ft8Modulator.baseFrequency = txFrequency
         let samples = ft8Modulator.modulate(ft8Msg)
-        audioEngine.transmit(samples: samples) { [weak self] in
-            Task { @MainActor in
-                self?.statusText = "Sent"
-                if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
-                self?.advanceFT8Sequence()
+
+        if isTruSDX, let port = trusdxPort {
+            // TruSDX: send audio over serial (CAT streaming)
+            isTransmitting = true
+            Task {
+                do {
+                    print("[FT8-TX] TruSDX: setting USB mode (MD2;)")
+                    try await port.write("MD2;")
+                    print("[FT8-TX] TruSDX: keying TX (TX0;)")
+                    try await port.write("TX0;")
+                    print("[FT8-TX] TruSDX: sending \(samples.count) audio samples")
+                    await trusdxAudio.sendAudio(samples, fromSampleRate: 12000)
+                    print("[FT8-TX] TruSDX: audio sent, going back to RX")
+                    try await port.write("RX;")
+                    print("[FT8-TX] TruSDX: TX complete")
+                } catch {
+                    print("[FT8-TX] TruSDX: ERROR: \(error)")
+                }
+                await MainActor.run {
+                    self.isTransmitting = false
+                    self.statusText = "Sent"
+                    self.advanceFT8Sequence()
+                }
+            }
+        } else {
+            if settings.useHamlib { Task { try? await catController.setMode("USB"); try? await catController.pttOn() } }
+            audioEngine.transmit(samples: samples) { [weak self] in
+                Task { @MainActor in
+                    self?.statusText = "Sent"
+                    if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
+                    self?.advanceFT8Sequence()
+                }
             }
         }
     }
@@ -397,13 +520,38 @@ class AppState: ObservableObject {
             statusText = settings.callsign.isEmpty ? "Callsign required!" : ""; return
         }
         statusText = "Sending..."
-        if settings.useHamlib { Task { try? await catController.pttOn() } }
         let msg = "\(settings.callsign): \(txMessage.text)"
         let samples = js8Modulator.modulate(message: msg, frequency: txMessage.frequency, speed: settings.speed)
-        audioEngine.transmit(samples: samples) { [weak self] in
-            Task { @MainActor in
-                self?.statusText = "Sent"
-                if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
+
+        if isTruSDX, let port = trusdxPort {
+            // TruSDX: send audio over serial (CAT streaming)
+            isTransmitting = true
+            Task {
+                do {
+                    print("[JS8-TX] TruSDX: setting USB mode (MD2;)")
+                    try await port.write("MD2;")
+                    print("[JS8-TX] TruSDX: keying TX (TX0;)")
+                    try await port.write("TX0;")
+                    print("[JS8-TX] TruSDX: sending \(samples.count) audio samples")
+                    await trusdxAudio.sendAudio(samples, fromSampleRate: 12000)
+                    print("[JS8-TX] TruSDX: audio sent, going back to RX")
+                    try await port.write("RX;")
+                    print("[JS8-TX] TruSDX: TX complete")
+                } catch {
+                    print("[JS8-TX] TruSDX: ERROR: \(error)")
+                }
+                await MainActor.run {
+                    self.isTransmitting = false
+                    self.statusText = "Sent"
+                }
+            }
+        } else {
+            if settings.useHamlib { Task { try? await catController.pttOn() } }
+            audioEngine.transmit(samples: samples) { [weak self] in
+                Task { @MainActor in
+                    self?.statusText = "Sent"
+                    if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
+                }
             }
         }
     }
@@ -412,21 +560,40 @@ class AppState: ObservableObject {
 
     @Published var cwKeying = false
 
-    /// Start continuous CW decoding from audio input
+    /// Update GGMorse decoder sample rate if needed
+    private func ensureCWDecoderRate(_ sampleRate: Int) {
+        let rate = Float(sampleRate)
+        guard rate != cwDecoder.sampleRate, sampleRate > 0 else { return }
+        cwDecoder.updateSampleRate(rate)
+    }
+
+    /// Start continuous CW decoding from audio input (using ggmorse)
     private func startCWDecodeLoop() {
         cwDecoding = true
+        let rate = Int(audioEngine.effectiveSampleRate)
+        ensureCWDecoderRate(rate)
         cwDecoder.reset()
+        print("[GGMorse] *** startCWDecodeLoop STARTED *** sampleRate=\(rate)")
         demodTask = Task { [weak self] in
+            var loopCount = 0
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 100_000_000) // 100ms chunks
-                guard let self else { break }
+                guard let self else { print("[GGMorse] self is nil, exiting"); break }
+                // Adapt to sample rate changes
+                let currentRate = Int(self.audioEngine.effectiveSampleRate)
+                self.ensureCWDecoderRate(currentRate)
                 let samples = self.audioEngine.getBufferedSamples()
+                loopCount += 1
+                if loopCount <= 20 || loopCount % 10 == 0 {
+                    let rms = samples.isEmpty ? 0 : sqrt(samples.reduce(0) { $0 + $1 * $1 } / Float(samples.count))
+                    print("[GGMorse] #\(loopCount): \(samples.count) samples, rms=\(String(format: "%.4f", rms)), pitch=\(self.cwDecoder.pitch)Hz, wpm=\(self.cwDecoder.wpm)")
+                }
                 guard !samples.isEmpty else { continue }
                 let decoded = self.cwDecoder.process(samples: samples)
                 if !decoded.isEmpty {
+                    print("[GGMorse] *** DECODED: '\(decoded)' *** pitch=\(self.cwDecoder.pitch)Hz wpm=\(self.cwDecoder.wpm)")
                     await MainActor.run {
                         self.cwDecodedText += decoded
-                        // Keep last 2000 chars
                         if self.cwDecodedText.count > 2000 {
                             self.cwDecodedText = String(self.cwDecodedText.suffix(1500))
                         }
@@ -434,14 +601,13 @@ class AppState: ObservableObject {
                 }
                 self.audioEngine.clearBuffer()
             }
+            print("[GGMorse] loop exited after \(loopCount) iterations")
         }
     }
 
-    /// Stop CW decoding and flush remaining text
+    /// Stop CW decoding
     func stopCWDecoding() {
         demodTask?.cancel(); demodTask = nil
-        let remaining = cwDecoder.finalize()
-        if !remaining.isEmpty { cwDecodedText += remaining }
         cwDecoding = false
     }
 
@@ -462,23 +628,75 @@ class AppState: ObservableObject {
         cwText = ""
         cwKeying = true
 
-        // Set CW mode before keying
-        Task { try? await catController.setMode("CW") }
+        if isTruSDX, let port = trusdxPort {
+            // TruSDX: direct POSIX writes for zero-latency CW keying
+            let fd = port.rawFD
+            guard fd >= 0 else { statusText = "Serial port not open"; cwKeying = false; return }
 
-        // Synchronous PTT callbacks for the keying thread
-        let cat = catController
-        let keyDown = { let s = DispatchSemaphore(value: 0); Task { try? await cat.pttOn(); s.signal() }; s.wait() }
-        let keyUp   = { let s = DispatchSemaphore(value: 0); Task { try? await cat.pttOff(); s.signal() }; s.wait() }
+            // Pause read loop during CW TX to avoid contention
+            print("[CW-TX] TruSDX: pausing audio streaming for CW")
+            trusdxAudio.stopStreaming()
 
-        morseKeyer.key(text: text, wpm: speed, keyDown: keyDown, keyUp: keyUp) { [weak self] in
-            self?.cwKeying = false
-            self?.statusText = "CW gesendet"
+            // Set CW mode synchronously before keying starts
+            print("[CW-TX] TruSDX: setting CW mode (MD3;) fd=\(fd)")
+            let md3 = Array("MD3;".utf8)
+            md3.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
+            Thread.sleep(forTimeInterval: 0.05) // 50ms for mode switch to take effect
+
+            // Direct POSIX write — no actor, no Task, no await, ~microseconds
+            let tx0 = Array("TX0;".utf8)
+            let rx  = Array("RX;".utf8)
+            let keyDown: () -> Void = {
+                print("[CW-TX] KEY DOWN")
+                tx0.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
+            }
+            let keyUp: () -> Void = {
+                print("[CW-TX] KEY UP")
+                rx.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
+            }
+
+            print("[CW-TX] TruSDX: starting keyer, \(text) @ \(speed) WPM")
+            morseKeyer.key(text: text, wpm: speed, keyDown: keyDown, keyUp: keyUp) { [weak self] in
+                print("[CW-TX] TruSDX: keying complete, resuming streaming")
+                self?.trusdxAudio.startStreaming()
+                self?.cwKeying = false
+                self?.statusText = "CW gesendet"
+            }
+        } else {
+            // Other rigs: via Hamlib/CATController
+            Task {
+                try? await catController.setMode("CW")
+                let rig = await catController.getHamlibRig()
+                let ioQueue = DispatchQueue(label: "morse.ptt", qos: .userInteractive)
+                let keyDown = { ioQueue.async { try? rig?.setPTT(true) } }
+                let keyUp   = { ioQueue.async { try? rig?.setPTT(false) } }
+
+                await MainActor.run {
+                    self.morseKeyer.key(text: text, wpm: speed, keyDown: keyDown, keyUp: keyUp) { [weak self] in
+                        self?.cwKeying = false
+                        self?.statusText = "CW gesendet"
+                    }
+                }
+            }
         }
     }
 
     func stopCW() {
         morseKeyer.stop()
-        Task { try? await catController.pttOff() }
+        if isTruSDX, let port = trusdxPort {
+            // Direct POSIX write for immediate stop
+            let fd = port.rawFD
+            if fd >= 0 {
+                print("[CW-TX] TruSDX: STOP — sending RX;")
+                let rx = Array("RX;".utf8)
+                rx.withUnsafeBufferPointer { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
+            }
+            // Resume streaming
+            print("[CW-TX] TruSDX: resuming streaming after stop")
+            trusdxAudio.startStreaming()
+        } else {
+            Task { try? await catController.pttOff() }
+        }
         cwKeying = false
         statusText = "CW gestoppt"
     }

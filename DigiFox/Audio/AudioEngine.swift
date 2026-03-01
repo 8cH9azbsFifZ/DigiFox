@@ -9,12 +9,15 @@ class AudioEngine: ObservableObject {
     @Published var spectrumData = [Float]()
     @Published var inputLevel: Float = 0
     @Published var usbAudioConnected = false
+    /// Effective input sample rate (updated on start or when external source is set)
+    @Published var effectiveSampleRate: Double = 12000
 
     private var engine = AVAudioEngine()
     private let fftProcessor = FFTProcessor(size: 2048)
     private var audioBuffer = [Float]()
     private let bufferLock = NSLock()
     private var routeChangeObserver: NSObjectProtocol?
+    private var externalFFTBuffer = [Float]()  // accumulator for external (TruSDX) samples
 
     var onSpectrumUpdate: (([Float]) -> Void)?
 
@@ -99,6 +102,9 @@ class AudioEngine: ObservableObject {
                 print("AudioEngine: No valid audio format available")
                 return
             }
+            let actualRate = format.sampleRate
+            print("[AudioEngine] start: effective sampleRate=\(actualRate) (requested 12000)")
+            DispatchQueue.main.async { self.effectiveSampleRate = actualRate }
             inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
                 self?.processInput(buffer)
             }
@@ -209,5 +215,43 @@ class AudioEngine: ObservableObject {
 
     func clearBuffer() {
         bufferLock.lock(); audioBuffer.removeAll(); bufferLock.unlock()
+    }
+
+    /// Feed samples from an external source (e.g. TruSDX serial audio) into the buffer
+    func feedExternalSamples(_ samples: [Float], sampleRate: Double) {
+        DispatchQueue.main.async {
+            if self.effectiveSampleRate != sampleRate {
+                print("[AudioEngine] external sampleRate changed: \(self.effectiveSampleRate) → \(sampleRate)")
+                self.effectiveSampleRate = sampleRate
+            }
+        }
+        processInput_external(samples)
+    }
+
+    private func processInput_external(_ samples: [Float]) {
+        guard !samples.isEmpty else { return }
+
+        let rms = sqrt(samples.reduce(0) { $0 + $1 * $1 } / Float(samples.count))
+        DispatchQueue.main.async { self.inputLevel = rms }
+
+        // Accumulate samples for FFT; compute spectrum when we have enough
+        externalFFTBuffer.append(contentsOf: samples)
+        while externalFFTBuffer.count >= fftProcessor.size {
+            let chunk = Array(externalFFTBuffer.prefix(fftProcessor.size))
+            externalFFTBuffer.removeFirst(fftProcessor.size)
+            let spectrum = fftProcessor.magnitudeSpectrum(chunk)
+            if !spectrum.isEmpty {
+                DispatchQueue.main.async {
+                    self.spectrumData = spectrum
+                    self.onSpectrumUpdate?(spectrum)
+                }
+            }
+        }
+
+        bufferLock.lock()
+        audioBuffer.append(contentsOf: samples)
+        let maxBuf = Int(12000.0 * 30)
+        if audioBuffer.count > maxBuf { audioBuffer.removeFirst(audioBuffer.count - maxBuf) }
+        bufferLock.unlock()
     }
 }
