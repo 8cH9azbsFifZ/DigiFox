@@ -3,6 +3,8 @@ import SwiftUI
 struct CWView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var settings: AppSettings
+    @State private var isEditingFreq = false
+    @State private var freqText = ""
 
     var body: some View {
         NavigationStack {
@@ -20,8 +22,26 @@ struct CWView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Dial").font(.caption2).foregroundStyle(.secondary)
-                        Text(fmt(settings.dialFrequency))
+                        if isEditingFreq {
+                            TextField("MHz", text: $freqText, onCommit: {
+                                if let mhz = Double(freqText.replacingOccurrences(of: ",", with: ".")) {
+                                    let hz = UInt64(mhz * 1_000_000)
+                                    appState.setRigFrequency(hz)
+                                }
+                                isEditingFreq = false
+                            })
                             .font(.system(.caption, design: .monospaced)).bold()
+                            .keyboardType(.decimalPad)
+                            .frame(width: 110)
+                            .textFieldStyle(.roundedBorder)
+                        } else {
+                            Text(fmt(settings.dialFrequency))
+                                .font(.system(.caption, design: .monospaced)).bold()
+                                .onTapGesture {
+                                    freqText = String(format: "%.6f", settings.dialFrequency / 1_000_000)
+                                    isEditingFreq = true
+                                }
+                        }
                     }
                     Spacer()
                     VStack(alignment: .center, spacing: 2) {
