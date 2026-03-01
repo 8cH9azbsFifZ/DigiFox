@@ -18,6 +18,31 @@ class AudioEngine: ObservableObject {
     private let bufferLock = NSLock()
     private var routeChangeObserver: NSObjectProtocol?
     private var externalFFTBuffer = [Float]()  // accumulator for external (TruSDX) samples
+    /// Actual input sample rate (set from audio tap or external feed, used for resampling)
+    private var inputRate: Double = 12000
+
+    /// Resample audio from any source rate to 12 kHz using Accelerate (vDSP_vlint).
+    /// Works for both upsampling (e.g. TruSDX 7825→12000) and downsampling (e.g. USB 48000→12000).
+    private static func resampleTo12kHz(_ input: [Float], from srcRate: Double) -> [Float] {
+        guard !input.isEmpty else { return [] }
+        let ratio = srcRate / 12000.0
+        if abs(ratio - 1.0) < 0.01 { return input }
+        let outputCount = Int(Double(input.count) / ratio)
+        guard outputCount > 1 else { return input }
+
+        var positions = [Float](repeating: 0, count: outputCount)
+        var start: Float = 0
+        var step = Float(ratio)
+        vDSP_vramp(&start, &step, &positions, 1, vDSP_Length(outputCount))
+
+        var maxPos = Float(input.count - 1)
+        var zero: Float = 0
+        vDSP_vclip(positions, 1, &zero, &maxPos, &positions, 1, vDSP_Length(outputCount))
+
+        var output = [Float](repeating: 0, count: outputCount)
+        vDSP_vlint(input, positions, 1, &output, 1, vDSP_Length(outputCount), vDSP_Length(input.count))
+        return output
+    }
     private var monitorPlayer: AVAudioPlayerNode?
 
     var onSpectrumUpdate: (([Float]) -> Void)?
@@ -106,6 +131,7 @@ class AudioEngine: ObservableObject {
             }
             let actualRate = format.sampleRate
             Log.d("Audio", "start: effective sampleRate=\(actualRate) (requested 12000)")
+            inputRate = actualRate
             DispatchQueue.main.async { self.effectiveSampleRate = actualRate }
             inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
                 self?.processInput(buffer)
@@ -213,11 +239,14 @@ class AudioEngine: ObservableObject {
     private func processInput(_ buffer: AVAudioPCMBuffer) {
         guard let cd = buffer.floatChannelData?[0] else { return }
         let n = Int(buffer.frameLength)
-        var samples = [Float](repeating: 0, count: n)
-        for i in 0..<n { samples[i] = cd[i] }
+        var raw = [Float](repeating: 0, count: n)
+        for i in 0..<n { raw[i] = cd[i] }
+
+        // Resample to 12 kHz if hardware rate differs (e.g. USB at 48kHz)
+        let samples = Self.resampleTo12kHz(raw, from: inputRate)
 
         var rms: Float = 0
-        vDSP_rmsqv(samples, 1, &rms, vDSP_Length(n))
+        vDSP_rmsqv(samples, 1, &rms, vDSP_Length(samples.count))
         let spectrum = fftProcessor.magnitudeSpectrum(samples)
 
         DispatchQueue.main.async { self.inputLevel = rms; self.spectrumData = spectrum }
@@ -241,22 +270,26 @@ class AudioEngine: ObservableObject {
 
     /// Feed samples from an external source (e.g. TruSDX serial audio) into the buffer
     func feedExternalSamples(_ samples: [Float], sampleRate: Double) {
+        inputRate = sampleRate
         DispatchQueue.main.async {
             if self.effectiveSampleRate != sampleRate {
                 Log.d("Audio", "external sampleRate changed: \(self.effectiveSampleRate) → \(sampleRate)")
                 self.effectiveSampleRate = sampleRate
             }
         }
-        processInput_external(samples)
+        processInput_external(samples, srcRate: sampleRate)
     }
 
-    private func processInput_external(_ samples: [Float]) {
-        guard !samples.isEmpty else { return }
+    private func processInput_external(_ raw: [Float], srcRate: Double) {
+        guard !raw.isEmpty else { return }
+
+        // Resample to 12 kHz (e.g. TruSDX 7825 Hz → 12000 Hz)
+        let samples = Self.resampleTo12kHz(raw, from: srcRate)
 
         let rms = sqrt(samples.reduce(0) { $0 + $1 * $1 } / Float(samples.count))
         DispatchQueue.main.async { self.inputLevel = rms }
 
-        // Accumulate samples for FFT; compute spectrum when we have enough
+        // Accumulate resampled samples for FFT
         externalFFTBuffer.append(contentsOf: samples)
         while externalFFTBuffer.count >= fftProcessor.size {
             let chunk = Array(externalFFTBuffer.prefix(fftProcessor.size))
