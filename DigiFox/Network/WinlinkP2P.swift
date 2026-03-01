@@ -118,6 +118,17 @@ final class ARDOPB2FTransport: B2FTransport, @unchecked Sendable {
         throw WinlinkError.timeout
     }
 
+    func sendByte(_ byte: UInt8) async throws {
+        try await sendData(Data([byte]))
+    }
+
+    func receiveByte() async throws -> UInt8 {
+        let data = try await receiveData(count: 1)
+        return data[0]
+    }
+
+    var onProgress: ((B2FSession.Progress) -> Void)?
+
     /// Daten vom ARQ Session empfangen (Callback).
     func onARQDataReceived(_ data: Data) {
         bufferLock.lock()

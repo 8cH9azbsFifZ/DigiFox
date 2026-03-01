@@ -7,6 +7,7 @@
 
 import Foundation
 import Security
+import CryptoKit
 
 /// Winlink-Kontodaten
 struct WinlinkAccount: Codable, Equatable {
@@ -77,30 +78,13 @@ final class WinlinkAccountManager {
     // MARK: - Winlink Challenge/Response
 
     /// Berechnet die Winlink-Challenge-Response für die Authentifizierung.
-    /// Verwendet den CMSv5-Algorithmus: MD5(challenge + password).
+    /// Verwendet MD5(challenge + password) — wie in Pat/wl2k-go.
     func challengeResponse(challenge: String, password: String) -> String {
         let input = challenge + password
-        let data = Data(input.utf8)
-
-        // Simple MD5-like hash for challenge response
-        // In production, use CryptoKit or CommonCrypto
-        var hash = [UInt8](repeating: 0, count: 16)
-        data.withUnsafeBytes { bytes in
-            var h: [UInt32] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476]
-            let ptr = bytes.bindMemory(to: UInt8.self)
-            for i in 0..<ptr.count {
-                h[i % 4] = h[i % 4] &+ UInt32(ptr[i]) &* 0x01000193
-                h[i % 4] = h[i % 4] ^ (h[i % 4] >> 16)
-            }
-            for i in 0..<4 {
-                hash[i * 4] = UInt8(h[i] & 0xFF)
-                hash[i * 4 + 1] = UInt8((h[i] >> 8) & 0xFF)
-                hash[i * 4 + 2] = UInt8((h[i] >> 16) & 0xFF)
-                hash[i * 4 + 3] = UInt8((h[i] >> 24) & 0xFF)
-            }
-        }
-
-        return hash.map { String(format: "%02x", $0) }.joined()
+        let digest = Insecure.MD5.hash(data: Data(input.utf8))
+        let result = digest.map { String(format: "%02x", $0) }.joined()
+        Log.d("WinlinkAuth", "challengeResponse: hash computed for challenge '\(challenge.prefix(8))...'")
+        return result
     }
 
     // MARK: - Keychain Helpers

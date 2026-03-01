@@ -4,6 +4,13 @@
 /// Datenübertragung über ARDOP. Verwaltet Connection Setup, Handshaking,
 /// Retransmission und adaptive Modulationswahl basierend auf Kanalqualität.
 ///
+/// Wichtige Korrekturen vs. älterer Version:
+/// - Timeout-Enforcement für Connection- und Idle-Timeouts
+/// - Bandwidth-Constraint: Modulation nur innerhalb der verhandelten Bandwidth
+/// - DISCACK-Antwort auf DISC (ARDOP Spec Compliance)
+/// - Frame-Typ bleibt pro Frame konstant (kein Re-Modulation bei NAK)
+/// - Sequenz-Validierung bei ACK
+///
 /// Referenz: https://github.com/pflarue/ardop (ARDOP Spezifikation)
 /// Referenz: https://github.com/la5nta/wl2k-go/tree/master/transport/ardop
 
@@ -23,14 +30,13 @@ enum ARDOPSessionState: String, Sendable {
     case failed = "Fehlgeschlagen"
 }
 
-/// ARDOP Bandwidth selection — see ARDOPFrameType.swift for the canonical definition
-
 /// ARQ Frame für die Sitzungsverwaltung
 struct ARQFrame: Sendable {
     enum FrameKind: Sendable {
         case conReq(callsign: String, targetCallsign: String, bandwidth: ARDOPBandwidth)
         case conAck(callsign: String, bandwidth: ARDOPBandwidth)
         case disc
+        case discAck
         case data(payload: Data, sequenceNumber: Int)
         case ack(sequenceNumber: Int)
         case nak(sequenceNumber: Int)
@@ -72,23 +78,14 @@ struct ChannelQuality: Sendable {
 // MARK: - ARQ Session Actor
 
 /// Thread-sicherer ARDOP ARQ Session Manager.
-///
-/// Verwaltet den vollständigen Lebenszyklus einer ARDOP-Verbindung:
-/// 1. Connection Request/Acknowledge Handshake
-/// 2. Adaptive Modulationswahl basierend auf SNR
-/// 3. Datenübertragung mit ARQ (ACK/NAK Retransmission)
-/// 4. Sauberes Disconnect
 actor ARDOPSession {
 
     // MARK: - Configuration
 
-    /// Eigenes Rufzeichen
     let myCallsign: String
-    /// Maximale Bandwidth
     let maxBandwidth: ARDOPBandwidth
-    /// Connection timeout in Sekunden
     let connectionTimeout: TimeInterval
-    /// Max retransmission attempts
+    let idleTimeout: TimeInterval
     let maxRetries: Int
 
     // MARK: - State
@@ -98,28 +95,26 @@ actor ARDOPSession {
     private(set) var channelQuality = ChannelQuality()
     private(set) var currentFrameType: ARDOPFrameType = .fsk4_500_100
 
-    /// Outgoing data queue
+    /// Negotiated session bandwidth (agreed during handshake)
+    private var sessionBandwidth: ARDOPBandwidth = .bw500
+
     private var txQueue = Data()
-    /// Received data buffer
     private var rxBuffer = Data()
-    /// Current TX sequence number
     private var txSequence: Int = 0
-    /// Last acknowledged sequence
     private var lastAckedSequence: Int = -1
-    /// Pending (unacknowledged) frames
-    private var pendingFrames: [(seq: Int, data: Data, retries: Int)] = []
-    /// Retry count for connection
+    /// Pending frames with their ORIGINAL frame type (not re-modulated on retransmit)
+    private var pendingFrames: [(seq: Int, data: Data, frameType: ARDOPFrameType, retries: Int)] = []
     private var connectRetries: Int = 0
+
+    /// Timestamps for timeout tracking
+    private var connectionStartTime: Date?
+    private var lastActivityTime: Date = Date()
 
     // MARK: - Callbacks
 
-    /// Wird aufgerufen wenn sich der Zustand ändert
     var onStateChange: ((ARDOPSessionState) -> Void)?
-    /// Wird aufgerufen wenn Daten empfangen wurden
     var onDataReceived: ((Data) -> Void)?
-    /// Wird aufgerufen wenn ein Frame gesendet werden soll (→ Modulator → Audio)
     var onTransmitFrame: ((Data, ARDOPFrameType) -> Void)?
-    /// Wird aufgerufen wenn ein Control-Frame gesendet werden soll
     var onTransmitControl: ((ARDOPFrameType) -> Void)?
 
     // MARK: - Init
@@ -127,93 +122,116 @@ actor ARDOPSession {
     init(callsign: String,
          bandwidth: ARDOPBandwidth = .bw500,
          timeout: TimeInterval = 120,
+         idleTimeout: TimeInterval = 300,
          maxRetries: Int = 10) {
         self.myCallsign = callsign
         self.maxBandwidth = bandwidth
         self.connectionTimeout = timeout
+        self.idleTimeout = idleTimeout
         self.maxRetries = maxRetries
+        Log.d("ARQ", "Session erstellt: call=\(callsign) bw=\(bandwidth) timeout=\(timeout)s")
     }
 
     // MARK: - Connection Management
 
-    /// Verbindungsaufbau zu einer Gegenstelle starten.
     func connect(to targetCallsign: String) {
-        guard state == .disconnected || state == .listening else { return }
+        guard state == .disconnected || state == .listening else {
+            Log.d("ARQ", "connect: ungültiger Zustand \(state)")
+            return
+        }
         remoteCallsign = targetCallsign
         connectRetries = 0
+        connectionStartTime = Date()
         setState(.connecting)
         sendConnectRequest(to: targetCallsign)
+        Log.d("ARQ", "Verbindungsaufbau zu \(targetCallsign) gestartet")
     }
 
-    /// In Empfangsbereitschaft gehen (für eingehende Verbindungen).
     func listen() {
         guard state == .disconnected else { return }
         setState(.listening)
+        Log.d("ARQ", "Empfangsbereit")
     }
 
-    /// Verbindung trennen.
     func disconnect() {
         guard state != .disconnected else { return }
+        Log.d("ARQ", "Disconnect angefordert (state=\(state))")
         setState(.disconnecting)
         onTransmitControl?(.disc)
-        // Give time for DISC to be sent, then clean up
         cleanupSession()
     }
 
     // MARK: - Data Transfer
 
-    /// Daten in die Sendewarteschlange stellen.
     func send(data: Data) {
-        guard state == .connected else { return }
+        guard state == .connected else {
+            Log.d("ARQ", "send: nicht verbunden (state=\(state))")
+            return
+        }
+        Log.d("ARQ", "Sende \(data.count) bytes in TX-Queue")
         txQueue.append(data)
         sendNextDataFrame()
     }
 
-    /// Alle empfangenen Daten abholen und Buffer leeren.
     func receiveAll() -> Data {
         let data = rxBuffer
         rxBuffer = Data()
         return data
     }
 
-    /// Anzahl der Bytes in der Sendewarteschlange.
     var txQueueLength: Int { txQueue.count }
-
-    /// Anzahl der empfangenen Bytes.
     var rxBufferLength: Int { rxBuffer.count }
 
-    // MARK: - Frame Processing (called from Demodulator)
+    // MARK: - Timeout Check
 
-    /// Eingehendes ARQ-Frame verarbeiten.
+    /// Prüft auf Connection- und Idle-Timeouts. Sollte regelmäßig aufgerufen werden.
+    func checkTimeouts() {
+        let now = Date()
+
+        if state == .connecting, let start = connectionStartTime {
+            if now.timeIntervalSince(start) > connectionTimeout {
+                Log.d("ARQ", "Connection-Timeout nach \(connectionTimeout)s")
+                setState(.failed)
+                cleanupSession()
+                return
+            }
+        }
+
+        if (state == .connected || state == .sendingData || state == .receivingData) {
+            if now.timeIntervalSince(lastActivityTime) > idleTimeout {
+                Log.d("ARQ", "Idle-Timeout nach \(idleTimeout)s")
+                disconnect()
+            }
+        }
+    }
+
+    // MARK: - Frame Processing
+
     func processReceivedFrame(_ frame: ARQFrame) {
+        lastActivityTime = Date()
+
         switch frame.kind {
         case .conReq(let callsign, let target, let bandwidth):
             handleConReq(from: callsign, target: target, bandwidth: bandwidth)
-
         case .conAck(let callsign, let bandwidth):
             handleConAck(from: callsign, bandwidth: bandwidth)
-
         case .disc:
             handleDisconnect()
-
+        case .discAck:
+            Log.d("ARQ", "DISCACK empfangen")
+            cleanupSession()
         case .data(let payload, let seq):
             handleDataFrame(payload: payload, seq: seq, snr: frame.snr)
-
         case .ack(let seq):
             handleAck(seq: seq)
-
         case .nak(let seq):
             handleNak(seq: seq)
-
         case .idle:
             updateChannelQuality(snr: frame.snr)
-
         case .ping(let callsign):
             handlePing(from: callsign)
-
         case .pingAck(let snr, _):
             updateChannelQuality(snr: snr)
-
         case .break:
             handleBreak()
         }
@@ -229,28 +247,49 @@ actor ARDOPSession {
         case .bw1000: bwType = .conReq1000
         case .bw2000: bwType = .conReq2000
         }
+        Log.d("ARQ", "TX ConReq: target=\(target) bw=\(maxBandwidth)")
         onTransmitControl?(bwType)
     }
 
     private func handleConReq(from callsign: String, target: String, bandwidth: ARDOPBandwidth) {
-        guard state == .listening else { return }
-        guard target.uppercased() == myCallsign.uppercased() else { return }
+        guard state == .listening else {
+            Log.d("ARQ", "ConReq ignoriert (state=\(state))")
+            return
+        }
+        guard target.uppercased() == myCallsign.uppercased() else {
+            Log.d("ARQ", "ConReq ignoriert (target=\(target), my=\(myCallsign))")
+            return
+        }
 
         remoteCallsign = callsign
+        // Negotiate bandwidth: use minimum of requested and our max
+        sessionBandwidth = bandwidth.rawValue < maxBandwidth.rawValue ? bandwidth : maxBandwidth
+        currentFrameType = initialFrameType(for: sessionBandwidth)
+        Log.d("ARQ", "ConReq akzeptiert: from=\(callsign) bw=\(sessionBandwidth)")
+
         setState(.connected)
+
+        // Send ConAck
         onTransmitControl?(.conAck)
     }
 
     private func handleConAck(from callsign: String, bandwidth: ARDOPBandwidth) {
         guard state == .connecting else { return }
         remoteCallsign = callsign
+        sessionBandwidth = bandwidth
+        currentFrameType = initialFrameType(for: sessionBandwidth)
         txSequence = 0
         lastAckedSequence = -1
         pendingFrames.removeAll()
+        connectionStartTime = nil
+        Log.d("ARQ", "Verbunden mit \(callsign) (bw=\(bandwidth))")
         setState(.connected)
     }
 
     private func handleDisconnect() {
+        Log.d("ARQ", "DISC empfangen — sende DISCACK")
+        // ARDOP spec: respond to DISC with DISCACK
+        onTransmitControl?(.discAck)
         cleanupSession()
     }
 
@@ -258,29 +297,30 @@ actor ARDOPSession {
         guard state == .connected || state == .receivingData else { return }
         setState(.receivingData)
 
-        // Buffer received data
+        Log.d("ARQ", "RX Data: seq=\(seq) len=\(payload.count) snr=\(snr ?? -99)")
         rxBuffer.append(payload)
         onDataReceived?(payload)
 
-        // Send ACK
         updateChannelQuality(snr: snr)
         onTransmitControl?(.ack)
-
-        // Return to connected after processing
         setState(.connected)
     }
 
     private func handleAck(seq: Int) {
         guard state == .connected || state == .sendingData else { return }
 
-        // Remove acknowledged frame from pending
+        // Validate sequence number
+        guard seq >= 0, seq <= txSequence else {
+            Log.d("ARQ", "ACK mit ungültiger Sequenz \(seq) (txSeq=\(txSequence))")
+            return
+        }
+
+        Log.d("ARQ", "ACK: seq=\(seq), pending=\(pendingFrames.count)")
         pendingFrames.removeAll { $0.seq <= seq }
         lastAckedSequence = seq
 
-        // Adapt modulation based on success
         adaptModulation(success: true)
 
-        // Send next frame if available
         if !txQueue.isEmpty {
             sendNextDataFrame()
         } else if pendingFrames.isEmpty {
@@ -291,27 +331,34 @@ actor ARDOPSession {
     private func handleNak(seq: Int) {
         guard state == .connected || state == .sendingData else { return }
 
-        // Retransmit the NAK'd frame
-        if let idx = pendingFrames.firstIndex(where: { $0.seq == seq }) {
-            pendingFrames[idx].retries += 1
-            if pendingFrames[idx].retries >= maxRetries {
-                setState(.failed)
-                return
-            }
-            // Downgrade modulation on NAK
-            adaptModulation(success: false)
-            let frameData = pendingFrames[idx].data
-            onTransmitFrame?(frameData, currentFrameType)
+        guard let idx = pendingFrames.firstIndex(where: { $0.seq == seq }) else {
+            Log.d("ARQ", "NAK für unbekannte Sequenz \(seq)")
+            return
         }
+
+        pendingFrames[idx].retries += 1
+        Log.d("ARQ", "NAK: seq=\(seq) retry=\(pendingFrames[idx].retries)/\(maxRetries)")
+
+        if pendingFrames[idx].retries >= maxRetries {
+            Log.d("ARQ", "Max Retries erreicht — Session Failed")
+            setState(.failed)
+            return
+        }
+
+        adaptModulation(success: false)
+
+        // Retransmit with the ORIGINAL frame type (not current — data was encoded for original)
+        let frame = pendingFrames[idx]
+        onTransmitFrame?(frame.data, frame.frameType)
     }
 
     private func handlePing(from callsign: String) {
-        // Respond with PingAck containing our SNR estimate
+        Log.d("ARQ", "Ping von \(callsign)")
         onTransmitControl?(.ack)
     }
 
     private func handleBreak() {
-        // Remote side requests immediate stop
+        Log.d("ARQ", "BREAK empfangen — Sendewarteschlange geleert")
         txQueue.removeAll()
         pendingFrames.removeAll()
         setState(.connected)
@@ -323,63 +370,81 @@ actor ARDOPSession {
         guard !txQueue.isEmpty else { return }
         setState(.sendingData)
 
-        // Calculate max payload for current frame type
         let maxPayload = currentFrameType.netDataBytes
-
-        // Extract chunk from queue
         let chunkSize = min(maxPayload, txQueue.count)
-        let chunk = txQueue.prefix(chunkSize)
-        txQueue = txQueue.dropFirst(chunkSize)
+        let chunk = Data(txQueue.prefix(chunkSize))
+        txQueue.removeFirst(chunkSize)
 
-        // Track pending frame
         let seq = txSequence
         txSequence += 1
-        pendingFrames.append((seq: seq, data: Data(chunk), retries: 0))
+        // Store frame with its frame type (for retransmission)
+        pendingFrames.append((seq: seq, data: chunk, frameType: currentFrameType, retries: 0))
 
-        // Send via callback
-        onTransmitFrame?(Data(chunk), currentFrameType)
+        Log.d("ARQ", "TX Data: seq=\(seq) len=\(chunk.count) type=\(currentFrameType)")
+        onTransmitFrame?(chunk, currentFrameType)
     }
 
-    // MARK: - Adaptive Modulation
+    // MARK: - Adaptive Modulation (bandwidth-constrained)
 
     private func adaptModulation(success: Bool) {
         if success {
-            // Try upgrading if channel is good
             if channelQuality.frameErrorRate < 0.1 {
                 upgradeModulation()
             }
+            channelQuality.frameErrorRate = max(0, channelQuality.frameErrorRate - 0.05)
         } else {
-            // Downgrade on failure
             channelQuality.frameErrorRate = min(1.0, channelQuality.frameErrorRate + 0.2)
             downgradeModulation()
         }
     }
 
+    /// Returns data frame types for the given bandwidth constraint.
+    private func dataFrameTypes(for bandwidth: ARDOPBandwidth) -> [ARDOPFrameType] {
+        switch bandwidth {
+        case .bw200:
+            return [.fsk4_200_50S, .fsk4_200_50, .psk4_200_100]
+        case .bw500:
+            return [.fsk4_200_50S, .fsk4_200_50, .fsk4_500_100S, .fsk4_500_100,
+                    .psk4_200_100, .psk4_500_100]
+        case .bw1000:
+            return [.fsk4_200_50S, .fsk4_200_50, .fsk4_500_100S, .fsk4_500_100,
+                    .psk4_200_100, .psk4_500_100, .psk4_1000_100, .psk8_1000_100]
+        case .bw2000:
+            return [.fsk4_200_50S, .fsk4_200_50, .fsk4_500_100S, .fsk4_500_100,
+                    .psk4_200_100, .psk4_500_100, .psk4_1000_100, .psk8_1000_100,
+                    .psk4_2000_100, .psk8_2000_100, .qam16_2000_100]
+        }
+    }
+
+    private func initialFrameType(for bandwidth: ARDOPBandwidth) -> ARDOPFrameType {
+        switch bandwidth {
+        case .bw200:  return .fsk4_200_50S
+        case .bw500:  return .fsk4_500_100S
+        case .bw1000: return .psk4_500_100
+        case .bw2000: return .psk4_1000_100
+        }
+    }
+
     private func upgradeModulation() {
-        let types: [ARDOPFrameType] = [
-            .fsk4_200_50S, .fsk4_200_50, .fsk4_500_100S, .fsk4_500_100,
-            .psk4_200_100, .psk4_500_100, .psk4_1000_100,
-            .psk8_1000_100, .psk4_2000_100, .psk8_2000_100, .qam16_2000_100
-        ]
+        let types = dataFrameTypes(for: sessionBandwidth)
         if let idx = types.firstIndex(of: currentFrameType), idx < types.count - 1 {
+            let old = currentFrameType
             currentFrameType = types[idx + 1]
+            Log.d("ARQ", "Modulation upgrade: \(old) → \(currentFrameType)")
         }
     }
 
     private func downgradeModulation() {
-        let types: [ARDOPFrameType] = [
-            .fsk4_200_50S, .fsk4_200_50, .fsk4_500_100S, .fsk4_500_100,
-            .psk4_200_100, .psk4_500_100, .psk4_1000_100,
-            .psk8_1000_100, .psk4_2000_100, .psk8_2000_100, .qam16_2000_100
-        ]
+        let types = dataFrameTypes(for: sessionBandwidth)
         if let idx = types.firstIndex(of: currentFrameType), idx > 0 {
+            let old = currentFrameType
             currentFrameType = types[idx - 1]
+            Log.d("ARQ", "Modulation downgrade: \(old) → \(currentFrameType)")
         }
     }
 
     private func updateChannelQuality(snr: Int?) {
         if let snr = snr {
-            // Exponential moving average
             channelQuality.snr = channelQuality.snr * 0.7 + Double(snr) * 0.3
         }
         channelQuality.lastUpdate = Date()
@@ -388,7 +453,11 @@ actor ARDOPSession {
     // MARK: - Session Lifecycle
 
     private func setState(_ newState: ARDOPSessionState) {
+        let old = state
         state = newState
+        if old != newState {
+            Log.d("ARQ", "State: \(old.rawValue) → \(newState.rawValue)")
+        }
         onStateChange?(newState)
     }
 
@@ -399,6 +468,7 @@ actor ARDOPSession {
         txSequence = 0
         lastAckedSequence = -1
         remoteCallsign = nil
+        connectionStartTime = nil
         channelQuality = ChannelQuality()
         setState(.disconnected)
     }
@@ -407,13 +477,13 @@ actor ARDOPSession {
 // MARK: - Session Statistics
 
 extension ARDOPSession {
-    /// Aktuelle Sitzungsstatistik
     struct SessionStats: Sendable {
         let state: ARDOPSessionState
         let remoteCallsign: String?
         let snr: Double
         let frameErrorRate: Double
         let currentMode: String
+        let sessionBandwidth: String
         let txQueueBytes: Int
         let rxBufferBytes: Int
         let pendingFrames: Int
@@ -426,6 +496,7 @@ extension ARDOPSession {
             snr: channelQuality.snr,
             frameErrorRate: channelQuality.frameErrorRate,
             currentMode: "\(currentFrameType)",
+            sessionBandwidth: "\(sessionBandwidth)",
             txQueueBytes: txQueue.count,
             rxBufferBytes: rxBuffer.count,
             pendingFrames: pendingFrames.count
