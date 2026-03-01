@@ -84,6 +84,7 @@ WNLK0001A00000000001 /* WinlinkView.swift in Sources */ = {isa = PBXBuildFile; f
 		3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */; };
 		ED920B204863FC2595479B13 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0A20C208CB0CC2881BF3557 /* LogManager.swift */; };
 		77F0218DF3DE148ABBEEF7A0 /* LogOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */; };
+		3F51AFAC585AA3A0FBA691A0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -179,6 +180,7 @@ WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnow
 		AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ggmorse_c_api.h; sourceTree = "<group>"; };
 		E0A20C208CB0CC2881BF3557 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogOutputView.swift; sourceTree = "<group>"; };
+		B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -251,6 +253,7 @@ WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnow
 				FC88B5C6BE929AAA2439AE99 /* DigiFox-Bridging-Header.h */,
 				69BA09EC57DA87A82A7B35D6 /* DigiFox.entitlements */,
 				FA2E4E8F3202061B2C6D40FB /* Info.plist */,
+				B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */,
 				F2F14C716C3C551D84A5C425 /* App */,
 				42CA9773F9222CC41D2D11E7 /* Audio */,
 				B59712FC1DAE2E8A56C55184 /* Codec */,
@@ -490,6 +493,7 @@ sourceTree = "<group>";
 			buildActionMask = 2147483647;
 			files = (
 				3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */,
+				3F51AFAC585AA3A0FBA691A0 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
