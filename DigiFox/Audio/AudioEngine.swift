@@ -97,11 +97,11 @@ class AudioEngine: ObservableObject {
 
             switch routeReason {
             case .newDeviceAvailable:
-                Log.d("Audio", "Route change: new device available")
+                Log.d("Audio", "Route change: new device available — restarting engine")
                 if self.isRunning { self.stop(); self.start() }
             case .oldDeviceUnavailable:
-                Log.d("Audio", "Route change: device removed")
-                if self.isRunning { self.stop() }
+                Log.d("Audio", "Route change: device removed — restarting engine")
+                if self.isRunning { self.stop(); self.start() }
             default: break
             }
         }
@@ -113,17 +113,34 @@ class AudioEngine: ObservableObject {
         do {
             let session = AVAudioSession.sharedInstance()
 
+            // Deactivate first to ensure clean route switch
+            try? session.setActive(false, options: .notifyOthersOnDeactivation)
+
             // Check for USB audio first — if present, don't use defaultToSpeaker
             let hasUSB = (session.availableInputs ?? []).contains { $0.portType == .usbAudio }
             let options: AVAudioSession.CategoryOptions = hasUSB ? [] : [.defaultToSpeaker]
             try session.setCategory(.playAndRecord, mode: .measurement, options: options)
+
+            // Set preferred input BEFORE activating the session
+            if let usbInput = (session.availableInputs ?? []).first(where: { $0.portType == .usbAudio }) {
+                try session.setPreferredInput(usbInput)
+                Log.d("Audio", "USB preferred input set: \(usbInput.portName)")
+            } else {
+                Log.d("Audio", "No USB audio device found, using built-in mic/speaker")
+            }
+
             try session.setPreferredSampleRate(12000.0)
             try session.setActive(true)
 
-            // Route input AND output to USB audio device (Digirig CM108B)
-            selectUSBAudioInput()
+            // Log actual route after activation
+            let inputs = session.currentRoute.inputs.map { "\($0.portName) (\($0.portType.rawValue))" }
+            let outputs = session.currentRoute.outputs.map { "\($0.portName) (\($0.portType.rawValue))" }
+            Log.d("Audio", "Active route — IN: \(inputs.joined(separator: ", ")) | OUT: \(outputs.joined(separator: ", "))")
 
             updateUSBStatus()
+
+            // Reset engine to pick up new route
+            engine = AVAudioEngine()
 
             let inputNode = engine.inputNode
             let format = inputNode.outputFormat(forBus: 0)
@@ -132,7 +149,7 @@ class AudioEngine: ObservableObject {
                 return
             }
             let actualRate = format.sampleRate
-            Log.d("Audio", "start: hardware sampleRate=\(actualRate), resampling to 12000")
+            Log.d("Audio", "start: hardware sampleRate=\(actualRate), channels=\(format.channelCount), resampling to 12000")
             inputRate = actualRate
             DispatchQueue.main.async { self.hardwareSampleRate = actualRate }
             inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
@@ -156,8 +173,6 @@ class AudioEngine: ObservableObject {
             } catch {
                 Log.d("Audio", "Failed to select USB input: \(error)")
             }
-        } else {
-            Log.d("Audio", "No USB audio device found, using built-in mic/speaker")
         }
     }
 
@@ -178,8 +193,10 @@ class AudioEngine: ObservableObject {
         if !engine.isRunning {
             do {
                 let session = AVAudioSession.sharedInstance()
-                // Use .playback to avoid requiring input node (crashes on Simulator)
-                try session.setCategory(.playback, options: [.defaultToSpeaker])
+                let hasUSB = (session.availableInputs ?? []).contains { $0.portType == .usbAudio }
+                let options: AVAudioSession.CategoryOptions = hasUSB ? [] : [.defaultToSpeaker]
+                try session.setCategory(.playAndRecord, mode: .measurement, options: options)
+                selectUSBAudioInput()
                 try session.setActive(true)
                 // Connect a dummy player to mainMixerNode before starting
                 // to ensure at least one output node exists
