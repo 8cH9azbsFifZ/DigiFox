@@ -236,11 +236,11 @@ struct SettingsView: View {
 
                 Section {
                     Toggle("PSK Reporter", isOn: $settings.pskReporterEnabled)
-                        .onChange(of: settings.pskReporterEnabled) { _ in appState.setupSpotReporters() }
+                        .onChange(of: settings.pskReporterEnabled) { appState.setupSpotReporters() }
                     Toggle("Reverse Beacon Network", isOn: $settings.rbnReporterEnabled)
-                        .onChange(of: settings.rbnReporterEnabled) { _ in appState.setupSpotReporters() }
+                        .onChange(of: settings.rbnReporterEnabled) { appState.setupSpotReporters() }
                     Toggle("WSPRnet", isOn: $settings.wsprNetReporterEnabled)
-                        .onChange(of: settings.wsprNetReporterEnabled) { _ in appState.setupSpotReporters() }
+                        .onChange(of: settings.wsprNetReporterEnabled) { appState.setupSpotReporters() }
                 } header: {
                     Text("Spot Reporter")
                 } footer: {
