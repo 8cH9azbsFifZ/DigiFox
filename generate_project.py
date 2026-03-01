@@ -407,7 +407,7 @@ def generate():
 \t\t\t\tSWIFT_OBJC_BRIDGING_HEADER = "{BRIDGING_HEADER}";
 \t\t\t\tSWIFT_EMIT_LOC_STRINGS = YES;
 \t\t\t\tTARGETED_DEVICE_FAMILY = "1,2";
-\t\t\t\tHEADER_SEARCH_PATHS = ("$(PROJECT_DIR)/vendor/hamlib/include", "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Hamlib.framework/Headers");
+\t\t\t\tHEADER_SEARCH_PATHS = ("$(PROJECT_DIR)/vendor/hamlib/include", "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Hamlib.framework/Headers", "$(PROJECT_DIR)/DigiFox/Codec/FT8/ft8_lib");
 \t\t\t\tLIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/vendor/hamlib/lib";
 \t\t\t\tOTHER_LDFLAGS = ("-lhamlib",);
 \t\t\t\tEXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64;"""

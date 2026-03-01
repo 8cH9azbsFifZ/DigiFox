@@ -397,10 +397,10 @@ final class LZHUFCodec {
         putBuf |= c >> putLen
         putLen += UInt8(l)
         if putLen >= 8 {
-            writeByte(UInt8(putBuf >> 8))
+            writeByte(UInt8(truncatingIfNeeded: putBuf >> 8))
             putLen -= 8
             if putLen >= 8 {
-                writeByte(UInt8(putBuf & 0xFF))
+                writeByte(UInt8(truncatingIfNeeded: putBuf))
                 putLen -= 8
                 putBuf = c << UInt(l - Int(putLen))
             } else {
@@ -537,7 +537,7 @@ final class LZHUFCodec {
         } while len > 0
 
         if putLen > 0 {
-            writeByte(UInt8(putBuf >> 8))
+            writeByte(UInt8(truncatingIfNeeded: putBuf >> 8))
         }
     }
 

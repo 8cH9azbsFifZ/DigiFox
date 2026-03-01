@@ -158,30 +158,33 @@ final class FT8Demodulator {
 
     /// Convert 8 tone powers to 3 soft LLR bits using Gray-code mapping.
     ///
-    /// For each of the 3 bit positions, compute the LLR as:
-    ///   LLR(bit_k) = log(sum of powers where bit_k=0) - log(sum of powers where bit_k=1)
+    /// Uses the same max-log-MAP approach as ft8_lib's ft8_extract_symbol:
+    ///   LLR(bit_k) = max(powers where bit_k=0) - max(powers where bit_k=1)
     /// Positive LLR means bit is more likely 0.
+    /// Magnitudes are converted to log domain first.
     private func toneToSoftBits(_ powers: [Float]) -> [Float] {
-        var softBits = [Float](repeating: 0, count: 3)
-
-        for bit in 0..<3 {
-            var sum0: Float = 1e-10
-            var sum1: Float = 1e-10
-
-            for tone in 0..<8 {
-                let grayVal = FT8Protocol.grayDecode[tone]
-                let bitVal = (grayVal >> (2 - bit)) & 1
-                if bitVal == 0 {
-                    sum0 += powers[tone]
-                } else {
-                    sum1 += powers[tone]
-                }
-            }
-
-            softBits[bit] = log(sum0) - log(sum1)
+        // Map tone magnitudes via Gray code into natural bit order (log domain)
+        var s = [Float](repeating: -120.0, count: 8)
+        for j in 0..<8 {
+            let p = powers[FT8Protocol.grayEncode[j]]
+            s[j] = p > 1e-10 ? 10.0 * log10(p) : -120.0
         }
 
+        // ft8_lib convention (positive = bit 1 more likely):
+        //   logl[0] = max4(s[4],s[5],s[6],s[7]) - max4(s[0],s[1],s[2],s[3])
+        //   logl[1] = max4(s[2],s[3],s[6],s[7]) - max4(s[0],s[1],s[4],s[5])
+        //   logl[2] = max4(s[1],s[3],s[5],s[7]) - max4(s[0],s[2],s[4],s[6])
+        // Our convention: positive = bit 0 more likely → negate
+        var softBits = [Float](repeating: 0, count: 3)
+        softBits[0] = max4(s[0], s[1], s[2], s[3]) - max4(s[4], s[5], s[6], s[7])
+        softBits[1] = max4(s[0], s[1], s[4], s[5]) - max4(s[2], s[3], s[6], s[7])
+        softBits[2] = max4(s[0], s[2], s[4], s[6]) - max4(s[1], s[3], s[5], s[7])
+
         return softBits
+    }
+
+    private func max4(_ a: Float, _ b: Float, _ c: Float, _ d: Float) -> Float {
+        return max(max(a, b), max(c, d))
     }
 
     // MARK: - SNR Estimation
