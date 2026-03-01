@@ -204,7 +204,7 @@ class AppState: ObservableObject {
 
     func connectRig() {
         guard settings.useHamlib else { statusText = "No rig model selected"; Log.d("RIG", "Connect aborted — no rig model selected"); return }
-        let baudRate = settings.radioProfile.defaultBaudRate
+        let baudRate = settings.radioProfile == .trusdx ? settings.radioProfile.defaultBaudRate : settings.rigSerialRate
         let modelId = settings.radioProfile == .trusdx ? settings.radioProfile.defaultHamlibModel : settings.rigModel
         Log.d("RIG", "Connecting: profile=\(settings.radioProfile.rawValue) model=\(modelId) baud=\(baudRate)")
         Task {
