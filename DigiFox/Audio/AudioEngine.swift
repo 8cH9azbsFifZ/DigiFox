@@ -70,10 +70,10 @@ class AudioEngine: ObservableObject {
 
             switch routeReason {
             case .newDeviceAvailable:
-                // USB device plugged in — restart to pick it up
+                Log.d("Audio", "Route change: new device available")
                 if self.isRunning { self.stop(); self.start() }
             case .oldDeviceUnavailable:
-                // USB device unplugged
+                Log.d("Audio", "Route change: device removed")
                 if self.isRunning { self.stop() }
             default: break
             }
@@ -82,6 +82,7 @@ class AudioEngine: ObservableObject {
 
     func start() {
         guard !isRunning else { return }
+        Log.d("Audio", "Starting audio engine")
         do {
             let session = AVAudioSession.sharedInstance()
 
@@ -100,11 +101,11 @@ class AudioEngine: ObservableObject {
             let inputNode = engine.inputNode
             let format = inputNode.outputFormat(forBus: 0)
             guard format.sampleRate > 0 else {
-                print("AudioEngine: No valid audio format available")
+                Log.d("Audio", "No valid audio format available")
                 return
             }
             let actualRate = format.sampleRate
-            print("[AudioEngine] start: effective sampleRate=\(actualRate) (requested 12000)")
+            Log.d("Audio", "start: effective sampleRate=\(actualRate) (requested 12000)")
             DispatchQueue.main.async { self.effectiveSampleRate = actualRate }
             inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
                 self?.processInput(buffer)
@@ -112,7 +113,7 @@ class AudioEngine: ObservableObject {
             try engine.start()
             DispatchQueue.main.async { self.isRunning = true }
         } catch {
-            print("AudioEngine error: \(error)")
+            Log.d("Audio-ERROR", "\(error)")
         }
     }
 
@@ -123,16 +124,17 @@ class AudioEngine: ObservableObject {
         if let usbInput = (session.availableInputs ?? []).first(where: { $0.portType == .usbAudio }) {
             do {
                 try session.setPreferredInput(usbInput)
-                print("AudioEngine: USB audio routed (in+out): \(usbInput.portName)")
+                Log.d("Audio", "USB audio routed (in+out): \(usbInput.portName)")
             } catch {
-                print("AudioEngine: Failed to select USB input: \(error)")
+                Log.d("Audio", "Failed to select USB input: \(error)")
             }
         } else {
-            print("AudioEngine: No USB audio device found, using built-in mic/speaker")
+            Log.d("Audio", "No USB audio device found, using built-in mic/speaker")
         }
     }
 
     func stop() {
+        Log.d("Audio", "Stopping audio engine")
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         DispatchQueue.main.async { self.isRunning = false; self.isTransmitting = false }
@@ -155,9 +157,9 @@ class AudioEngine: ObservableObject {
                 // to ensure at least one output node exists
                 let _ = engine.mainMixerNode
                 try engine.start()
-                print("[AudioEngine] transmit: engine started in playback mode")
+                Log.d("Audio", "transmit: engine started in playback mode")
             } catch {
-                print("[AudioEngine] transmit start error: \(error)")
+                Log.d("Audio", "transmit start error: \(error)")
                 completion?()
                 return
             }
@@ -178,7 +180,9 @@ class AudioEngine: ObservableObject {
         }
         buffer.frameLength = count
         if let cd = buffer.floatChannelData?[0] {
-            for i in 0..<samples.count { cd[i] = samples[i] }
+            samples.withUnsafeBufferPointer { src in
+                cd.update(from: src.baseAddress!, count: samples.count)
+            }
         }
 
         let player = AVAudioPlayerNode()
@@ -199,7 +203,7 @@ class AudioEngine: ObservableObject {
     /// Stop monitor playback immediately (TX Halt)
     func stopPlayback() {
         if let player = monitorPlayer {
-            print("[AudioEngine] stopPlayback: stopping monitor player")
+            Log.d("Audio", "stopPlayback: stopping monitor player")
             player.stop()
             engine.detach(player)
             monitorPlayer = nil
@@ -239,7 +243,7 @@ class AudioEngine: ObservableObject {
     func feedExternalSamples(_ samples: [Float], sampleRate: Double) {
         DispatchQueue.main.async {
             if self.effectiveSampleRate != sampleRate {
-                print("[AudioEngine] external sampleRate changed: \(self.effectiveSampleRate) → \(sampleRate)")
+                Log.d("Audio", "external sampleRate changed: \(self.effectiveSampleRate) → \(sampleRate)")
                 self.effectiveSampleRate = sampleRate
             }
         }

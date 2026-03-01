@@ -9,7 +9,12 @@ private let audioLog = Logger(subsystem: "com.digifox.app", category: "TruSDX-Au
 
 /// Pure demultiplexer for the (tr)uSDX CAT_STREAMING protocol.
 ///
+/// (tr)uSDX designed by Manuel Klüber (DL2MAN) — a compact QRP transceiver
+/// for digital modes and CW with built-in USB audio streaming.
+///
+/// Project: https://dl2man.de
 /// Protocol reference: https://dl2man.de/5-trusdx-details/
+/// Source code: https://github.com/threeme3/usdx
 ///
 /// Supported TS-480 CAT commands:
 ///   FA; FAnnnnnn;  - Get/Set Frequency in Hz
@@ -164,19 +169,19 @@ class TruSDXSerialAudio: ObservableObject {
 
     func startStreaming() {
         guard let port = serialPort else {
-            NSLog("[TruSDX-Audio] startStreaming: no serial port attached")
+            Log.d("TruSDX-Audio", "startStreaming: no serial port attached")
             state = .error("Serial port not connected")
             return
         }
         state = .streaming
         demuxer.reset()
-        NSLog("[TruSDX-Audio] startStreaming: sending UA1;")
+        Log.d("TruSDX-Audio", "startStreaming: sending UA1;")
         readTask = Task { [weak self] in
             do {
                 try await port.write("UA1;")
-                NSLog("[TruSDX-Audio] startStreaming: UA1; sent OK")
+                Log.d("TruSDX-Audio", "startStreaming: UA1; sent OK")
             } catch {
-                NSLog("[TruSDX-Audio] startStreaming: UA1; FAILED: \(error)")
+                Log.d("TruSDX-Audio", "startStreaming: UA1; FAILED: \(error)")
                 await MainActor.run { self?.state = .error("Failed to start streaming: \(error.localizedDescription)") }
                 return
             }
@@ -186,7 +191,7 @@ class TruSDXSerialAudio: ObservableObject {
                 guard let self else { break }
                 let isOpen = await port.isOpen
                 guard isOpen else {
-                    NSLog("[TruSDX-Audio] readLoop: port closed, stopping")
+                    Log.d("TruSDX-Audio", "readLoop: port closed, stopping")
                     break
                 }
                 do {
@@ -197,21 +202,21 @@ class TruSDXSerialAudio: ObservableObject {
                         self.handleData(data)
                         // Count samples from demuxer (approximate via data size)
                         if totalReads % 500 == 0 {
-                            NSLog("[TruSDX-Audio] readLoop: \(totalReads) reads, \(data.count) bytes last read")
+                            Log.d("TruSDX-Audio", "readLoop: \(totalReads) reads, \(data.count) bytes last read")
                         }
                     }
                 } catch {
-                    NSLog("[TruSDX-Audio] readLoop: read error: \(error)")
+                    Log.d("TruSDX-Audio", "readLoop: read error: \(error)")
                     break
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000) // 1ms
             }
-            NSLog("[TruSDX-Audio] readLoop: ended after \(totalReads) reads")
+            Log.d("TruSDX-Audio", "readLoop: ended after \(totalReads) reads")
         }
     }
 
     func stopStreaming() {
-        NSLog("[TruSDX-Audio] stopStreaming")
+        Log.d("TruSDX-Audio", "stopStreaming")
         readTask?.cancel()
         readTask = nil
         guard let port = serialPort else { return }
@@ -225,16 +230,16 @@ class TruSDXSerialAudio: ObservableObject {
     /// The caller must send TX0; before and RX; after this call.
     func sendAudio(_ samples: [Float], fromSampleRate: Double = 12000) async {
         guard let port = serialPort else {
-            NSLog("[TruSDX-Audio] sendAudio: no serial port attached")
+            Log.d("TruSDX-Audio", "sendAudio: no serial port attached")
             return
         }
         let downsampled = Self.downsample(samples, from: fromSampleRate, to: Self.txSampleRate)
-        NSLog("[TruSDX-Audio] sendAudio: \(samples.count) samples @ \(fromSampleRate)Hz → \(downsampled.count) samples @ \(Self.txSampleRate)Hz")
+        Log.d("TruSDX-Audio", "sendAudio: \(samples.count) samples @ \(fromSampleRate)Hz → \(downsampled.count) samples @ \(Self.txSampleRate)Hz")
 
         // Pause read loop during TX to avoid actor contention
         let wasStreaming = readTask != nil
         if wasStreaming {
-            NSLog("[TruSDX-Audio] sendAudio: pausing readTask for TX")
+            Log.d("TruSDX-Audio", "sendAudio: pausing readTask for TX")
             readTask?.cancel()
             readTask = nil
         }
@@ -245,12 +250,12 @@ class TruSDXSerialAudio: ObservableObject {
         let txStart = CACurrentMediaTime()
 
         let totalChunks = (downsampled.count + chunkSize - 1) / chunkSize
-        NSLog("[TruSDX-Audio] sendAudio: will send \(totalChunks) chunks of \(chunkSize) samples")
+        Log.d("TruSDX-Audio", "sendAudio: will send \(totalChunks) chunks of \(chunkSize) samples")
 
         while offset < downsampled.count {
             // Check for cancellation (TX Halt)
             if Task.isCancelled {
-                NSLog("[TruSDX-Audio] sendAudio: CANCELLED at chunk \(chunksSent)/\(totalChunks)")
+                Log.d("TruSDX-Audio", "sendAudio: CANCELLED at chunk \(chunksSent)/\(totalChunks)")
                 break
             }
             let end = min(offset + chunkSize, downsampled.count)
@@ -263,12 +268,12 @@ class TruSDXSerialAudio: ObservableObject {
             do {
                 try await port.write(payload)
             } catch {
-                NSLog("[TruSDX-Audio] sendAudio: write error at chunk \(chunksSent)/\(totalChunks): \(error)")
+                Log.d("TruSDX-Audio", "sendAudio: write error at chunk \(chunksSent)/\(totalChunks): \(error)")
                 break
             }
             chunksSent += 1
             if chunksSent % 50 == 0 {
-                NSLog("[TruSDX-Audio] sendAudio: progress \(chunksSent)/\(totalChunks) chunks")
+                Log.d("TruSDX-Audio", "sendAudio: progress \(chunksSent)/\(totalChunks) chunks")
             }
             let samplesInChunk = end - offset
             offset = end
@@ -278,11 +283,11 @@ class TruSDXSerialAudio: ObservableObject {
         }
 
         let elapsed = CACurrentMediaTime() - txStart
-        NSLog("[TruSDX-Audio] sendAudio: done — \(chunksSent) chunks in \(String(format: "%.2f", elapsed))s")
+        Log.d("TruSDX-Audio", "sendAudio: done — \(chunksSent) chunks in \(String(format: "%.2f", elapsed))s")
 
         // Do NOT resume read loop here — caller sends RX; first, then resumes
         if wasStreaming {
-            NSLog("[TruSDX-Audio] sendAudio: read loop paused, caller must resume after RX;")
+            Log.d("TruSDX-Audio", "sendAudio: read loop paused, caller must resume after RX;")
         }
     }
 

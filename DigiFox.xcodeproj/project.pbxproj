@@ -21,6 +21,13 @@
 		WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000003 /* WSPRMessagePack.swift */; };
 		WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000004 /* WSPRProtocol.swift */; };
 		WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000005 /* WSPRDemodulator.swift */; };
+ARDP0001A00000000001 /* ARDOPProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000001 /* ARDOPProtocol.swift */; };
+ARDP0001A00000000002 /* ARDOPFrameType.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000002 /* ARDOPFrameType.swift */; };
+ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000003 /* ARDOPCRC.swift */; };
+ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000004 /* ARDOPReedSolomon.swift */; };
+ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000005 /* ARDOPModulator.swift */; };
+ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000006 /* ARDOPDemodulator.swift */; };
+WNLK0001A00000000001 /* WinlinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WNLK0001B00000000001 /* WinlinkView.swift */; };
 		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
 		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
 		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
@@ -75,6 +82,8 @@
 		E2AD17D58F154912ADF38F8C /* multipass_avg.c in Sources */ = {isa = PBXBuildFile; fileRef = 800C5FA98B9F476C903DC872 /* multipass_avg.c */; };
 		EB62927D3F374271BA782020 /* simd_detect.c in Sources */ = {isa = PBXBuildFile; fileRef = A2569AA4DE6F4CEE921224EE /* simd_detect.c */; };
 		3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */; };
+		ED920B204863FC2595479B13 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0A20C208CB0CC2881BF3557 /* LogManager.swift */; };
+		77F0218DF3DE148ABBEEF7A0 /* LogOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -132,6 +141,13 @@
 		WSPR0001B00000000003 /* WSPRMessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRMessagePack.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000004 /* WSPRProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRProtocol.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000005 /* WSPRDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRDemodulator.swift; sourceTree = "<group>"; };
+ARDP0001B00000000001 /* ARDOPProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPProtocol.swift; sourceTree = "<group>"; };
+ARDP0001B00000000002 /* ARDOPFrameType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPFrameType.swift; sourceTree = "<group>"; };
+ARDP0001B00000000003 /* ARDOPCRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPCRC.swift; sourceTree = "<group>"; };
+ARDP0001B00000000004 /* ARDOPReedSolomon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPReedSolomon.swift; sourceTree = "<group>"; };
+ARDP0001B00000000005 /* ARDOPModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPModulator.swift; sourceTree = "<group>"; };
+ARDP0001B00000000006 /* ARDOPDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPDemodulator.swift; sourceTree = "<group>"; };
+WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkView.swift"; path = "DigiFox/Views/Winlink/WinlinkView.swift"; sourceTree = SOURCE_ROOT; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
 		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
@@ -161,6 +177,8 @@
 		AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ggmorse_c_api.mm; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGMorseDecoder.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ggmorse_c_api.h; sourceTree = "<group>"; };
+		E0A20C208CB0CC2881BF3557 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
+		9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogOutputView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -251,6 +269,7 @@
 				3162F0A739A1503D79C5C77C /* FT8 */,
 				F3C3A79EE0AB64B4B1FA781A /* JS8 */,
 				WSPR0001C00000000002 /* WSPR */,
+				ARDP0001C00000000001 /* ARDOP */,
 			
 				582CA28724C94084AF5A423F /* CW */,);
 			path = Codec;
@@ -296,11 +315,13 @@
 		E17000C80B9D69E84FA2A1CC /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */,
 				7354379C821B3BA96621F06D /* WaterfallView.swift */,
 				D6BDE5B4F829D7E61279FCDE /* FT8 */,
 				6458CC06F3E6FB57D79D5340 /* JS8 */,
 				380B32B34CDD352AAAEDC231 /* CW */,
 				WSPR0001C00000000001 /* WSPR */,
+				WNLK0001C00000000001 /* Winlink */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -308,6 +329,7 @@
 		F2F14C716C3C551D84A5C425 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				E0A20C208CB0CC2881BF3557 /* LogManager.swift */,
 				B7362B696CD0741400AECD33 /* AppState.swift */,
 				B14583D19B921994C4665B7E /* ContentView.swift */,
 				FB6ED5782F101779C286560E /* DigiFoxApp.swift */,
@@ -387,6 +409,27 @@
 			path = WSPR;
 			sourceTree = "<group>";
 		};
+ARDP0001C00000000001 /* ARDOP */ = {
+isa = PBXGroup;
+children = (
+ARDP0001B00000000001 /* ARDOPProtocol.swift */,
+ARDP0001B00000000002 /* ARDOPFrameType.swift */,
+ARDP0001B00000000003 /* ARDOPCRC.swift */,
+ARDP0001B00000000004 /* ARDOPReedSolomon.swift */,
+ARDP0001B00000000005 /* ARDOPModulator.swift */,
+ARDP0001B00000000006 /* ARDOPDemodulator.swift */,
+);
+path = ARDOP;
+sourceTree = "<group>";
+};
+WNLK0001C00000000001 /* Winlink */ = {
+isa = PBXGroup;
+children = (
+WNLK0001B00000000001 /* WinlinkView.swift */,
+);
+path = Winlink;
+sourceTree = "<group>";
+};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -457,6 +500,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77F0218DF3DE148ABBEEF7A0 /* LogOutputView.swift in Sources */,
+				ED920B204863FC2595479B13 /* LogManager.swift in Sources */,
 				A2C0C56E20AE4ED76BDB7BED /* AppState.swift in Sources */,
 				E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */,
 				A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */,
@@ -524,7 +569,14 @@
 				WSPR0001A00000000002 /* WSPRModulator.swift in Sources */,
 				WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */,
 				WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */,
-				WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */,);
+				WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */,
+ARDP0001A00000000001 /* ARDOPProtocol.swift in Sources */,
+ARDP0001A00000000002 /* ARDOPFrameType.swift in Sources */,
+ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */,
+ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */,
+ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */,
+ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */,
+WNLK0001A00000000001 /* WinlinkView.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

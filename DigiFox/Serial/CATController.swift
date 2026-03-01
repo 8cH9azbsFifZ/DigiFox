@@ -28,8 +28,10 @@ actor CATController {
     /// Connect to a rig using Hamlib model ID
     func connect(modelId: Int, path: String, baudRate: Int = 9600) throws {
         disconnect()
+        Log.d("CAT", "Connecting: model=\(modelId) path=\(path) baud=\(baudRate)")
 
         guard let rig = HamlibRig(modelId: modelId) else {
+            Log.d("CAT-ERROR", "Failed to init Hamlib model \(modelId)")
             throw CATError.initFailed(modelId: modelId)
         }
 
@@ -39,6 +41,7 @@ actor CATController {
         self.hamlibRig = rig
         state.isConnected = true
         state.rigName = rig.caps?.displayName ?? "Rig #\(modelId)"
+        Log.d("CAT", "Connected: \(state.rigName)")
     }
 
     /// Connect using first Digirig device found
@@ -51,6 +54,7 @@ actor CATController {
 
     /// Disconnect from rig
     func disconnect() {
+        Log.d("CAT", "Disconnecting rig")
         hamlibRig?.close()
         hamlibRig = nil
         state.isConnected = false
@@ -68,12 +72,14 @@ actor CATController {
 
     func pttOn() throws {
         guard let rig = hamlibRig else { throw CATError.notConnected }
+        Log.d("CAT", "PTT ON")
         try rig.setPTT(true)
         state.isTransmitting = true
     }
 
     func pttOff() throws {
         guard let rig = hamlibRig else { throw CATError.notConnected }
+        Log.d("CAT", "PTT OFF")
         try rig.setPTT(false)
         state.isTransmitting = false
     }
@@ -82,6 +88,7 @@ actor CATController {
 
     func setFrequency(_ hz: UInt64) throws {
         guard let rig = hamlibRig else { throw CATError.notConnected }
+        Log.d("CAT", "Set frequency: \(hz) Hz")
         try rig.setFrequency(Double(hz))
         state.frequency = hz
     }
@@ -97,6 +104,7 @@ actor CATController {
 
     func setMode(_ mode: String) throws {
         guard let rig = hamlibRig else { throw CATError.notConnected }
+        Log.d("CAT", "Set mode: \(mode)")
         let hamlibMode = HamlibRig.modeFromString(mode)
         try rig.setMode(hamlibMode)
         state.mode = mode

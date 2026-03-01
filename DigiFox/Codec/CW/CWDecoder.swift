@@ -32,7 +32,7 @@ final class CWDecoder {
         cfg.envelope_mode = CW_ENVELOPE_MULTIPASS
         cfg.min_word_length = 1
         decoder = cw_decoder_create(&cfg)
-        print("[CWDecoder] created: sr=\(sampleRate) center=\(centerFreq) bw=\(bandwidth) wpm=\(initialWPM)")
+        Log.d("CW-RX", "created: sr=\(sampleRate) center=\(centerFreq) bw=\(bandwidth) wpm=\(initialWPM)")
     }
 
     deinit {

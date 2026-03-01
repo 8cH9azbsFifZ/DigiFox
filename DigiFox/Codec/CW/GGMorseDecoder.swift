@@ -26,7 +26,7 @@ final class GGMorseDecoder {
     init(sampleRate: Float = 12000, samplesPerFrame: Int = 128) {
         self.sampleRate = sampleRate
         instance = ggmorse_wrapper_create(sampleRate, Int32(samplesPerFrame))
-        print("[GGMorse] created: sr=\(sampleRate) spf=\(samplesPerFrame)")
+        Log.d("CW-RX", "created: sr=\(sampleRate) spf=\(samplesPerFrame)")
     }
 
     deinit {
@@ -51,13 +51,13 @@ final class GGMorseDecoder {
     func reset() {
         guard let inst = instance else { return }
         ggmorse_wrapper_reset(inst)
-        print("[GGMorse] reset")
+        Log.d("CW-RX", "reset")
     }
 
     /// Recreate decoder with new sample rate
     func updateSampleRate(_ newRate: Float) {
         guard newRate != sampleRate, newRate > 0 else { return }
-        print("[GGMorse] rate change: \(sampleRate) → \(newRate)")
+        Log.d("CW-RX", "rate change: \(sampleRate) → \(newRate)")
         if let inst = instance { ggmorse_wrapper_destroy(inst) }
         sampleRate = newRate
         instance = ggmorse_wrapper_create(newRate, 128)
