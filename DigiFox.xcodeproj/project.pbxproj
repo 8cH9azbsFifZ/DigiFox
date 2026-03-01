@@ -103,6 +103,10 @@ FT8L000000000000000012 /* constants.c in Sources */ = {isa = PBXBuildFile; fileR
 FT8L000000000000000014 /* ldpc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000004 /* ldpc.c */; };
 FT8L000000000000000016 /* crc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000006 /* crc.c */; };
 		CWTG00000000000000002 /* CWToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CWTG00000000000000001 /* CWToneGenerator.swift */; };
+		PSKR0000000000000002 /* PSKReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = PSKR0000000000000001 /* PSKReporter.swift */; };
+		RBNR0000000000000002 /* RBNReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = RBNR0000000000000001 /* RBNReporter.swift */; };
+		WSPR0000000000000002 /* WSPRNetReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0000000000000001 /* WSPRNetReporter.swift */; };
+		SPOT0000000000000002 /* SpotReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPOT0000000000000001 /* SpotReporter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -221,6 +225,10 @@ FT8L000000000000000005 /* ldpc.h */ = {isa = PBXFileReference; lastKnownFileType
 FT8L000000000000000006 /* crc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = crc.c; sourceTree = "<group>"; };
 FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crc.h; sourceTree = "<group>"; };
 		CWTG00000000000000001 /* CWToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWToneGenerator.swift; sourceTree = "<group>"; };
+		PSKR0000000000000001 /* PSKReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PSKReporter.swift"; path = "DigiFox/Network/PSKReporter.swift"; sourceTree = SOURCE_ROOT; };
+		RBNR0000000000000001 /* RBNReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "RBNReporter.swift"; path = "DigiFox/Network/RBNReporter.swift"; sourceTree = SOURCE_ROOT; };
+		WSPR0000000000000001 /* WSPRNetReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WSPRNetReporter.swift"; path = "DigiFox/Network/WSPRNetReporter.swift"; sourceTree = SOURCE_ROOT; };
+		SPOT0000000000000001 /* SpotReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SpotReporter.swift"; path = "DigiFox/Network/SpotReporter.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -670,7 +678,11 @@ WNLK0001A00000000001 /* WinlinkView.swift in Sources */,
 FT8L000000000000000012 /* constants.c in Sources */,
 FT8L000000000000000014 /* ldpc.c in Sources */,
 FT8L000000000000000016 /* crc.c in Sources */,
-				CWTG00000000000000002 /* CWToneGenerator.swift in Sources */,);
+				CWTG00000000000000002 /* CWToneGenerator.swift in Sources */,
+				PSKR0000000000000002 /* PSKReporter.swift in Sources */,
+				RBNR0000000000000002 /* RBNReporter.swift in Sources */,
+				WSPR0000000000000002 /* WSPRNetReporter.swift in Sources */,
+				SPOT0000000000000002 /* SpotReporter.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

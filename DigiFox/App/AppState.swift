@@ -84,6 +84,11 @@ class AppState: ObservableObject {
     private var rigPollTask: Task<Void, Never>?
     private var txTask: Task<Void, Never>?
 
+    // Spot reporters (ported from wave-owl)
+    private var pskReporter: PSKReporter?
+    private var rbnReporter: RBNReporter?
+    private var wsprNetReporter: WSPRNetReporter?
+
     init() {
         // DX call/grid start empty (no QSO partner yet)
         dxCall = ""
@@ -101,6 +106,7 @@ class AppState: ObservableObject {
         startUSBMonitoring()
         updateTxMessages()
         startReceiving()
+        setupSpotReporters()
         Log.d("App", "AppState initialized — callsign=\(settings.callsign) grid=\(settings.grid)")
     }
 
@@ -504,6 +510,7 @@ class AppState: ObservableObject {
                     )
                     self?.rxMessages.insert(msg, at: 0)
                     if (self?.rxMessages.count ?? 0) > 200 { self?.rxMessages.removeLast() }
+                    self?.reportSpot(msg)
                     if let call = r.message.from {
                         self?.updateStation(callsign: call, grid: r.message.grid ?? "", frequency: r.frequency, snr: Int(r.snr))
                     }
@@ -638,6 +645,7 @@ class AppState: ObservableObject {
                     )
                     self?.rxMessages.insert(msg, at: 0)
                     if (self?.rxMessages.count ?? 0) > 200 { self?.rxMessages.removeLast() }
+                    self?.reportSpot(msg)
                     if let call = p.from { self?.updateStation(callsign: call, frequency: r.frequency, snr: Int(r.snr)) }
                 }
             }
@@ -757,6 +765,7 @@ class AppState: ObservableObject {
                     )
                     self?.rxMessages.insert(msg, at: 0)
                     if (self?.rxMessages.count ?? 0) > 200 { self?.rxMessages.removeLast() }
+                    self?.reportSpot(msg)
                     Log.d("WSPR-RX", "Decoded: \(text) SNR=\(r.snr)dB f=\(String(format: "%.1f", r.frequency))Hz")
                 }
                 if results.isEmpty {
@@ -996,6 +1005,117 @@ class AppState: ObservableObject {
         cwKeying = false
         isTransmitting = false
         statusText = "CW gestoppt"
+    }
+
+    // MARK: - Spot Reporters
+
+    /// Initialize or tear down spot reporters based on settings.
+    func setupSpotReporters() {
+        let call = settings.callsign
+        let grid = settings.grid
+        guard !call.isEmpty else {
+            stopAllReporters()
+            return
+        }
+
+        // PSK Reporter
+        if settings.pskReporterEnabled {
+            if pskReporter == nil {
+                pskReporter = PSKReporter(callsign: call, grid: grid, antenna: settings.antenna)
+                pskReporter?.start()
+                Log.d("Reporters", "PSK Reporter enabled")
+            }
+        } else if pskReporter != nil {
+            pskReporter?.stop()
+            pskReporter = nil
+            Log.d("Reporters", "PSK Reporter disabled")
+        }
+
+        // RBN Reporter
+        if settings.rbnReporterEnabled {
+            if rbnReporter == nil {
+                rbnReporter = RBNReporter(callsign: call, grid: grid)
+                rbnReporter?.start()
+                Log.d("Reporters", "RBN Reporter enabled")
+            }
+        } else if rbnReporter != nil {
+            rbnReporter?.stop()
+            rbnReporter = nil
+            Log.d("Reporters", "RBN Reporter disabled")
+        }
+
+        // WSPRNet Reporter
+        if settings.wsprNetReporterEnabled {
+            if wsprNetReporter == nil {
+                wsprNetReporter = WSPRNetReporter(callsign: call, grid: grid)
+                wsprNetReporter?.start()
+                Log.d("Reporters", "WSPRNet Reporter enabled")
+            }
+        } else if wsprNetReporter != nil {
+            wsprNetReporter?.stop()
+            wsprNetReporter = nil
+            Log.d("Reporters", "WSPRNet Reporter disabled")
+        }
+    }
+
+    private func stopAllReporters() {
+        pskReporter?.stop(); pskReporter = nil
+        rbnReporter?.stop(); rbnReporter = nil
+        wsprNetReporter?.stop(); wsprNetReporter = nil
+    }
+
+    /// Report a decoded RX message to all active reporters.
+    private func reportSpot(_ msg: RxMessage) {
+        let call = settings.callsign
+        guard !call.isEmpty else { return }
+
+        // Extract spotted callsign from the decoded message
+        var spottedCall: String?
+        switch msg.mode {
+        case .ft8:
+            spottedCall = msg.ft8Message?.from
+        case .js8:
+            spottedCall = msg.from
+        case .wspr:
+            spottedCall = msg.wsprMessage?.callsign
+        default:
+            break
+        }
+        guard let spottedCall, !spottedCall.isEmpty else { return }
+
+        let dialFreq = settings.dialFrequency
+        let spotFreqHz = Int(dialFreq + msg.frequency)
+
+        let spot = Spot(
+            timestamp: msg.timestamp,
+            frequency: spotFreqHz,
+            callsign: spottedCall,
+            snr: msg.snr,
+            mode: msg.mode.name,
+            spotterCallsign: call
+        )
+
+        // PSK Reporter and RBN accept all digital mode spots
+        pskReporter?.report(spot)
+        rbnReporter?.report(spot)
+
+        // WSPRNet gets WSPR-specific reports with extra metadata
+        if msg.mode == .wspr, let wspr = msg.wsprMessage {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HHmm"
+            formatter.timeZone = TimeZone(identifier: "UTC")
+            wsprNetReporter?.reportWSPR(
+                txCallsign: wspr.callsign,
+                txGrid: wspr.grid,
+                powerDBm: wspr.power,
+                snr: msg.snr,
+                dt: msg.deltaTime,
+                drift: 0,
+                txFreqHz: spotFreqHz,
+                dialFreqHz: Int(dialFreq),
+                timestamp: formatter.string(from: msg.timestamp)
+            )
+        }
     }
 
     // MARK: - Helpers

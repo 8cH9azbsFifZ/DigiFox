@@ -237,12 +237,36 @@ class AudioEngine: ObservableObject {
 
         DispatchQueue.main.async { self.isTransmitting = true }
 
-        guard let format = AVAudioFormat(standardFormatWithSampleRate: 12000.0, channels: 1) else {
+        // Use the engine's output format for the player connection
+        let mixerFormat = engine.mainMixerNode.outputFormat(forBus: 0)
+        let outputRate = mixerFormat.sampleRate > 0 ? mixerFormat.sampleRate : 12000.0
+        Log.d("Audio", "transmit: \(samples.count) samples at 12kHz, mixer at \(outputRate)Hz")
+
+        // Resample TX audio from 12 kHz to engine output rate if needed
+        let txSamples: [Float]
+        if abs(outputRate - 12000.0) > 1.0 {
+            let ratio = outputRate / 12000.0
+            let outCount = Int(Double(samples.count) * ratio)
+            var positions = [Float](repeating: 0, count: outCount)
+            var start: Float = 0
+            var step = Float(1.0 / ratio)
+            vDSP_vramp(&start, &step, &positions, 1, vDSP_Length(outCount))
+            var maxPos = Float(samples.count - 1)
+            var zero: Float = 0
+            vDSP_vclip(positions, 1, &zero, &maxPos, &positions, 1, vDSP_Length(outCount))
+            var resampled = [Float](repeating: 0, count: outCount)
+            vDSP_vlint(samples, positions, 1, &resampled, 1, vDSP_Length(outCount), vDSP_Length(samples.count))
+            txSamples = resampled
+        } else {
+            txSamples = samples
+        }
+
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: outputRate, channels: 1) else {
             DispatchQueue.main.async { self.isTransmitting = false }
             completion?()
             return
         }
-        let count = AVAudioFrameCount(samples.count)
+        let count = AVAudioFrameCount(txSamples.count)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: count) else {
             DispatchQueue.main.async { self.isTransmitting = false }
             completion?()
@@ -250,8 +274,8 @@ class AudioEngine: ObservableObject {
         }
         buffer.frameLength = count
         if let cd = buffer.floatChannelData?[0] {
-            samples.withUnsafeBufferPointer { src in
-                cd.update(from: src.baseAddress!, count: samples.count)
+            txSamples.withUnsafeBufferPointer { src in
+                cd.update(from: src.baseAddress!, count: txSamples.count)
             }
         }
 
