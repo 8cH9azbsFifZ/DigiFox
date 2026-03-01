@@ -3,12 +3,33 @@ import SwiftUI
 struct JS8FrequencyView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var settings: AppSettings
+    @State private var isEditing = false
+    @State private var freqText = ""
 
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Dial").font(.caption2).foregroundStyle(.secondary)
-                Text(fmt(settings.dialFrequency)).font(.system(.caption, design: .monospaced)).bold()
+                if isEditing {
+                    TextField("MHz", text: $freqText, onCommit: {
+                        if let mhz = Double(freqText.replacingOccurrences(of: ",", with: ".")) {
+                            let hz = UInt64(mhz * 1_000_000)
+                            appState.setRigFrequency(hz)
+                        }
+                        isEditing = false
+                    })
+                    .font(.system(.caption, design: .monospaced)).bold()
+                    .keyboardType(.decimalPad)
+                    .frame(width: 110)
+                    .textFieldStyle(.roundedBorder)
+                } else {
+                    Text(fmt(settings.dialFrequency))
+                        .font(.system(.caption, design: .monospaced)).bold()
+                        .onTapGesture {
+                            freqText = String(format: "%.6f", settings.dialFrequency / 1_000_000)
+                            isEditing = true
+                        }
+                }
             }
             Spacer()
             VStack(spacing: 2) {
