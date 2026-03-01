@@ -44,10 +44,10 @@ typedef struct {
     int match_length;
     int match_position;
 
-    // Bit I/O
-    unsigned int putbuf;
+    // Bit I/O (must be 64-bit to match Go's uint)
+    uint64_t putbuf;
     unsigned char putlen;
-    unsigned int getbuf;
+    uint64_t getbuf;
     unsigned char getlen;
 
     // Stream I/O
@@ -351,7 +351,7 @@ static void delete_node(lzhuf_state *s, int p) {
 
 // --- Bit I/O (matches wl2k-go putCode/getBit/getByte) ---
 
-static void put_code(lzhuf_state *s, int l, unsigned int c) {
+static void put_code(lzhuf_state *s, int l, uint64_t c) {
     s->putbuf |= c >> s->putlen;
     s->putlen += (unsigned char)l;
     if (s->putlen >= 8) {
@@ -360,7 +360,7 @@ static void put_code(lzhuf_state *s, int l, unsigned int c) {
         if (s->putlen >= 8) {
             out_byte(s, (unsigned char)(s->putbuf & 0xFF));
             s->putlen -= 8;
-            s->putbuf = c << (unsigned int)(l - (int)s->putlen);
+            s->putbuf = c << (uint64_t)(l - (int)s->putlen);
         } else {
             s->putbuf <<= 8;
         }
@@ -370,7 +370,7 @@ static void put_code(lzhuf_state *s, int l, unsigned int c) {
 static int get_bit(lzhuf_state *s) {
     while (s->getlen <= 8) {
         int i = in_byte(s);
-        s->getbuf |= (unsigned int)(i < 0 ? 0 : i) << (8 - s->getlen);
+        s->getbuf |= (uint64_t)(i < 0 ? 0 : i) << (8 - s->getlen);
         s->getlen += 8;
     }
     int bit = (int)((s->getbuf >> 15) & 1);
@@ -382,7 +382,7 @@ static int get_bit(lzhuf_state *s) {
 static int get_byte_val(lzhuf_state *s) {
     while (s->getlen <= 8) {
         int i = in_byte(s);
-        s->getbuf |= (unsigned int)(i < 0 ? 0 : i) << (8 - s->getlen);
+        s->getbuf |= (uint64_t)(i < 0 ? 0 : i) << (8 - s->getlen);
         s->getlen += 8;
     }
     int b = (int)(s->getbuf >> 8) & 0xFF;
@@ -394,7 +394,7 @@ static int get_byte_val(lzhuf_state *s) {
 // --- Huffman encode/decode ---
 
 static void encode_char(lzhuf_state *s, int c) {
-    unsigned int code = 0;
+    uint64_t code = 0;
     int len = 0;
     int k = s->prnt[c + LZ_T];
     do {
@@ -409,8 +409,8 @@ static void encode_char(lzhuf_state *s, int c) {
 
 static void encode_position(lzhuf_state *s, int c) {
     int i = c >> 6;
-    put_code(s, (int)p_len[i], (unsigned int)p_code[i] << 8);
-    put_code(s, 6, (unsigned int)(c & 0x3F) << 10);
+    put_code(s, (int)p_len[i], (uint64_t)p_code[i] << 8);
+    put_code(s, 6, (uint64_t)(c & 0x3F) << 10);
 }
 
 static int decode_char(lzhuf_state *s) {

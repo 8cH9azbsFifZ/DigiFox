@@ -584,12 +584,28 @@ class AppState: ObservableObject {
                 }
             }
         } else {
-            if settings.useHamlib { Task { try? await catController.setMode("USB"); try? await catController.pttOn() } }
-            audioEngine.transmit(samples: samples) { [weak self] in
-                Task { @MainActor in
-                    self?.statusText = "Sent"
-                    if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
-                    self?.advanceFT8Sequence()
+            isTransmitting = true
+            txTask = Task {
+                if settings.useHamlib {
+                    do {
+                        try await catController.setMode("USB")
+                        try await catController.pttOn()
+                        // Allow rig time to switch to TX
+                        try await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                    } catch {
+                        Log.d("FT8-TX", "PTT/Mode error: \(error)")
+                    }
+                }
+                await MainActor.run {
+                    self.audioEngine.transmit(samples: samples) { [weak self] in
+                        Task { @MainActor in
+                            self?.statusText = "Sent"
+                            if self?.settings.useHamlib == true { try? await self?.catController.pttOff() }
+                            self?.isTransmitting = false
+                            self?.txTask = nil
+                            self?.advanceFT8Sequence()
+                        }
+                    }
                 }
             }
         }
@@ -924,16 +940,32 @@ class AppState: ObservableObject {
                 self?.statusText = "CW gesendet"
             }
         } else {
-            // Other rigs: via Hamlib/CATController
+            // Other rigs (FT-817 etc.): Audio CW tone via USB mode.
+            // Stay in USB — do NOT switch to CW mode. The rig treats the
+            // keyed sine wave as a normal audio signal, just like FT8.
+            Log.d("CW-TX", "Audio-CW: generating tone, \(text) @ \(speed) WPM")
+            let samples = CWToneGenerator.generate(text: text, wpm: speed)
+            guard !samples.isEmpty else {
+                cwKeying = false
+                isTransmitting = false
+                statusText = "CW: leerer Text"
+                return
+            }
+            Log.d("CW-TX", "Audio-CW: \(samples.count) samples (\(String(format: "%.1f", Double(samples.count) / 12000.0))s)")
+
             Task {
-                try? await catController.setMode("CW")
-                let rig = await catController.getHamlibRig()
-                let ioQueue = DispatchQueue(label: "morse.ptt", qos: .userInteractive)
-                let keyDown = { ioQueue.async { try? rig?.setPTT(true) } }
-                let keyUp   = { ioQueue.async { try? rig?.setPTT(false) } }
+                do { try await catController.pttOn() }
+                catch { Log.d("CW-TX", "PTT on error: \(error)") }
+
+                // Small delay for rig TX switch
+                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
 
                 await MainActor.run {
-                    self.morseKeyer.key(text: text, wpm: speed, keyDown: keyDown, keyUp: keyUp) { [weak self] in
+                    self.audioEngine.transmit(samples: samples) { [weak self] in
+                        Task {
+                            do { try await self?.catController.pttOff() }
+                            catch { Log.d("CW-TX", "PTT off error: \(error)") }
+                        }
                         self?.cwKeying = false
                         self?.isTransmitting = false
                         self?.statusText = "CW gesendet"
@@ -957,6 +989,8 @@ class AppState: ObservableObject {
             Log.d("CW-TX", "TruSDX: resuming streaming after stop")
             trusdxAudio.startStreaming()
         } else {
+            // Stop audio playback and PTT
+            audioEngine.stopPlayback()
             Task { try? await catController.pttOff() }
         }
         cwKeying = false
