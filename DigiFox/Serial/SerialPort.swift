@@ -86,6 +86,10 @@ actor SerialPort {
         // IOKit discovery (works on device and in Simulator via macOS host)
         if IOKitUSBSerial.isAvailable() {
             let objcDevices = IOKitUSBSerial.discoverDevices()
+            Log.d("Serial", "IOKit found \(objcDevices.count) raw serial service(s)")
+            for dev in objcDevices {
+                Log.d("Serial", "  raw: path=\(dev.path) name=\(dev.name) VID=0x\(String(dev.vendorID, radix: 16)) PID=0x\(String(dev.productID, radix: 16))")
+            }
             devices = objcDevices.compactMap { dev -> SerialDeviceInfo? in
                 // Filter out system/debug/bluetooth serial ports
                 let pathLower = dev.path.lowercased()
@@ -100,6 +104,38 @@ actor SerialPort {
                     vendorID: dev.vendorID,
                     productID: dev.productID
                 )
+            }
+        }
+
+        // POSIX fallback: scan /dev for USB serial devices IOKit may have missed
+        if devices.isEmpty {
+            Log.d("Serial", "IOKit returned 0 devices, trying POSIX /dev scan")
+            let fm = FileManager.default
+            if let entries = try? fm.contentsOfDirectory(atPath: "/dev") {
+                let usbPaths = entries.filter { entry in
+                    let lower = entry.lowercased()
+                    return (lower.hasPrefix("tty.usb") || lower.hasPrefix("tty.slab") ||
+                            lower.hasPrefix("tty.silabs") || lower.hasPrefix("tty.wchusbserial") ||
+                            lower.hasPrefix("tty.cp210") || lower.hasPrefix("tty.digirig"))
+                }.map { "/dev/\($0)" }
+                Log.d("Serial", "POSIX found \(usbPaths.count) USB tty path(s): \(usbPaths)")
+                for path in usbPaths {
+                    let lower = path.lowercased()
+                    // Guess VID from path name
+                    let vid: UInt16
+                    if lower.contains("slab") || lower.contains("silabs") || lower.contains("cp210") {
+                        vid = 0x10C4 // Silicon Labs (Digirig)
+                    } else if lower.contains("wchusbserial") || lower.contains("ch34") {
+                        vid = 0x1A86 // QinHeng (TruSDX)
+                    } else {
+                        vid = 0x10C4 // Default to Digirig
+                    }
+                    devices.append(SerialDeviceInfo(
+                        id: path, path: path,
+                        name: "USB Serial (\(path.components(separatedBy: "/").last ?? ""))",
+                        vendorID: vid, productID: 0
+                    ))
+                }
             }
         }
 
@@ -128,6 +164,7 @@ actor SerialPort {
         }
         #endif
 
+        Log.d("Serial", "discoverDevices: \(devices.count) device(s) after filtering")
         return devices
     }
 
