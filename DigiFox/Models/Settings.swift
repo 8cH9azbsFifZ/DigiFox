@@ -77,5 +77,5 @@ class AppSettings: ObservableObject {
         set { speedRaw = newValue.rawValue }
     }
 
-    var useHamlib: Bool { rigModel > 0 }
+    var useHamlib: Bool { rigModel > 0 && radioProfile.requiresSerial }
 }
