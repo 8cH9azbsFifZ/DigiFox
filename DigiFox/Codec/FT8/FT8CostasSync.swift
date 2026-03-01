@@ -116,17 +116,20 @@ enum FT8CostasSync {
 
         guard numSlices > 0 else { return [] }
 
-        let log2n = vDSP_Length(log2(Double(fftSize)))
-        guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
+        // Use vDSP_DFT for exact 1920-point DFT (non-power-of-2).
+        // 1920 = 15 × 2^7 — gives exact 6.25 Hz bin spacing at 12 kHz,
+        // matching the FT8 tone spacing. vDSP_fft_zrip only supports
+        // power-of-2 sizes and would silently truncate to 1024 points.
+        guard let dftSetup = vDSP_DFT_zop_CreateSetup(nil, vDSP_Length(fftSize), .FORWARD) else {
             return []
         }
-        defer { vDSP_destroy_fftsetup(fftSetup) }
+        defer { vDSP_DFT_DestroySetup(dftSetup) }
 
         // Hann window
         var window = [Float](repeating: 0, count: fftSize)
         vDSP_hann_window(&window, vDSP_Length(fftSize), Int32(vDSP_HANN_NORM))
 
-        // Parallel FFT computation across time slices
+        // Parallel DFT computation across time slices (vDSP_DFT_Execute is thread-safe)
         let resultPtr = UnsafeMutablePointer<[Float]>.allocate(capacity: numSlices)
         resultPtr.initialize(repeating: [Float](), count: numSlices)
         defer { resultPtr.deinitialize(count: numSlices); resultPtr.deallocate() }
@@ -139,32 +142,23 @@ enum FT8CostasSync {
             vDSP_vmul(Array(samples[offset..<(offset + fftSize)]), 1,
                       window, 1, &windowed, 1, vDSP_Length(fftSize))
 
-            var real = [Float](repeating: 0, count: halfFFT)
-            var imag = [Float](repeating: 0, count: halfFFT)
+            var imagIn = [Float](repeating: 0, count: fftSize)
+            var realOut = [Float](repeating: 0, count: fftSize)
+            var imagOut = [Float](repeating: 0, count: fftSize)
 
-            real.withUnsafeMutableBufferPointer { realBuf in
-                imag.withUnsafeMutableBufferPointer { imagBuf in
-                    windowed.withUnsafeBufferPointer { buf in
-                        buf.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: halfFFT) { complexBuf in
-                            var split = DSPSplitComplex(realp: realBuf.baseAddress!, imagp: imagBuf.baseAddress!)
-                            vDSP_ctoz(complexBuf, 2, &split, 1, vDSP_Length(halfFFT))
-                        }
-                    }
-                    var split = DSPSplitComplex(realp: realBuf.baseAddress!, imagp: imagBuf.baseAddress!)
-                    vDSP_fft_zrip(fftSetup, &split, 1, log2n, FFTDirection(FFT_FORWARD))
-                }
-            }
+            vDSP_DFT_Execute(dftSetup, windowed, imagIn, &realOut, &imagOut)
 
+            // Magnitude squared of positive frequencies (bins 0..halfFFT-1)
             var magnitudes = [Float](repeating: 0, count: halfFFT)
-            real.withUnsafeMutableBufferPointer { realBuf in
-                imag.withUnsafeMutableBufferPointer { imagBuf in
-                    var split = DSPSplitComplex(realp: realBuf.baseAddress!, imagp: imagBuf.baseAddress!)
+            realOut.withUnsafeMutableBufferPointer { rBuf in
+                imagOut.withUnsafeMutableBufferPointer { iBuf in
+                    var split = DSPSplitComplex(realp: rBuf.baseAddress!, imagp: iBuf.baseAddress!)
                     vDSP_zvmags(&split, 1, &magnitudes, 1, vDSP_Length(halfFFT))
                 }
             }
 
-            var one: Float = 1e-10
-            vDSP_vsadd(magnitudes, 1, &one, &magnitudes, 1, vDSP_Length(halfFFT))
+            var floor: Float = 1e-10
+            vDSP_vsadd(magnitudes, 1, &floor, &magnitudes, 1, vDSP_Length(halfFFT))
 
             resultPtr[slice] = magnitudes
         }

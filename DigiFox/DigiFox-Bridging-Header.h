@@ -13,4 +13,10 @@
 #include "ldpc.h"
 #include "crc.h"
 
+// LZHUF compression — Haruhiko Okumura (1989), public domain
+// C port faithful to wl2k-go/lzhuf (la5nta, MIT license)
+// Used by Winlink B2F protocol (Pat client)
+// https://github.com/la5nta/wl2k-go/tree/master/lzhuf
+#include "lzhuf.h"
+
 #endif
