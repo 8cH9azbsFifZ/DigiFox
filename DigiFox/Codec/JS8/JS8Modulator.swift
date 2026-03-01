@@ -1,19 +1,18 @@
 import Foundation
 
 class JS8Modulator {
-    private let ldpc = LDPCCodec()
 
     func modulate(message: String, frequency: Double, speed: JS8Speed) -> [Float] {
         let payload = PackMessage.pack(message)
         let withCRC = JS8CRC.append(to: payload)
-        let codeword = ldpc.encode(withCRC)
+        let codeword = LDPC.encode(withCRC)
 
-        // 174 coded bits → 58 data symbols (3 bits each)
+        // 174 coded bits → 58 data symbols (3 bits each, Gray-coded)
         var dataSymbols = [Int]()
         for i in stride(from: 0, to: min(codeword.count, 174), by: 3) {
             guard i + 2 < codeword.count else { break }
-            let s = Int(codeword[i]) << 2 | Int(codeword[i+1]) << 1 | Int(codeword[i+2])
-            dataSymbols.append(s)
+            let natural = Int(codeword[i]) << 2 | Int(codeword[i+1]) << 1 | Int(codeword[i+2])
+            dataSymbols.append(JS8Protocol.grayEncode[natural])
         }
 
         // Build 79-symbol frame: Costas + data

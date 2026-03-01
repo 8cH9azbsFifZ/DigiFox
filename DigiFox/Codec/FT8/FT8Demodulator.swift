@@ -33,12 +33,16 @@ final class FT8Demodulator {
     func demodulate(_ samples: [Float]) -> [DecodedMessage] {
         // Generate spectrogram
         let spec = FT8CostasSync.spectrogram(from: samples)
-        guard !spec.isEmpty else { return [] }
+        guard !spec.isEmpty else {
+            Log.d("FT8-Demod", "spectrogram empty!")
+            return []
+        }
 
         let freqBins = spec[0].count
         let binSpacing = FT8Protocol.sampleRate / Double(FT8Protocol.symbolSamples * 2)
         let minBin = max(0, Int(minFrequency / binSpacing))
         let maxBin = min(freqBins - 8, Int(maxFrequency / binSpacing))
+        Log.d("FT8-Demod", "spectrogram: \(spec.count)×\(freqBins), binSpacing=\(String(format: "%.2f", binSpacing))Hz, search \(minBin)..\(maxBin) bins")
 
         // Find sync candidates
         let candidates = FT8CostasSync.correlate(
@@ -48,6 +52,7 @@ final class FT8Demodulator {
             maxFreq: maxBin,
             maxCandidates: maxCandidates
         )
+        Log.d("FT8-Demod", "\(candidates.count) sync candidates (threshold=\(syncThreshold), top score=\(candidates.first.map { String(format: "%.2f", $0.score) } ?? "n/a"))")
 
         // Parallel candidate decoding (LDPC is the bottleneck)
         struct IndexedDecode {
@@ -57,6 +62,9 @@ final class FT8Demodulator {
         }
         let lock = NSLock()
         var parallelResults = [IndexedDecode]()
+
+        let ldpcPassCount = NSLock()
+        var ldpcPassed = 0, crcPassed = 0
 
         DispatchQueue.concurrentPerform(iterations: candidates.count) { idx in
             let candidate = candidates[idx]
@@ -71,9 +79,11 @@ final class FT8Demodulator {
             ) else { return }
 
             guard let decoded91 = LDPC.decode(softBits) else { return }
+            ldpcPassCount.lock(); ldpcPassed += 1; ldpcPassCount.unlock()
 
             let message91 = decoded91.map { $0 }
             guard FT8CRC.validate(message91) else { return }
+            ldpcPassCount.lock(); crcPassed += 1; ldpcPassCount.unlock()
 
             let payload = Array(message91[0..<FT8Protocol.payloadBits])
             let msg = FT8MessagePack.unpack(payload)
@@ -90,6 +100,7 @@ final class FT8Demodulator {
             parallelResults.append(IndexedDecode(index: idx, key: key, message: result))
             lock.unlock()
         }
+        Log.d("FT8-Demod", "Pipeline: \(candidates.count) candidates → \(ldpcPassed) LDPC pass → \(crcPassed) CRC pass → \(parallelResults.count) unique")
 
         // Deduplicate preserving priority order (lower index = higher score)
         parallelResults.sort { $0.index < $1.index }

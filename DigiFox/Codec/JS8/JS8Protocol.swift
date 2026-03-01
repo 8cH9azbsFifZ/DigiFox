@@ -41,6 +41,17 @@ enum JS8Protocol {
     static let charset: [Character] = Array(" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./?@")
     static let charsetSize = 43
 
+    // MARK: - Gray Code Tables (same as FT8)
+
+    /// Maps 3-bit natural binary to Gray code (for symbol mapping).
+    static let grayEncode: [Int] = [0, 1, 3, 2, 5, 6, 4, 7]
+    /// Maps 3-bit Gray code back to natural binary.
+    static let grayDecode: [Int] = {
+        var table = [Int](repeating: 0, count: 8)
+        for i in 0..<8 { table[grayEncode[i]] = i }
+        return table
+    }()
+
     static func toneSpacing(for speed: JS8Speed) -> Double {
         sampleRate / Double(speed.symbolSamples)
     }

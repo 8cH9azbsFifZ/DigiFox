@@ -63,7 +63,8 @@ enum FT8Protocol {
     // MARK: - Gray Code Tables
 
     /// Maps 3-bit natural binary to Gray code (for symbol mapping).
-    static let grayEncode: [Int] = [0, 1, 3, 2, 6, 7, 5, 4]
+    /// From WSJT-X / ft8_lib kFT8_Gray_map.
+    static let grayEncode: [Int] = [0, 1, 3, 2, 5, 6, 4, 7]
     /// Maps 3-bit Gray code back to natural binary.
     static let grayDecode: [Int] = {
         var table = [Int](repeating: 0, count: 8)
