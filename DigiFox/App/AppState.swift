@@ -85,9 +85,9 @@ class AppState: ObservableObject {
     private var txTask: Task<Void, Never>?
 
     init() {
-        // Pre-fill DX call/grid from settings
-        dxCall = settings.callsign
-        dxGrid = settings.grid
+        // DX call/grid start empty (no QSO partner yet)
+        dxCall = ""
+        dxGrid = ""
         // Initial CW decoder (ggmorse) at default rate
         cwDecoder = GGMorseDecoder(sampleRate: 12000)
         setupBindings()
@@ -114,6 +114,11 @@ class AppState: ObservableObject {
         $dxCall.sink { [weak self] _ in self?.updateTxMessages() }.store(in: &cancellables)
         $dxGrid.sink { [weak self] _ in self?.updateTxMessages() }.store(in: &cancellables)
         $dxReport.sink { [weak self] _ in self?.updateTxMessages() }.store(in: &cancellables)
+        // Re-build TX messages when callsign or grid changes in UserDefaults
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateTxMessages() }
+            .store(in: &cancellables)
     }
 
     // MARK: - FT8 TX Messages (WSJT-X style)

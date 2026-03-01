@@ -187,6 +187,15 @@ struct SettingsView: View {
                                 .fontWeight(settings.digitalMode == .cw ? .semibold : .regular)
                         }
                     }
+                    if let wspr = BandPlan.wsprFrequency(for: settings.selectedBand) {
+                        HStack {
+                            Image(systemName: "dot.radiowaves.right").foregroundStyle(.purple)
+                            Text("WSPR"); Spacer()
+                            Text(Band.formatMHz(wspr))
+                                .foregroundStyle(settings.digitalMode == .wspr ? .primary : .secondary)
+                                .fontWeight(settings.digitalMode == .wspr ? .semibold : .regular)
+                        }
+                    }
 
                     HStack {
                         Text("Dial"); Spacer()
