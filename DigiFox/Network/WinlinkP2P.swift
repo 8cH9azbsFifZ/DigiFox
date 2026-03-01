@@ -1,23 +1,22 @@
-/// Winlink P2P Mode — Direkte Station-zu-Station Nachrichten.
+/// Winlink P2P Mode — Direct station-to-station messaging.
 ///
-/// Ermöglicht den direkten Nachrichtenaustausch zwischen zwei Stationen
-/// ohne RMS-Gateway. Beide Stationen müssen ARDOP verwenden und sich
-/// auf einer gemeinsamen Frequenz befinden.
+/// Enables direct message exchange between two stations without an
+/// RMS gateway. Both stations must use ARDOP and be on a common frequency.
 ///
-/// P2P-Ablauf:
-/// 1. Station A geht auf LISTEN (Empfangsbereit)
-/// 2. Station B sendet CONNECT an Station A
-/// 3. ARDOP ARQ Session wird aufgebaut
-/// 4. B2F-Protokoll tauscht Nachrichten aus
+/// P2P workflow:
+/// 1. Station A enters LISTEN mode (ready to receive)
+/// 2. Station B sends CONNECT to Station A
+/// 3. ARDOP ARQ session is established
+/// 4. B2F protocol exchanges messages
 /// 5. Disconnect
 ///
-/// Referenz: https://github.com/la5nta/pat (P2P mode / listen)
+/// Reference: https://github.com/la5nta/pat (P2P mode / listen)
 
 import Foundation
 
 // MARK: - P2P Session State
 
-/// Zustand der P2P-Verbindung
+/// P2P connection state
 enum P2PState: String, Sendable {
     case idle = "Inaktiv"
     case listening = "Empfangsbereit"
@@ -31,8 +30,8 @@ enum P2PState: String, Sendable {
 
 /// Adapter: ARDOP ARQ Session → B2FTransport.
 ///
-/// Wandelt die ARDOP ARQ Session in ein B2FTransport-Interface um,
-/// damit der B2F-Protokoll-Handler direkt darüber arbeiten kann.
+/// Wraps the ARDOP ARQ session as a B2FTransport interface so
+/// the B2F protocol handler can operate directly over it.
 final class ARDOPB2FTransport: B2FTransport, @unchecked Sendable {
 
     private let session: ARDOPSession
@@ -48,11 +47,12 @@ final class ARDOPB2FTransport: B2FTransport, @unchecked Sendable {
 
     init(session: ARDOPSession, modulator: ARDOPModulator, demodulator: ARDOPDemodulator) {
         self.session = session
+        Log.d("P2P", "ARDOPB2FTransport created")
         self.modulator = modulator
         self.demodulator = demodulator
     }
 
-    /// Aktiviert den Transport und verbindet Callbacks.
+    /// Activates the transport and connects callbacks.
     func activate() async {
         await session.listen()
 
@@ -129,7 +129,7 @@ final class ARDOPB2FTransport: B2FTransport, @unchecked Sendable {
 
     var onProgress: ((B2FSession.Progress) -> Void)?
 
-    /// Daten vom ARQ Session empfangen (Callback).
+    /// Data received from the ARQ session (callback).
     func onARQDataReceived(_ data: Data) {
         bufferLock.lock()
         dataBuffer.append(data)
@@ -147,10 +147,10 @@ final class ARDOPB2FTransport: B2FTransport, @unchecked Sendable {
 
 // MARK: - P2P Manager
 
-/// Winlink P2P Verbindungs-Manager.
+/// Winlink P2P connection manager.
 ///
-/// Koordiniert den direkten Nachrichtenaustausch zwischen zwei Stationen.
-/// Verwendet ARDOP ARQ für den Transport und B2F für den Nachrichtenaustausch.
+/// Coordinates direct message exchange between two stations.
+/// Uses ARDOP ARQ for transport and B2F for message exchange.
 final class WinlinkP2PManager: ObservableObject {
 
     @Published var state: P2PState = .idle
@@ -179,7 +179,7 @@ final class WinlinkP2PManager: ObservableObject {
 
     // MARK: - Listen Mode
 
-    /// Starte Empfangsbereitschaft für eingehende P2P-Verbindungen.
+    /// Start listening for incoming P2P connections.
     @MainActor
     func startListening(bandwidth: ARDOPBandwidth = .bw500) async {
         state = .listening
@@ -212,7 +212,7 @@ final class WinlinkP2PManager: ObservableObject {
         }
     }
 
-    /// Stoppe Empfangsbereitschaft.
+    /// Stop listening for incoming connections.
     @MainActor
     func stopListening() async {
         await ardopSession?.disconnect()
@@ -222,7 +222,7 @@ final class WinlinkP2PManager: ObservableObject {
 
     // MARK: - Connect Mode
 
-    /// Verbinde zu einer anderen Station für P2P-Nachrichtenaustausch.
+    /// Connect to another station for P2P message exchange.
     @MainActor
     func connect(to callsign: String, bandwidth: ARDOPBandwidth = .bw500) async {
         state = .connecting
