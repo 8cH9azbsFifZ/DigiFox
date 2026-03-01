@@ -3,232 +3,232 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		064254843EF46811A0F64A1C /* QSOPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */; };
+		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
+		1E75AB85B60449F382BF827E /* envelope.c in Sources */ = {isa = PBXBuildFile; fileRef = A33A39B26B8F4D1EAF6BD204 /* envelope.c */; };
+		1FF8D79DBBD745A18397D012 /* iir_filter_neon.c in Sources */ = {isa = PBXBuildFile; fileRef = 39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */; };
+		2D0914D5AF03A0443965406F /* RadioProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1CFB413DE6E09F3B76BA9E /* RadioProfile.swift */; };
+		2F4D06F3D4614BF5A33C4584 /* iir_filter.c in Sources */ = {isa = PBXBuildFile; fileRef = DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */; };
+		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
+		3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */; };
+		3D38325041224F90B52708EA /* morse_table.c in Sources */ = {isa = PBXBuildFile; fileRef = D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */; };
+		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
+		3DD47D3D86CC03B027C0D2FD /* FT8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418435FE10D17B959EF0917F /* FT8CRC.swift */; };
+		3DF64C06C73485A71513FA8D /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767548390C6AA54D38A1E9EB /* Message.swift */; };
+		3F51AFAC585AA3A0FBA691A0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */; };
+		45395C5049E39FFC267D9021 /* FT8CostasSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D552626313496C2C53436CC /* FT8CostasSync.swift */; };
+		47CF22F68DE0DB3001BD604B /* CATController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580375583F534EC4B83A224 /* CATController.swift */; };
+		4E98547E4734AB6FB01A7214 /* SerialPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5BB22A1B82163851B452FC /* SerialPort.swift */; };
+		5209CBB95EF2468BAB57B2B6 /* output_filter.c in Sources */ = {isa = PBXBuildFile; fileRef = A03C8C0854D54BDFBBC05609 /* output_filter.c */; };
+		54494D51D2B9EEC718D2F8C7 /* FT8MessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */; };
+		5566A55A16186E0E1581034E /* JS8FrequencyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */; };
+		56454416AC5E0719E6594B03 /* JS8Demodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DED2C96F47C2E9EBA84A99 /* JS8Demodulator.swift */; };
+		56FBE2200A28FCA4671187FE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14583D19B921994C4665B7E /* ContentView.swift */; };
+		5D78E577BC3BA5E4BCC45FE8 /* DigiFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6ED5782F101779C286560E /* DigiFoxApp.swift */; };
+		75A4E287C49744B48AE753DF /* envelope_neon.c in Sources */ = {isa = PBXBuildFile; fileRef = B6D9C5A82F8246258AC46538 /* envelope_neon.c */; };
+		77F0218DF3DE148ABBEEF7A0 /* LogOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */; };
+		7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */; };
+		7FC4C58E90E2D9980692F1C4 /* FT8Demodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */; };
+		8720DD51995DA5D5CA21DC88 /* IOKitUSBSerial.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */; };
+		895AA7806CBE4034873A908F /* cw_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E06FBEBBED340788E8162AD /* cw_decoder.c */; };
+		89CA2F072218AE7A16625C59 /* JS8CostasSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9347F13C309171E2EE0FA2F /* JS8CostasSync.swift */; };
+		9333C074877601AFBDC6BCD0 /* TransmitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192E563AD496F876A00BCCC6 /* TransmitView.swift */; };
+		96F2C9535FBC3CFB73EF0A27 /* FFTProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */; };
 		98BAAD4DDFF444E3E7195165 /* CWView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5721BEC64C1746861BAF08C0 /* CWView.swift */; };
-		B1C2D3E4F5A6B7C8D9E0F1A2 /* MorseKeyShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */; };
-		D1E2F3A4B5C6D7E8F9A0B1C2 /* CWWaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */; };
-		C2D3E4F5A6B7C8D9E0F1A2B3 /* JS8Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */; };
+		9D2A5A6C306BF35B02D878D3 /* Station.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E07C9F63A23433D9AC19B7 /* Station.swift */; };
+		A1B2C3D4E5F67890ABCD1235 /* TruSDXSerialAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */; };
+		A2C0C56E20AE4ED76BDB7BED /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7362B696CD0741400AECD33 /* AppState.swift */; };
+		A610F56A8E75AF78DA03BB31 /* JS8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F13E1F0B7D04F5EDE880BE /* JS8Protocol.swift */; };
+		A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */; };
+		A7D652EBFF30B44F4F2F7202 /* FT8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */; };
 		AA11BB22CC33DD44EE55FF02 /* ggmorse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF01 /* ggmorse.cpp */; };
 		AA11BB22CC33DD44EE55FF04 /* resampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF03 /* resampler.cpp */; };
 		AA11BB22CC33DD44EE55FF06 /* ggmorse_c_api.mm in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */; };
 		AA11BB22CC33DD44EE55FF08 /* GGMorseDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */; };
+		ACFEF84CE50EB7CB5D1D3B5B /* JS8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABA1961DFD56F773EFFBE68 /* JS8CRC.swift */; };
+		ARDP0001A00000000001 /* ARDOPProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000001 /* ARDOPProtocol.swift */; };
+		ARDP0001A00000000002 /* ARDOPFrameType.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000002 /* ARDOPFrameType.swift */; };
+		ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000003 /* ARDOPCRC.swift */; };
+		ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000004 /* ARDOPReedSolomon.swift */; };
+		ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000005 /* ARDOPModulator.swift */; };
+		ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000006 /* ARDOPDemodulator.swift */; };
+		ARQS01A00000000000000000 /* ARDOPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARQS01B00000000000000000 /* ARDOPSession.swift */; };
+		B1C2D3E4F5A6B7C8D9E0F1A2 /* MorseKeyShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */; };
+		B412839F42DFAB78C39D04FD /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F7BC2894D85D4BA72E7D5 /* ClockView.swift */; };
+		C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86CEB297BD5C455ABADCDE45 /* BandPlan.swift */; };
+		C2D3E4F5A6B7C8D9E0F1A2B3 /* JS8Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */; };
+		CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5104ACA8BBA24A30B17A891E /* LocationManager.swift */; };
+		CWTG00000000000000002 /* CWToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CWTG00000000000000001 /* CWToneGenerator.swift */; };
+		CWTG000100010001CWTG0001 /* CWToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CWTG000200020002CWTG0002 /* CWToneGenerator.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C2 /* CWWaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */; };
+		D945D8CD0010A1F5C266E9E0 /* JS8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */; };
+		DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */; };
+		DE0FC3664ACDB359FBF073A6 /* FT8FrequencyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CBE374539C254F1DF51B2 /* FT8FrequencyView.swift */; };
+		E2112DC554CE4287992E1D0B /* kalman.c in Sources */ = {isa = PBXBuildFile; fileRef = 77B9C3D1CE92445794D89AE6 /* kalman.c */; };
+		E2AD17D58F154912ADF38F8C /* multipass_avg.c in Sources */ = {isa = PBXBuildFile; fileRef = 800C5FA98B9F476C903DC872 /* multipass_avg.c */; };
+		E373813AA45A1E073A02B5EF /* FT8MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */; };
+		E409D68845E8DB65BF6A02CD /* HamlibRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48778C5CEC1F377AD721046 /* HamlibRig.swift */; };
+		E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */; };
+		E7CCC16F41B3BF38F3AFB2C9 /* FT8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529893966F36D4348C07DF45 /* FT8Modulator.swift */; };
+		E85DC350C18EFFFB2C57092D /* MorseKeyer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */; };
+		E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B57730840D19777B21EEDA5 /* AudioEngine.swift */; };
+		EB62927D3F374271BA782020 /* simd_detect.c in Sources */ = {isa = PBXBuildFile; fileRef = A2569AA4DE6F4CEE921224EE /* simd_detect.c */; };
+		ED920B204863FC2595479B13 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0A20C208CB0CC2881BF3557 /* LogManager.swift */; };
+		F10FFE3027865181398D74FA /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B97C79A1D2D6953F3C7682 /* Settings.swift */; };
+		FAEB95B767BE19E8293239E5 /* JS8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD4C25E26B814B10704A659 /* JS8LDPC.swift */; };
+		FB80595FCE204D208E63087A /* timing.c in Sources */ = {isa = PBXBuildFile; fileRef = 78E62E17ECB04CC19AD7A050 /* timing.c */; };
+		FDF44DC5CB1DEFB68997677F /* hamlib_missing.c in Sources */ = {isa = PBXBuildFile; fileRef = A03C34181F0E5CFD42AD650F /* hamlib_missing.c */; };
+		FT8L000000000000000012 /* constants.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000002 /* constants.c */; };
+		FT8L000000000000000014 /* ldpc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000004 /* ldpc.c */; };
+		FT8L000000000000000016 /* crc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000006 /* crc.c */; };
+		LZHC01A00000000000000000 /* lzhuf.c in Sources */ = {isa = PBXBuildFile; fileRef = LZHC01B00000000000000000 /* lzhuf.c */; };
+		LZHF01A00000000000000000 /* LZHUFCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = LZHF01B00000000000000000 /* LZHUFCodec.swift */; };
+		PSKR0000000000000002 /* PSKReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = PSKR0000000000000001 /* PSKReporter.swift */; };
+		RBNR0000000000000002 /* RBNReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = RBNR0000000000000001 /* RBNReporter.swift */; };
+		SPOT0000000000000002 /* SpotReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPOT0000000000000001 /* SpotReporter.swift */; };
+		WACT01A00000000000000000 /* WinlinkAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = WACT01B00000000000000000 /* WinlinkAccount.swift */; };
+		WATT01A00000000000000000 /* WinlinkAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = WATT01B00000000000000000 /* WinlinkAttachment.swift */; };
+		WCMP01A00000000000000000 /* ComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WCMP01B00000000000000000 /* ComposeView.swift */; };
+		WCMS01A00000000000000000 /* CMSGatewayAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = WCMS01B00000000000000000 /* CMSGatewayAPI.swift */; };
+		WMLS01A00000000000000000 /* MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WMLS01B00000000000000000 /* MessageListView.swift */; };
+		WMSG01A00000000000000000 /* WinlinkMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = WMSG01B00000000000000000 /* WinlinkMessage.swift */; };
+		WNLK0001A00000000001 /* WinlinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WNLK0001B00000000001 /* WinlinkView.swift */; };
+		WP2P01A00000000000000000 /* WinlinkP2P.swift in Sources */ = {isa = PBXBuildFile; fileRef = WP2P01B00000000000000000 /* WinlinkP2P.swift */; };
+		WPOS01A00000000000000000 /* WinlinkPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPOS01B00000000000000000 /* WinlinkPosition.swift */; };
+		WPR001A00000000000000000 /* WinlinkProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPR001B00000000000000000 /* WinlinkProtocol.swift */; };
+		WSPR0000000000000002 /* WSPRNetReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0000000000000001 /* WSPRNetReporter.swift */; };
 		WSPR0001A00000000001 /* WSPRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000001 /* WSPRView.swift */; };
 		WSPR0001A00000000002 /* WSPRModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000002 /* WSPRModulator.swift */; };
 		WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000003 /* WSPRMessagePack.swift */; };
 		WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000004 /* WSPRProtocol.swift */; };
 		WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000005 /* WSPRDemodulator.swift */; };
-ARDP0001A00000000001 /* ARDOPProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000001 /* ARDOPProtocol.swift */; };
-ARDP0001A00000000002 /* ARDOPFrameType.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000002 /* ARDOPFrameType.swift */; };
-ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000003 /* ARDOPCRC.swift */; };
-ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000004 /* ARDOPReedSolomon.swift */; };
-ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000005 /* ARDOPModulator.swift */; };
-ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000006 /* ARDOPDemodulator.swift */; };
-LZHC01A00000000000000000 /* lzhuf.c in Sources */ = {isa = PBXBuildFile; fileRef = LZHC01B00000000000000000 /* lzhuf.c */; };
-WNLK0001A00000000001 /* WinlinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WNLK0001B00000000001 /* WinlinkView.swift */; };
-		LZHF01A00000000000000000 /* LZHUFCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = LZHF01B00000000000000000 /* LZHUFCodec.swift */; };
-		WACT01A00000000000000000 /* WinlinkAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = WACT01B00000000000000000 /* WinlinkAccount.swift */; };
-		WMSG01A00000000000000000 /* WinlinkMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = WMSG01B00000000000000000 /* WinlinkMessage.swift */; };
-		WATT01A00000000000000000 /* WinlinkAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = WATT01B00000000000000000 /* WinlinkAttachment.swift */; };
-		ARQS01A00000000000000000 /* ARDOPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARQS01B00000000000000000 /* ARDOPSession.swift */; };
-		WPR001A00000000000000000 /* WinlinkProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPR001B00000000000000000 /* WinlinkProtocol.swift */; };
 		WTEL01A00000000000000000 /* WinlinkTelnet.swift in Sources */ = {isa = PBXBuildFile; fileRef = WTEL01B00000000000000000 /* WinlinkTelnet.swift */; };
-		WCMS01A00000000000000000 /* CMSGatewayAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = WCMS01B00000000000000000 /* CMSGatewayAPI.swift */; };
-		WPOS01A00000000000000000 /* WinlinkPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPOS01B00000000000000000 /* WinlinkPosition.swift */; };
-		WP2P01A00000000000000000 /* WinlinkP2P.swift in Sources */ = {isa = PBXBuildFile; fileRef = WP2P01B00000000000000000 /* WinlinkP2P.swift */; };
-		WCMP01A00000000000000000 /* ComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WCMP01B00000000000000000 /* ComposeView.swift */; };
-		WMLS01A00000000000000000 /* MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WMLS01B00000000000000000 /* MessageListView.swift */; };
-		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
-		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
-		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
-		3DD47D3D86CC03B027C0D2FD /* FT8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418435FE10D17B959EF0917F /* FT8CRC.swift */; };
-		45395C5049E39FFC267D9021 /* FT8CostasSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D552626313496C2C53436CC /* FT8CostasSync.swift */; };
-		47CF22F68DE0DB3001BD604B /* CATController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580375583F534EC4B83A224 /* CATController.swift */; };
-		E85DC350C18EFFFB2C57092D /* MorseKeyer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */; };
-		4E98547E4734AB6FB01A7214 /* SerialPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5BB22A1B82163851B452FC /* SerialPort.swift */; };
-		54494D51D2B9EEC718D2F8C7 /* FT8MessagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */; };
-		56454416AC5E0719E6594B03 /* JS8Demodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DED2C96F47C2E9EBA84A99 /* JS8Demodulator.swift */; };
-		56FBE2200A28FCA4671187FE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14583D19B921994C4665B7E /* ContentView.swift */; };
-		5D78E577BC3BA5E4BCC45FE8 /* DigiFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6ED5782F101779C286560E /* DigiFoxApp.swift */; };
-		7FC4C58E90E2D9980692F1C4 /* FT8Demodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */; };
-		8720DD51995DA5D5CA21DC88 /* IOKitUSBSerial.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */; };
-		89CA2F072218AE7A16625C59 /* JS8CostasSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9347F13C309171E2EE0FA2F /* JS8CostasSync.swift */; };
-		9333C074877601AFBDC6BCD0 /* TransmitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192E563AD496F876A00BCCC6 /* TransmitView.swift */; };
-		96F2C9535FBC3CFB73EF0A27 /* FFTProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */; };
-		9D2A5A6C306BF35B02D878D3 /* Station.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E07C9F63A23433D9AC19B7 /* Station.swift */; };
-		A2C0C56E20AE4ED76BDB7BED /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7362B696CD0741400AECD33 /* AppState.swift */; };
-		A610F56A8E75AF78DA03BB31 /* JS8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F13E1F0B7D04F5EDE880BE /* JS8Protocol.swift */; };
-		A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */; };
-		A7D652EBFF30B44F4F2F7202 /* FT8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */; };
-		ACFEF84CE50EB7CB5D1D3B5B /* JS8CRC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABA1961DFD56F773EFFBE68 /* JS8CRC.swift */; };
-		B412839F42DFAB78C39D04FD /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F7BC2894D85D4BA72E7D5 /* ClockView.swift */; };
-		D945D8CD0010A1F5C266E9E0 /* JS8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */; };
-		DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */; };
-		E409D68845E8DB65BF6A02CD /* HamlibRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48778C5CEC1F377AD721046 /* HamlibRig.swift */; };
-		E7CCC16F41B3BF38F3AFB2C9 /* FT8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529893966F36D4348C07DF45 /* FT8Modulator.swift */; };
-				A1B2C3D4E5F67890ABCD1235 /* TruSDXSerialAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */; };
-		E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B57730840D19777B21EEDA5 /* AudioEngine.swift */; };
-		CWTG000100010001CWTG0001 /* CWToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CWTG000200020002CWTG0002 /* CWToneGenerator.swift */; };
-		FAEB95B767BE19E8293239E5 /* JS8LDPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD4C25E26B814B10704A659 /* JS8LDPC.swift */; };
-		FDF44DC5CB1DEFB68997677F /* hamlib_missing.c in Sources */ = {isa = PBXBuildFile; fileRef = A03C34181F0E5CFD42AD650F /* hamlib_missing.c */; };
-		3DF64C06C73485A71513FA8D /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767548390C6AA54D38A1E9EB /* Message.swift */; };
-		F10FFE3027865181398D74FA /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B97C79A1D2D6953F3C7682 /* Settings.swift */; };
-		2D0914D5AF03A0443965406F /* RadioProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1CFB413DE6E09F3B76BA9E /* RadioProfile.swift */; };
-		DE0FC3664ACDB359FBF073A6 /* FT8FrequencyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CBE374539C254F1DF51B2 /* FT8FrequencyView.swift */; };
-		E373813AA45A1E073A02B5EF /* FT8MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */; };
-		5566A55A16186E0E1581034E /* JS8FrequencyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */; };
-		7F6AF5B670633B922C8517AB /* JS8MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */; };
-		E51138FCA16481FB3930D216 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */; };
-		CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5104ACA8BBA24A30B17A891E /* LocationManager.swift */; };
-		C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86CEB297BD5C455ABADCDE45 /* BandPlan.swift */; };
-		895AA7806CBE4034873A908F /* cw_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E06FBEBBED340788E8162AD /* cw_decoder.c */; };
-		2F4D06F3D4614BF5A33C4584 /* iir_filter.c in Sources */ = {isa = PBXBuildFile; fileRef = DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */; };
-		1FF8D79DBBD745A18397D012 /* iir_filter_neon.c in Sources */ = {isa = PBXBuildFile; fileRef = 39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */; };
-		1E75AB85B60449F382BF827E /* envelope.c in Sources */ = {isa = PBXBuildFile; fileRef = A33A39B26B8F4D1EAF6BD204 /* envelope.c */; };
-		75A4E287C49744B48AE753DF /* envelope_neon.c in Sources */ = {isa = PBXBuildFile; fileRef = B6D9C5A82F8246258AC46538 /* envelope_neon.c */; };
-		3D38325041224F90B52708EA /* morse_table.c in Sources */ = {isa = PBXBuildFile; fileRef = D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */; };
-		FB80595FCE204D208E63087A /* timing.c in Sources */ = {isa = PBXBuildFile; fileRef = 78E62E17ECB04CC19AD7A050 /* timing.c */; };
-		5209CBB95EF2468BAB57B2B6 /* output_filter.c in Sources */ = {isa = PBXBuildFile; fileRef = A03C8C0854D54BDFBBC05609 /* output_filter.c */; };
-		E2112DC554CE4287992E1D0B /* kalman.c in Sources */ = {isa = PBXBuildFile; fileRef = 77B9C3D1CE92445794D89AE6 /* kalman.c */; };
-		E2AD17D58F154912ADF38F8C /* multipass_avg.c in Sources */ = {isa = PBXBuildFile; fileRef = 800C5FA98B9F476C903DC872 /* multipass_avg.c */; };
-		EB62927D3F374271BA782020 /* simd_detect.c in Sources */ = {isa = PBXBuildFile; fileRef = A2569AA4DE6F4CEE921224EE /* simd_detect.c */; };
-		3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */; };
-		ED920B204863FC2595479B13 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0A20C208CB0CC2881BF3557 /* LogManager.swift */; };
-		77F0218DF3DE148ABBEEF7A0 /* LogOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */; };
-		3F51AFAC585AA3A0FBA691A0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */; };
-FT8L000000000000000012 /* constants.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000002 /* constants.c */; };
-FT8L000000000000000014 /* ldpc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000004 /* ldpc.c */; };
-FT8L000000000000000016 /* crc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000006 /* crc.c */; };
-		CWTG00000000000000002 /* CWToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CWTG00000000000000001 /* CWToneGenerator.swift */; };
-		PSKR0000000000000002 /* PSKReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = PSKR0000000000000001 /* PSKReporter.swift */; };
-		RBNR0000000000000002 /* RBNReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = RBNR0000000000000001 /* RBNReporter.swift */; };
-		WSPR0000000000000002 /* WSPRNetReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0000000000000001 /* WSPRNetReporter.swift */; };
-		SPOT0000000000000002 /* SpotReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPOT0000000000000001 /* SpotReporter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Protocol.swift; sourceTree = "<group>"; };
 		0ABA1961DFD56F773EFFBE68 /* JS8CRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8CRC.swift; sourceTree = "<group>"; };
 		114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8Modulator.swift; sourceTree = "<group>"; };
+		16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FT8MessageListView.swift; path = DigiFox/Views/FT8/FT8MessageListView.swift; sourceTree = SOURCE_ROOT; };
 		192E563AD496F876A00BCCC6 /* TransmitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransmitView.swift; sourceTree = "<group>"; };
 		1BD4C25E26B814B10704A659 /* JS8LDPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8LDPC.swift; sourceTree = "<group>"; };
+		1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = JS8FrequencyView.swift; path = DigiFox/Views/JS8/JS8FrequencyView.swift; sourceTree = SOURCE_ROOT; };
+		28DB1A768DE04CC3B1D90109 /* cw_decoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cw_decoder.h; sourceTree = "<group>"; };
 		31DED2C96F47C2E9EBA84A99 /* JS8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8Demodulator.swift; sourceTree = "<group>"; };
+		39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = iir_filter_neon.c; sourceTree = "<group>"; };
 		402F7BC2894D85D4BA72E7D5 /* ClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockView.swift; sourceTree = "<group>"; };
+		409CBE374539C254F1DF51B2 /* FT8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FT8FrequencyView.swift; path = DigiFox/Views/FT8/FT8FrequencyView.swift; sourceTree = SOURCE_ROOT; };
 		418435FE10D17B959EF0917F /* FT8CRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8CRC.swift; sourceTree = "<group>"; };
+		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		529893966F36D4348C07DF45 /* FT8Modulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Modulator.swift; sourceTree = "<group>"; };
+		5721BEC64C1746861BAF08C0 /* CWView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CWView.swift; path = DigiFox/Views/CW/CWView.swift; sourceTree = SOURCE_ROOT; };
+		5967F824EFF541CDAAAA5A4D /* kalman.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kalman.h; sourceTree = "<group>"; };
+		62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseKeyer.swift; sourceTree = "<group>"; };
+		64E6B2DAB6BE426995ED44EE /* envelope.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = envelope.h; sourceTree = "<group>"; };
 		69BA09EC57DA87A82A7B35D6 /* DigiFox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DigiFox.entitlements; sourceTree = "<group>"; };
+		6D03778B77934362AA13A632 /* iir_filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iir_filter.h; sourceTree = "<group>"; };
 		70E07C9F63A23433D9AC19B7 /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Station.swift; sourceTree = "<group>"; };
 		7354379C821B3BA96621F06D /* WaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterfallView.swift; sourceTree = "<group>"; };
+		73B97C79A1D2D6953F3C7682 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Settings.swift; path = DigiFox/Models/Settings.swift; sourceTree = SOURCE_ROOT; };
+		767548390C6AA54D38A1E9EB /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Message.swift; path = DigiFox/Models/Message.swift; sourceTree = SOURCE_ROOT; };
+		77B9C3D1CE92445794D89AE6 /* kalman.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kalman.c; sourceTree = "<group>"; };
+		7804783FCEAB470CA69D0BAC /* morse_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = morse_table.h; sourceTree = "<group>"; };
+		78E62E17ECB04CC19AD7A050 /* timing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = timing.c; sourceTree = "<group>"; };
 		7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTProcessor.swift; sourceTree = "<group>"; };
+		800C5FA98B9F476C903DC872 /* multipass_avg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = multipass_avg.c; sourceTree = "<group>"; };
+		8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWDecoder.swift; sourceTree = "<group>"; };
+		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
 		8D552626313496C2C53436CC /* FT8CostasSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8CostasSync.swift; sourceTree = "<group>"; };
 		994344ED8663AD082F19E5F0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		9974C4B72639154796AEA187 /* DigiFox.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DigiFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9974C4B72639154796AEA187 /* DigiFox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DigiFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AA2ADB2B9D65C3DCD2F6787 /* IOKitUSBSerial.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IOKitUSBSerial.m; sourceTree = "<group>"; };
-				A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TruSDXSerialAudio.swift; sourceTree = "<group>"; };
 		9B57730840D19777B21EEDA5 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
-		CWTG000200020002CWTG0002 /* CWToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWToneGenerator.swift; sourceTree = "<group>"; };
+		9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogOutputView.swift; sourceTree = "<group>"; };
+		9E06FBEBBED340788E8162AD /* cw_decoder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cw_decoder.c; sourceTree = "<group>"; };
 		9E5BB22A1B82163851B452FC /* SerialPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialPort.swift; sourceTree = "<group>"; };
 		A03C34181F0E5CFD42AD650F /* hamlib_missing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hamlib_missing.c; sourceTree = "<group>"; };
+		A03C8C0854D54BDFBBC05609 /* output_filter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = output_filter.c; sourceTree = "<group>"; };
+		A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TruSDXSerialAudio.swift; sourceTree = "<group>"; };
+		A2569AA4DE6F4CEE921224EE /* simd_detect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = simd_detect.c; sourceTree = "<group>"; };
+		A33A39B26B8F4D1EAF6BD204 /* envelope.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = envelope.c; sourceTree = "<group>"; };
 		A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackMessage.swift; sourceTree = "<group>"; };
+		A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = simd_detect.h; sourceTree = "<group>"; };
 		A580375583F534EC4B83A224 /* CATController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATController.swift; sourceTree = "<group>"; };
-		62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseKeyer.swift; sourceTree = "<group>"; };
 		A5B2B7A5EA5AE3C44BBD8E24 /* QSOPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QSOPanelView.swift; sourceTree = "<group>"; };
 		A743E44179907C4095C9C0E7 /* FT8Demodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8Demodulator.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF01 /* ggmorse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ggmorse.cpp; path = vendor/ggmorse/ggmorse.cpp; sourceTree = SOURCE_ROOT; };
+		AA11BB22CC33DD44EE55FF03 /* resampler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = resampler.cpp; path = vendor/ggmorse/resampler.cpp; sourceTree = SOURCE_ROOT; };
+		AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ggmorse_c_api.mm; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGMorseDecoder.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ggmorse_c_api.h; sourceTree = "<group>"; };
+		ARDP0001B00000000001 /* ARDOPProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPProtocol.swift; sourceTree = "<group>"; };
+		ARDP0001B00000000002 /* ARDOPFrameType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPFrameType.swift; sourceTree = "<group>"; };
+		ARDP0001B00000000003 /* ARDOPCRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPCRC.swift; sourceTree = "<group>"; };
+		ARDP0001B00000000004 /* ARDOPReedSolomon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPReedSolomon.swift; sourceTree = "<group>"; };
+		ARDP0001B00000000005 /* ARDOPModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPModulator.swift; sourceTree = "<group>"; };
+		ARDP0001B00000000006 /* ARDOPDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPDemodulator.swift; sourceTree = "<group>"; };
+		ARQS01B00000000000000000 /* ARDOPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ARDOPSession.swift; path = DigiFox/Network/ARDOPSession.swift; sourceTree = SOURCE_ROOT; };
 		B14583D19B921994C4665B7E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MorseKeyShape.swift; path = DigiFox/Views/CW/MorseKeyShape.swift; sourceTree = SOURCE_ROOT; };
 		B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8MessagePack.swift; sourceTree = "<group>"; };
+		B6D9C5A82F8246258AC46538 /* envelope_neon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = envelope_neon.c; sourceTree = "<group>"; };
 		B6F13E1F0B7D04F5EDE880BE /* JS8Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8Protocol.swift; sourceTree = "<group>"; };
 		B7362B696CD0741400AECD33 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = JS8MessageListView.swift; path = DigiFox/Views/JS8/JS8MessageListView.swift; sourceTree = SOURCE_ROOT; };
+		C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = JS8Icon.swift; path = DigiFox/Views/JS8/JS8Icon.swift; sourceTree = SOURCE_ROOT; };
+		CB1CFB413DE6E09F3B76BA9E /* RadioProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RadioProfile.swift; path = DigiFox/Models/RadioProfile.swift; sourceTree = SOURCE_ROOT; };
+		CWTG00000000000000001 /* CWToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWToneGenerator.swift; sourceTree = "<group>"; };
+		CWTG000200020002CWTG0002 /* CWToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWToneGenerator.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CWWaterfallView.swift; path = DigiFox/Views/CW/CWWaterfallView.swift; sourceTree = SOURCE_ROOT; };
+		D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = morse_table.c; sourceTree = "<group>"; };
+		DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = iir_filter.c; sourceTree = "<group>"; };
 		DF3072BCA53FEB5F523A08B4 /* BandActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandActivityView.swift; sourceTree = "<group>"; };
+		E0A20C208CB0CC2881BF3557 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		E46D1FCCED3D0598F17EBED7 /* FT8LDPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FT8LDPC.swift; sourceTree = "<group>"; };
 		E9347F13C309171E2EE0FA2F /* JS8CostasSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JS8CostasSync.swift; sourceTree = "<group>"; };
+		EC4B3B9075C2431ABBCAB084 /* output_filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = output_filter.h; sourceTree = "<group>"; };
+		ECCDC51ECD1B43EEBD5686F8 /* multipass_avg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = multipass_avg.h; sourceTree = "<group>"; };
 		F05D9D59090B41B404812A32 /* IOKitUSBSerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IOKitUSBSerial.h; sourceTree = "<group>"; };
 		F48778C5CEC1F377AD721046 /* HamlibRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamlibRig.swift; sourceTree = "<group>"; };
+		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = DigiFox/Views/SettingsView.swift; sourceTree = SOURCE_ROOT; };
 		FA2E4E8F3202061B2C6D40FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		FA40EBB57BCC4A37B40832B6 /* timing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timing.h; sourceTree = "<group>"; };
 		FB6ED5782F101779C286560E /* DigiFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigiFoxApp.swift; sourceTree = "<group>"; };
 		FC88B5C6BE929AAA2439AE99 /* DigiFox-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DigiFox-Bridging-Header.h"; sourceTree = "<group>"; };
-		767548390C6AA54D38A1E9EB /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Message.swift"; path = "DigiFox/Models/Message.swift"; sourceTree = SOURCE_ROOT; };
-		73B97C79A1D2D6953F3C7682 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Settings.swift"; path = "DigiFox/Models/Settings.swift"; sourceTree = SOURCE_ROOT; };
-		CB1CFB413DE6E09F3B76BA9E /* RadioProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "RadioProfile.swift"; path = "DigiFox/Models/RadioProfile.swift"; sourceTree = SOURCE_ROOT; };
-		409CBE374539C254F1DF51B2 /* FT8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FT8FrequencyView.swift"; path = "DigiFox/Views/FT8/FT8FrequencyView.swift"; sourceTree = SOURCE_ROOT; };
-		16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FT8MessageListView.swift"; path = "DigiFox/Views/FT8/FT8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
-		1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8FrequencyView.swift"; path = "DigiFox/Views/JS8/JS8FrequencyView.swift"; sourceTree = SOURCE_ROOT; };
-		BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8MessageListView.swift"; path = "DigiFox/Views/JS8/JS8MessageListView.swift"; sourceTree = SOURCE_ROOT; };
-		5721BEC64C1746861BAF08C0 /* CWView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CWView.swift"; path = "DigiFox/Views/CW/CWView.swift"; sourceTree = SOURCE_ROOT; };
-		B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MorseKeyShape.swift"; path = "DigiFox/Views/CW/MorseKeyShape.swift"; sourceTree = SOURCE_ROOT; };
-		D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CWWaterfallView.swift"; path = "DigiFox/Views/CW/CWWaterfallView.swift"; sourceTree = SOURCE_ROOT; };
-		C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "JS8Icon.swift"; path = "DigiFox/Views/JS8/JS8Icon.swift"; sourceTree = SOURCE_ROOT; };
-		WSPR0001B00000000001 /* WSPRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WSPRView.swift"; path = "DigiFox/Views/WSPR/WSPRView.swift"; sourceTree = SOURCE_ROOT; };
+		FT8L000000000000000002 /* constants.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = constants.c; sourceTree = "<group>"; };
+		FT8L000000000000000003 /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
+		FT8L000000000000000004 /* ldpc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ldpc.c; sourceTree = "<group>"; };
+		FT8L000000000000000005 /* ldpc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ldpc.h; sourceTree = "<group>"; };
+		FT8L000000000000000006 /* crc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = crc.c; sourceTree = "<group>"; };
+		FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crc.h; sourceTree = "<group>"; };
+		LZHC01B00000000000000000 /* lzhuf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lzhuf.c; sourceTree = "<group>"; };
+		LZHF01B00000000000000000 /* LZHUFCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LZHUFCodec.swift; path = DigiFox/Codec/ARDOP/LZHUFCodec.swift; sourceTree = SOURCE_ROOT; };
+		LZHH01B00000000000000000 /* lzhuf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lzhuf.h; sourceTree = "<group>"; };
+		PSKR0000000000000001 /* PSKReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PSKReporter.swift; path = DigiFox/Network/PSKReporter.swift; sourceTree = SOURCE_ROOT; };
+		RBNR0000000000000001 /* RBNReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RBNReporter.swift; path = DigiFox/Network/RBNReporter.swift; sourceTree = SOURCE_ROOT; };
+		SPOT0000000000000001 /* SpotReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpotReporter.swift; path = DigiFox/Network/SpotReporter.swift; sourceTree = SOURCE_ROOT; };
+		WACT01B00000000000000000 /* WinlinkAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkAccount.swift; path = DigiFox/Models/WinlinkAccount.swift; sourceTree = SOURCE_ROOT; };
+		WATT01B00000000000000000 /* WinlinkAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkAttachment.swift; path = DigiFox/Models/WinlinkAttachment.swift; sourceTree = SOURCE_ROOT; };
+		WCMP01B00000000000000000 /* ComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ComposeView.swift; path = DigiFox/Views/Winlink/ComposeView.swift; sourceTree = SOURCE_ROOT; };
+		WCMS01B00000000000000000 /* CMSGatewayAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CMSGatewayAPI.swift; path = DigiFox/Network/CMSGatewayAPI.swift; sourceTree = SOURCE_ROOT; };
+		WMLS01B00000000000000000 /* MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessageListView.swift; path = DigiFox/Views/Winlink/MessageListView.swift; sourceTree = SOURCE_ROOT; };
+		WMSG01B00000000000000000 /* WinlinkMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkMessage.swift; path = DigiFox/Models/WinlinkMessage.swift; sourceTree = SOURCE_ROOT; };
+		WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkView.swift; path = DigiFox/Views/Winlink/WinlinkView.swift; sourceTree = SOURCE_ROOT; };
+		WP2P01B00000000000000000 /* WinlinkP2P.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkP2P.swift; path = DigiFox/Network/WinlinkP2P.swift; sourceTree = SOURCE_ROOT; };
+		WPOS01B00000000000000000 /* WinlinkPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkPosition.swift; path = DigiFox/Network/WinlinkPosition.swift; sourceTree = SOURCE_ROOT; };
+		WPR001B00000000000000000 /* WinlinkProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkProtocol.swift; path = DigiFox/Network/WinlinkProtocol.swift; sourceTree = SOURCE_ROOT; };
+		WSPR0000000000000001 /* WSPRNetReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WSPRNetReporter.swift; path = DigiFox/Network/WSPRNetReporter.swift; sourceTree = SOURCE_ROOT; };
+		WSPR0001B00000000001 /* WSPRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WSPRView.swift; path = DigiFox/Views/WSPR/WSPRView.swift; sourceTree = SOURCE_ROOT; };
 		WSPR0001B00000000002 /* WSPRModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRModulator.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000003 /* WSPRMessagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRMessagePack.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000004 /* WSPRProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRProtocol.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000005 /* WSPRDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRDemodulator.swift; sourceTree = "<group>"; };
-ARDP0001B00000000001 /* ARDOPProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPProtocol.swift; sourceTree = "<group>"; };
-ARDP0001B00000000002 /* ARDOPFrameType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPFrameType.swift; sourceTree = "<group>"; };
-ARDP0001B00000000003 /* ARDOPCRC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPCRC.swift; sourceTree = "<group>"; };
-ARDP0001B00000000004 /* ARDOPReedSolomon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPReedSolomon.swift; sourceTree = "<group>"; };
-ARDP0001B00000000005 /* ARDOPModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPModulator.swift; sourceTree = "<group>"; };
-ARDP0001B00000000006 /* ARDOPDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPDemodulator.swift; sourceTree = "<group>"; };
-LZHC01B00000000000000000 /* lzhuf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lzhuf.c; sourceTree = "<group>"; };
-LZHH01B00000000000000000 /* lzhuf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lzhuf.h; sourceTree = "<group>"; };
-		LZHF01B00000000000000000 /* LZHUFCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LZHUFCodec.swift"; path = "DigiFox/Codec/ARDOP/LZHUFCodec.swift"; sourceTree = SOURCE_ROOT; };
-		WACT01B00000000000000000 /* WinlinkAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkAccount.swift"; path = "DigiFox/Models/WinlinkAccount.swift"; sourceTree = SOURCE_ROOT; };
-		WMSG01B00000000000000000 /* WinlinkMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkMessage.swift"; path = "DigiFox/Models/WinlinkMessage.swift"; sourceTree = SOURCE_ROOT; };
-		WATT01B00000000000000000 /* WinlinkAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkAttachment.swift"; path = "DigiFox/Models/WinlinkAttachment.swift"; sourceTree = SOURCE_ROOT; };
-		ARQS01B00000000000000000 /* ARDOPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ARDOPSession.swift"; path = "DigiFox/Network/ARDOPSession.swift"; sourceTree = SOURCE_ROOT; };
-		WPR001B00000000000000000 /* WinlinkProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkProtocol.swift"; path = "DigiFox/Network/WinlinkProtocol.swift"; sourceTree = SOURCE_ROOT; };
-		WTEL01B00000000000000000 /* WinlinkTelnet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkTelnet.swift"; path = "DigiFox/Network/WinlinkTelnet.swift"; sourceTree = SOURCE_ROOT; };
-		WCMS01B00000000000000000 /* CMSGatewayAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CMSGatewayAPI.swift"; path = "DigiFox/Network/CMSGatewayAPI.swift"; sourceTree = SOURCE_ROOT; };
-		WPOS01B00000000000000000 /* WinlinkPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkPosition.swift"; path = "DigiFox/Network/WinlinkPosition.swift"; sourceTree = SOURCE_ROOT; };
-		WP2P01B00000000000000000 /* WinlinkP2P.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkP2P.swift"; path = "DigiFox/Network/WinlinkP2P.swift"; sourceTree = SOURCE_ROOT; };
-		WCMP01B00000000000000000 /* ComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ComposeView.swift"; path = "DigiFox/Views/Winlink/ComposeView.swift"; sourceTree = SOURCE_ROOT; };
-		WMLS01B00000000000000000 /* MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MessageListView.swift"; path = "DigiFox/Views/Winlink/MessageListView.swift"; sourceTree = SOURCE_ROOT; };
-		WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkView.swift"; path = "DigiFox/Views/Winlink/WinlinkView.swift"; sourceTree = SOURCE_ROOT; };
-		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
-		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
-		9E06FBEBBED340788E8162AD /* cw_decoder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cw_decoder.c; sourceTree = "<group>"; };
-		28DB1A768DE04CC3B1D90109 /* cw_decoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cw_decoder.h; sourceTree = "<group>"; };
-		DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = iir_filter.c; sourceTree = "<group>"; };
-		6D03778B77934362AA13A632 /* iir_filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iir_filter.h; sourceTree = "<group>"; };
-		39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = iir_filter_neon.c; sourceTree = "<group>"; };
-		A33A39B26B8F4D1EAF6BD204 /* envelope.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = envelope.c; sourceTree = "<group>"; };
-		64E6B2DAB6BE426995ED44EE /* envelope.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = envelope.h; sourceTree = "<group>"; };
-		B6D9C5A82F8246258AC46538 /* envelope_neon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = envelope_neon.c; sourceTree = "<group>"; };
-		D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = morse_table.c; sourceTree = "<group>"; };
-		7804783FCEAB470CA69D0BAC /* morse_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = morse_table.h; sourceTree = "<group>"; };
-		78E62E17ECB04CC19AD7A050 /* timing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = timing.c; sourceTree = "<group>"; };
-		FA40EBB57BCC4A37B40832B6 /* timing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timing.h; sourceTree = "<group>"; };
-		A03C8C0854D54BDFBBC05609 /* output_filter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = output_filter.c; sourceTree = "<group>"; };
-		EC4B3B9075C2431ABBCAB084 /* output_filter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = output_filter.h; sourceTree = "<group>"; };
-		77B9C3D1CE92445794D89AE6 /* kalman.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kalman.c; sourceTree = "<group>"; };
-		5967F824EFF541CDAAAA5A4D /* kalman.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kalman.h; sourceTree = "<group>"; };
-		800C5FA98B9F476C903DC872 /* multipass_avg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = multipass_avg.c; sourceTree = "<group>"; };
-		ECCDC51ECD1B43EEBD5686F8 /* multipass_avg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = multipass_avg.h; sourceTree = "<group>"; };
-		A2569AA4DE6F4CEE921224EE /* simd_detect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = simd_detect.c; sourceTree = "<group>"; };
-		A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = simd_detect.h; sourceTree = "<group>"; };
-		8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWDecoder.swift; sourceTree = "<group>"; };
-		AA11BB22CC33DD44EE55FF01 /* ggmorse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "ggmorse.cpp"; path = "vendor/ggmorse/ggmorse.cpp"; sourceTree = SOURCE_ROOT; };
-		AA11BB22CC33DD44EE55FF03 /* resampler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "resampler.cpp"; path = "vendor/ggmorse/resampler.cpp"; sourceTree = SOURCE_ROOT; };
-		AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ggmorse_c_api.mm; sourceTree = "<group>"; };
-		AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGMorseDecoder.swift; sourceTree = "<group>"; };
-		AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ggmorse_c_api.h; sourceTree = "<group>"; };
-		E0A20C208CB0CC2881BF3557 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
-		9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogOutputView.swift; sourceTree = "<group>"; };
-		B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-FT8L000000000000000002 /* constants.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = constants.c; sourceTree = "<group>"; };
-FT8L000000000000000003 /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
-FT8L000000000000000004 /* ldpc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ldpc.c; sourceTree = "<group>"; };
-FT8L000000000000000005 /* ldpc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ldpc.h; sourceTree = "<group>"; };
-FT8L000000000000000006 /* crc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = crc.c; sourceTree = "<group>"; };
-FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crc.h; sourceTree = "<group>"; };
-		CWTG00000000000000001 /* CWToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWToneGenerator.swift; sourceTree = "<group>"; };
-		PSKR0000000000000001 /* PSKReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PSKReporter.swift"; path = "DigiFox/Network/PSKReporter.swift"; sourceTree = SOURCE_ROOT; };
-		RBNR0000000000000001 /* RBNReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "RBNReporter.swift"; path = "DigiFox/Network/RBNReporter.swift"; sourceTree = SOURCE_ROOT; };
-		WSPR0000000000000001 /* WSPRNetReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WSPRNetReporter.swift"; path = "DigiFox/Network/WSPRNetReporter.swift"; sourceTree = SOURCE_ROOT; };
-		SPOT0000000000000001 /* SpotReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SpotReporter.swift"; path = "DigiFox/Network/SpotReporter.swift"; sourceTree = SOURCE_ROOT; };
+		WTEL01B00000000000000000 /* WinlinkTelnet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkTelnet.swift; path = DigiFox/Network/WinlinkTelnet.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -255,9 +255,36 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 				B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */,
 				529893966F36D4348C07DF45 /* FT8Modulator.swift */,
 				02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */,
-			
-				FT8L000000000000000001 /* ft8_lib */,);
+				FT8L000000000000000001 /* ft8_lib */,
+			);
 			path = FT8;
+			sourceTree = "<group>";
+		};
+		31BD6F512F54F41500A65ECE /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				767548390C6AA54D38A1E9EB /* Message.swift */,
+				73B97C79A1D2D6953F3C7682 /* Settings.swift */,
+				CB1CFB413DE6E09F3B76BA9E /* RadioProfile.swift */,
+				409CBE374539C254F1DF51B2 /* FT8FrequencyView.swift */,
+				16DA70B60B4D43C5260AF188 /* FT8MessageListView.swift */,
+				1E995FAEC96220375DFA0A74 /* JS8FrequencyView.swift */,
+				BBD6932AE819EA4B97B52003 /* JS8MessageListView.swift */,
+				FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */,
+				AA11BB22CC33DD44EE55FF01 /* ggmorse.cpp */,
+				AA11BB22CC33DD44EE55FF03 /* resampler.cpp */,
+				LZHF01B00000000000000000 /* LZHUFCodec.swift */,
+				WACT01B00000000000000000 /* WinlinkAccount.swift */,
+				WMSG01B00000000000000000 /* WinlinkMessage.swift */,
+				WATT01B00000000000000000 /* WinlinkAttachment.swift */,
+				WCMP01B00000000000000000 /* ComposeView.swift */,
+				WMLS01B00000000000000000 /* MessageListView.swift */,
+				PSKR0000000000000001 /* PSKReporter.swift */,
+				RBNR0000000000000001 /* RBNReporter.swift */,
+				WSPR0000000000000001 /* WSPRNetReporter.swift */,
+				SPOT0000000000000001 /* SpotReporter.swift */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		35D4949E2C6C8D887CA076C9 = {
@@ -265,7 +292,18 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 			children = (
 				885EECA46C00596EF02074FE /* DigiFox */,
 				D4A564A37B2E058AD68C20FD /* Products */,
+				31BD6F512F54F41500A65ECE /* Recovered References */,
 			);
+			sourceTree = "<group>";
+		};
+		380B32B34CDD352AAAEDC231 /* CW */ = {
+			isa = PBXGroup;
+			children = (
+				5721BEC64C1746861BAF08C0 /* CWView.swift */,
+				B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */,
+			);
+			path = CW;
 			sourceTree = "<group>";
 		};
 		42CA9773F9222CC41D2D11E7 /* Audio */ = {
@@ -286,6 +324,37 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 				A03C34181F0E5CFD42AD650F /* hamlib_missing.c */,
 			);
 			path = HamlibStubs;
+			sourceTree = "<group>";
+		};
+		582CA28724C94084AF5A423F /* CW */ = {
+			isa = PBXGroup;
+			children = (
+				9E06FBEBBED340788E8162AD /* cw_decoder.c */,
+				28DB1A768DE04CC3B1D90109 /* cw_decoder.h */,
+				DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */,
+				6D03778B77934362AA13A632 /* iir_filter.h */,
+				39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */,
+				A33A39B26B8F4D1EAF6BD204 /* envelope.c */,
+				64E6B2DAB6BE426995ED44EE /* envelope.h */,
+				B6D9C5A82F8246258AC46538 /* envelope_neon.c */,
+				D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */,
+				7804783FCEAB470CA69D0BAC /* morse_table.h */,
+				78E62E17ECB04CC19AD7A050 /* timing.c */,
+				FA40EBB57BCC4A37B40832B6 /* timing.h */,
+				A03C8C0854D54BDFBBC05609 /* output_filter.c */,
+				EC4B3B9075C2431ABBCAB084 /* output_filter.h */,
+				77B9C3D1CE92445794D89AE6 /* kalman.c */,
+				5967F824EFF541CDAAAA5A4D /* kalman.h */,
+				800C5FA98B9F476C903DC872 /* multipass_avg.c */,
+				ECCDC51ECD1B43EEBD5686F8 /* multipass_avg.h */,
+				A2569AA4DE6F4CEE921224EE /* simd_detect.c */,
+				A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */,
+				8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */,
+				AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */,
+				AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */,
+				AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */,
+			);
+			path = CW;
 			sourceTree = "<group>";
 		};
 		6458CC06F3E6FB57D79D5340 /* JS8 */ = {
@@ -312,9 +381,24 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 				DEDAD50F16D8183C5F27EE88 /* Models */,
 				16FFA9D4604AE7535C90539A /* Serial */,
 				E17000C80B9D69E84FA2A1CC /* Views */,
-			
-				BDE601E697BC41898EAB17C8 /* Location */,);
+				BDE601E697BC41898EAB17C8 /* Location */,
+			);
 			path = DigiFox;
+			sourceTree = "<group>";
+		};
+		ARDP0001C00000000001 /* ARDOP */ = {
+			isa = PBXGroup;
+			children = (
+				ARDP0001B00000000001 /* ARDOPProtocol.swift */,
+				ARDP0001B00000000002 /* ARDOPFrameType.swift */,
+				ARDP0001B00000000003 /* ARDOPCRC.swift */,
+				ARDP0001B00000000004 /* ARDOPReedSolomon.swift */,
+				ARDP0001B00000000005 /* ARDOPModulator.swift */,
+				ARDP0001B00000000006 /* ARDOPDemodulator.swift */,
+				LZHC01B00000000000000000 /* lzhuf.c */,
+				LZHH01B00000000000000000 /* lzhuf.h */,
+			);
+			path = ARDOP;
 			sourceTree = "<group>";
 		};
 		B59712FC1DAE2E8A56C55184 /* Codec */ = {
@@ -324,9 +408,17 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 				F3C3A79EE0AB64B4B1FA781A /* JS8 */,
 				WSPR0001C00000000002 /* WSPR */,
 				ARDP0001C00000000001 /* ARDOP */,
-			
-				582CA28724C94084AF5A423F /* CW */,);
+				582CA28724C94084AF5A423F /* CW */,
+			);
 			path = Codec;
+			sourceTree = "<group>";
+		};
+		BDE601E697BC41898EAB17C8 /* Location */ = {
+			isa = PBXGroup;
+			children = (
+				5104ACA8BBA24A30B17A891E /* LocationManager.swift */,
+			);
+			path = Location;
 			sourceTree = "<group>";
 		};
 		D4A564A37B2E058AD68C20FD /* Products */ = {
@@ -347,22 +439,12 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 			path = FT8;
 			sourceTree = "<group>";
 		};
-		380B32B34CDD352AAAEDC231 /* CW */ = {
-			isa = PBXGroup;
-			children = (
-				5721BEC64C1746861BAF08C0 /* CWView.swift */,
-				B1C2D3E4F5A6B7C8D9E0F1A3 /* MorseKeyShape.swift */,
-				D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */,
-			);
-			path = CW;
-			sourceTree = "<group>";
-		};
 		DEDAD50F16D8183C5F27EE88 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				70E07C9F63A23433D9AC19B7 /* Station.swift */,
-			
-				86CEB297BD5C455ABADCDE45 /* BandPlan.swift */,);
+				86CEB297BD5C455ABADCDE45 /* BandPlan.swift */,
+			);
 			path = Models;
 			sourceTree = "<group>";
 		};
@@ -406,43 +488,38 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 			path = JS8;
 			sourceTree = "<group>";
 		};
-		BDE601E697BC41898EAB17C8 /* Location */ = {
+		FT8L000000000000000001 /* ft8_lib */ = {
 			isa = PBXGroup;
 			children = (
-				5104ACA8BBA24A30B17A891E /* LocationManager.swift */,
+				FT8L000000000000000002 /* constants.c */,
+				FT8L000000000000000003 /* constants.h */,
+				FT8L000000000000000004 /* ldpc.c */,
+				FT8L000000000000000005 /* ldpc.h */,
+				FT8L000000000000000006 /* crc.c */,
+				FT8L000000000000000007 /* crc.h */,
 			);
-			path = Location;
+			path = ft8_lib;
 			sourceTree = "<group>";
 		};
-		582CA28724C94084AF5A423F /* CW */ = {
+		NETW0001C00000000001 /* Network */ = {
 			isa = PBXGroup;
 			children = (
-				9E06FBEBBED340788E8162AD /* cw_decoder.c */,
-				28DB1A768DE04CC3B1D90109 /* cw_decoder.h */,
-				DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */,
-				6D03778B77934362AA13A632 /* iir_filter.h */,
-				39C5FDB5D0F44A799649F727 /* iir_filter_neon.c */,
-				A33A39B26B8F4D1EAF6BD204 /* envelope.c */,
-				64E6B2DAB6BE426995ED44EE /* envelope.h */,
-				B6D9C5A82F8246258AC46538 /* envelope_neon.c */,
-				D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */,
-				7804783FCEAB470CA69D0BAC /* morse_table.h */,
-				78E62E17ECB04CC19AD7A050 /* timing.c */,
-				FA40EBB57BCC4A37B40832B6 /* timing.h */,
-				A03C8C0854D54BDFBBC05609 /* output_filter.c */,
-				EC4B3B9075C2431ABBCAB084 /* output_filter.h */,
-				77B9C3D1CE92445794D89AE6 /* kalman.c */,
-				5967F824EFF541CDAAAA5A4D /* kalman.h */,
-				800C5FA98B9F476C903DC872 /* multipass_avg.c */,
-				ECCDC51ECD1B43EEBD5686F8 /* multipass_avg.h */,
-				A2569AA4DE6F4CEE921224EE /* simd_detect.c */,
-				A52B590E4EAD4EEEAC4C2428 /* simd_detect.h */,
-				8020A38DE7AD49A787CEBE17 /* CWDecoder.swift */,
-				AA11BB22CC33DD44EE55FF05 /* ggmorse_c_api.mm */,
-				AA11BB22CC33DD44EE55FF09 /* ggmorse_c_api.h */,
-				AA11BB22CC33DD44EE55FF07 /* GGMorseDecoder.swift */,
+				ARQS01B00000000000000000 /* ARDOPSession.swift */,
+				WPR001B00000000000000000 /* WinlinkProtocol.swift */,
+				WTEL01B00000000000000000 /* WinlinkTelnet.swift */,
+				WCMS01B00000000000000000 /* CMSGatewayAPI.swift */,
+				WPOS01B00000000000000000 /* WinlinkPosition.swift */,
+				WP2P01B00000000000000000 /* WinlinkP2P.swift */,
 			);
-			path = CW;
+			path = Network;
+			sourceTree = "<group>";
+		};
+		WNLK0001C00000000001 /* Winlink */ = {
+			isa = PBXGroup;
+			children = (
+				WNLK0001B00000000001 /* WinlinkView.swift */,
+			);
+			path = Winlink;
 			sourceTree = "<group>";
 		};
 		WSPR0001C00000000001 /* WSPR */ = {
@@ -464,55 +541,6 @@ FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType 
 			path = WSPR;
 			sourceTree = "<group>";
 		};
-ARDP0001C00000000001 /* ARDOP */ = {
-isa = PBXGroup;
-children = (
-ARDP0001B00000000001 /* ARDOPProtocol.swift */,
-ARDP0001B00000000002 /* ARDOPFrameType.swift */,
-ARDP0001B00000000003 /* ARDOPCRC.swift */,
-ARDP0001B00000000004 /* ARDOPReedSolomon.swift */,
-ARDP0001B00000000005 /* ARDOPModulator.swift */,
-ARDP0001B00000000006 /* ARDOPDemodulator.swift */,
-LZHC01B00000000000000000 /* lzhuf.c */,
-LZHH01B00000000000000000 /* lzhuf.h */,
-);
-path = ARDOP;
-sourceTree = "<group>";
-};
-WNLK0001C00000000001 /* Winlink */ = {
-isa = PBXGroup;
-children = (
-WNLK0001B00000000001 /* WinlinkView.swift */,
-);
-path = Winlink;
-sourceTree = "<group>";
-};
-		NETW0001C00000000001 /* Network */ = {
-			isa = PBXGroup;
-			children = (
-				ARQS01B00000000000000000 /* ARDOPSession.swift */,
-				WPR001B00000000000000000 /* WinlinkProtocol.swift */,
-				WTEL01B00000000000000000 /* WinlinkTelnet.swift */,
-				WCMS01B00000000000000000 /* CMSGatewayAPI.swift */,
-				WPOS01B00000000000000000 /* WinlinkPosition.swift */,
-				WP2P01B00000000000000000 /* WinlinkP2P.swift */,
-			);
-			path = Network;
-			sourceTree = "<group>";
-		};
-FT8L000000000000000001 /* ft8_lib */ = {
-isa = PBXGroup;
-children = (
-FT8L000000000000000002 /* constants.c */,
-FT8L000000000000000003 /* constants.h */,
-FT8L000000000000000004 /* ldpc.c */,
-FT8L000000000000000005 /* ldpc.h */,
-FT8L000000000000000006 /* crc.c */,
-FT8L000000000000000007 /* crc.h */,
-);
-path = ft8_lib;
-sourceTree = "<group>";
-};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -542,11 +570,6 @@ sourceTree = "<group>";
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					8263661C9454D5A9F74A2452 = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = 90B13F05ED0D3BA23D4F8A8D /* Build configuration list for PBXProject "DigiFox" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -558,7 +581,6 @@ sourceTree = "<group>";
 			);
 			mainGroup = 35D4949E2C6C8D887CA076C9;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -630,7 +652,7 @@ sourceTree = "<group>";
 				B1C2D3E4F5A6B7C8D9E0F1A2 /* MorseKeyShape.swift in Sources */,
 				D1E2F3A4B5C6D7E8F9A0B1C2 /* CWWaterfallView.swift in Sources */,
 				C2D3E4F5A6B7C8D9E0F1A2B3 /* JS8Icon.swift in Sources */,
-							CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */,
+				CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */,
 				C1965A33FBCC4728BD53D4DF /* BandPlan.swift in Sources */,
 				895AA7806CBE4034873A908F /* cw_decoder.c in Sources */,
 				2F4D06F3D4614BF5A33C4584 /* iir_filter.c in Sources */,
@@ -644,7 +666,6 @@ sourceTree = "<group>";
 				E2AD17D58F154912ADF38F8C /* multipass_avg.c in Sources */,
 				EB62927D3F374271BA782020 /* simd_detect.c in Sources */,
 				3C53BD5574B0412DA14C2828 /* CWDecoder.swift in Sources */,
-
 				A1B2C3D4E5F67890ABCD1235 /* TruSDXSerialAudio.swift in Sources */,
 				AA11BB22CC33DD44EE55FF02 /* ggmorse.cpp in Sources */,
 				AA11BB22CC33DD44EE55FF04 /* resampler.cpp in Sources */,
@@ -655,14 +676,14 @@ sourceTree = "<group>";
 				WSPR0001A00000000003 /* WSPRMessagePack.swift in Sources */,
 				WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */,
 				WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */,
-ARDP0001A00000000001 /* ARDOPProtocol.swift in Sources */,
-ARDP0001A00000000002 /* ARDOPFrameType.swift in Sources */,
-ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */,
-ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */,
-ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */,
-ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */,
-LZHC01A00000000000000000 /* lzhuf.c in Sources */,
-WNLK0001A00000000001 /* WinlinkView.swift in Sources */,
+				ARDP0001A00000000001 /* ARDOPProtocol.swift in Sources */,
+				ARDP0001A00000000002 /* ARDOPFrameType.swift in Sources */,
+				ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */,
+				ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */,
+				ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */,
+				ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */,
+				LZHC01A00000000000000000 /* lzhuf.c in Sources */,
+				WNLK0001A00000000001 /* WinlinkView.swift in Sources */,
 				LZHF01A00000000000000000 /* LZHUFCodec.swift in Sources */,
 				WACT01A00000000000000000 /* WinlinkAccount.swift in Sources */,
 				WMSG01A00000000000000000 /* WinlinkMessage.swift in Sources */,
@@ -675,14 +696,15 @@ WNLK0001A00000000001 /* WinlinkView.swift in Sources */,
 				WP2P01A00000000000000000 /* WinlinkP2P.swift in Sources */,
 				WCMP01A00000000000000000 /* ComposeView.swift in Sources */,
 				WMLS01A00000000000000000 /* MessageListView.swift in Sources */,
-FT8L000000000000000012 /* constants.c in Sources */,
-FT8L000000000000000014 /* ldpc.c in Sources */,
-FT8L000000000000000016 /* crc.c in Sources */,
+				FT8L000000000000000012 /* constants.c in Sources */,
+				FT8L000000000000000014 /* ldpc.c in Sources */,
+				FT8L000000000000000016 /* crc.c in Sources */,
 				CWTG00000000000000002 /* CWToneGenerator.swift in Sources */,
 				PSKR0000000000000002 /* PSKReporter.swift in Sources */,
 				RBNR0000000000000002 /* RBNReporter.swift in Sources */,
 				WSPR0000000000000002 /* WSPRNetReporter.swift in Sources */,
-				SPOT0000000000000002 /* SpotReporter.swift in Sources */,);
+				SPOT0000000000000002 /* SpotReporter.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -692,44 +714,44 @@ FT8L000000000000000016 /* crc.c in Sources */,
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DigiFox/DigiFox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = DigiFox/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				DEVELOPMENT_TEAM = C28S8EFBAD;
 				GENERATE_INFOPLIST_FILE = NO;
-				SWIFT_VERSION = 5.0;
-				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
+				);
+				INFOPLIST_FILE = DigiFox/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
+				MARKETING_VERSION = 0.4.0;
 				OTHER_LDFLAGS = "-lhamlib";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
+				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -737,44 +759,44 @@ FT8L000000000000000016 /* crc.c in Sources */,
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DigiFox/DigiFox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = DigiFox/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				DEVELOPMENT_TEAM = C28S8EFBAD;
 				GENERATE_INFOPLIST_FILE = NO;
-				SWIFT_VERSION = 5.0;
-				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
+				);
+				INFOPLIST_FILE = DigiFox/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
+				MARKETING_VERSION = 0.4.0;
 				OTHER_LDFLAGS = "-lhamlib";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
+				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -811,6 +833,7 @@ FT8L000000000000000016 /* crc.c in Sources */,
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = DigiFox/DigiFox.entitlements;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -823,41 +846,38 @@ FT8L000000000000000016 /* crc.c in Sources */,
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = "1,2";
 				GENERATE_INFOPLIST_FILE = NO;
-				SWIFT_VERSION = 5.0;
-				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = "-lhamlib";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -894,6 +914,7 @@ FT8L000000000000000016 /* crc.c in Sources */,
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = DigiFox/DigiFox.entitlements;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -912,42 +933,39 @@ FT8L000000000000000016 /* crc.c in Sources */,
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = "1,2";
 				GENERATE_INFOPLIST_FILE = NO;
-				SWIFT_VERSION = 5.0;
-				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64/Headers",
 				);
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
 					"$(PROJECT_DIR)/vendor/hamlib/include",
 					"$(PROJECT_DIR)/DigiFox/Codec/CW",
-"$(PROJECT_DIR)/vendor/ggmorse",
+					"$(PROJECT_DIR)/vendor/ggmorse",
 					"$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator/Headers",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lhamlib";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				CODE_SIGN_ENTITLEMENTS = "DigiFox/DigiFox.entitlements";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DigiFox/DigiFox-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
