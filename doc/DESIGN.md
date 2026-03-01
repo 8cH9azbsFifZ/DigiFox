@@ -99,6 +99,22 @@ All hardware I/O (serial ports, rig control, ARQ sessions) uses Swift
 `actor` isolation for thread safety. New hardware integrations must follow
 this pattern.
 
+### P7 — Meaningful debug logging
+
+Every significant operation must emit a `Log.d()` message so that runtime
+behaviour can be traced after the fact. This includes at minimum:
+
+- **Connection lifecycle:** device detected / opened / closed / error
+- **Audio path:** sample rate negotiation, resampling, buffer sizes
+- **CAT control:** commands sent, responses received, PTT state changes
+- **Codec cycles:** decode start/end, number of candidates, decoded messages
+- **Network / Winlink:** session state transitions, bytes sent/received
+
+Use the subsystem tag consistently (e.g. `"Audio"`, `"CAT"`, `"FT8-RX"`,
+`"Serial"`, `"Winlink"`). Include key parameters in the message
+(model ID, baud rate, sample rate, frequency, etc.) so logs are
+self-explanatory without cross-referencing source code.
+
 ---
 
 ## 2. Architecture Overview
