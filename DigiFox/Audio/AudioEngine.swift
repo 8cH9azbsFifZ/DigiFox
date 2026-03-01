@@ -9,8 +9,10 @@ class AudioEngine: ObservableObject {
     @Published var spectrumData = [Float]()
     @Published var inputLevel: Float = 0
     @Published var usbAudioConnected = false
-    /// Effective input sample rate (updated on start or when external source is set)
+    /// Effective sample rate of audio in the buffer (always 12 kHz after resampling)
     @Published var effectiveSampleRate: Double = 12000
+    /// Actual hardware input sample rate (for logging only)
+    @Published var hardwareSampleRate: Double = 12000
 
     private var engine = AVAudioEngine()
     private let fftProcessor = FFTProcessor(size: 2048)
@@ -130,9 +132,9 @@ class AudioEngine: ObservableObject {
                 return
             }
             let actualRate = format.sampleRate
-            Log.d("Audio", "start: effective sampleRate=\(actualRate) (requested 12000)")
+            Log.d("Audio", "start: hardware sampleRate=\(actualRate), resampling to 12000")
             inputRate = actualRate
-            DispatchQueue.main.async { self.effectiveSampleRate = actualRate }
+            DispatchQueue.main.async { self.hardwareSampleRate = actualRate }
             inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
                 self?.processInput(buffer)
             }
@@ -272,9 +274,9 @@ class AudioEngine: ObservableObject {
     func feedExternalSamples(_ samples: [Float], sampleRate: Double) {
         inputRate = sampleRate
         DispatchQueue.main.async {
-            if self.effectiveSampleRate != sampleRate {
-                Log.d("Audio", "external sampleRate changed: \(self.effectiveSampleRate) → \(sampleRate)")
-                self.effectiveSampleRate = sampleRate
+            if self.hardwareSampleRate != sampleRate {
+                Log.d("Audio", "external hardware sampleRate changed: \(self.hardwareSampleRate) → \(sampleRate)")
+                self.hardwareSampleRate = sampleRate
             }
         }
         processInput_external(samples, srcRate: sampleRate)
