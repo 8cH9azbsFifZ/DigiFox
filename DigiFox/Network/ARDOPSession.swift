@@ -23,15 +23,7 @@ enum ARDOPSessionState: String, Sendable {
     case failed = "Fehlgeschlagen"
 }
 
-/// ARDOP Bandwidth selection
-enum ARDOPBandwidth: Int, CaseIterable, Sendable {
-    case bw200 = 200
-    case bw500 = 500
-    case bw1000 = 1000
-    case bw2000 = 2000
-
-    var label: String { "\(rawValue) Hz" }
-}
+/// ARDOP Bandwidth selection — see ARDOPFrameType.swift for the canonical definition
 
 /// ARQ Frame für die Sitzungsverwaltung
 struct ARQFrame: Sendable {
@@ -72,7 +64,7 @@ struct ChannelQuality: Sendable {
         if snr > 15 { return .psk8_2000_100 }
         if snr > 10 { return .psk4_1000_100 }
         if snr > 5 { return .psk4_500_100 }
-        if snr > 0 { return .fsk4_500_50 }
+        if snr > 0 { return .fsk4_500_100 }
         return .fsk4_200_50S
     }
 }
@@ -104,7 +96,7 @@ actor ARDOPSession {
     private(set) var state: ARDOPSessionState = .disconnected
     private(set) var remoteCallsign: String?
     private(set) var channelQuality = ChannelQuality()
-    private(set) var currentFrameType: ARDOPFrameType = .fsk4_500_50
+    private(set) var currentFrameType: ARDOPFrameType = .fsk4_500_100
 
     /// Outgoing data queue
     private var txQueue = Data()
@@ -315,7 +307,7 @@ actor ARDOPSession {
 
     private func handlePing(from callsign: String) {
         // Respond with PingAck containing our SNR estimate
-        onTransmitControl?(.pingAck)
+        onTransmitControl?(.ack)
     }
 
     private func handleBreak() {
@@ -365,8 +357,8 @@ actor ARDOPSession {
 
     private func upgradeModulation() {
         let types: [ARDOPFrameType] = [
-            .fsk4_200_50S, .fsk4_200_50, .fsk4_500_50, .fsk4_500_50,
-            .psk4_500_50, .psk4_500_100, .psk4_1000_50, .psk4_1000_100,
+            .fsk4_200_50S, .fsk4_200_50, .fsk4_500_100S, .fsk4_500_100,
+            .psk4_200_100, .psk4_500_100, .psk4_1000_100,
             .psk8_1000_100, .psk4_2000_100, .psk8_2000_100, .qam16_2000_100
         ]
         if let idx = types.firstIndex(of: currentFrameType), idx < types.count - 1 {
@@ -376,8 +368,8 @@ actor ARDOPSession {
 
     private func downgradeModulation() {
         let types: [ARDOPFrameType] = [
-            .fsk4_200_50S, .fsk4_200_50, .fsk4_500_50, .fsk4_500_50,
-            .psk4_500_50, .psk4_500_100, .psk4_1000_50, .psk4_1000_100,
+            .fsk4_200_50S, .fsk4_200_50, .fsk4_500_100S, .fsk4_500_100,
+            .psk4_200_100, .psk4_500_100, .psk4_1000_100,
             .psk8_1000_100, .psk4_2000_100, .psk8_2000_100, .qam16_2000_100
         ]
         if let idx = types.firstIndex(of: currentFrameType), idx > 0 {
@@ -433,7 +425,7 @@ extension ARDOPSession {
             remoteCallsign: remoteCallsign,
             snr: channelQuality.snr,
             frameErrorRate: channelQuality.frameErrorRate,
-            currentMode: currentFrameType.description,
+            currentMode: "\(currentFrameType)",
             txQueueBytes: txQueue.count,
             rxBufferBytes: rxBuffer.count,
             pendingFrames: pendingFrames.count

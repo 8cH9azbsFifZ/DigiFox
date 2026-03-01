@@ -28,6 +28,18 @@ ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */ = {isa = PBXBuildFi
 ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000005 /* ARDOPModulator.swift */; };
 ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARDP0001B00000000006 /* ARDOPDemodulator.swift */; };
 WNLK0001A00000000001 /* WinlinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WNLK0001B00000000001 /* WinlinkView.swift */; };
+		LZHF01A00000000000000000 /* LZHUFCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = LZHF01B00000000000000000 /* LZHUFCodec.swift */; };
+		WACT01A00000000000000000 /* WinlinkAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = WACT01B00000000000000000 /* WinlinkAccount.swift */; };
+		WMSG01A00000000000000000 /* WinlinkMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = WMSG01B00000000000000000 /* WinlinkMessage.swift */; };
+		WATT01A00000000000000000 /* WinlinkAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = WATT01B00000000000000000 /* WinlinkAttachment.swift */; };
+		ARQS01A00000000000000000 /* ARDOPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = ARQS01B00000000000000000 /* ARDOPSession.swift */; };
+		WPR001A00000000000000000 /* WinlinkProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPR001B00000000000000000 /* WinlinkProtocol.swift */; };
+		WTEL01A00000000000000000 /* WinlinkTelnet.swift in Sources */ = {isa = PBXBuildFile; fileRef = WTEL01B00000000000000000 /* WinlinkTelnet.swift */; };
+		WCMS01A00000000000000000 /* CMSGatewayAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = WCMS01B00000000000000000 /* CMSGatewayAPI.swift */; };
+		WPOS01A00000000000000000 /* WinlinkPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPOS01B00000000000000000 /* WinlinkPosition.swift */; };
+		WP2P01A00000000000000000 /* WinlinkP2P.swift in Sources */ = {isa = PBXBuildFile; fileRef = WP2P01B00000000000000000 /* WinlinkP2P.swift */; };
+		WCMP01A00000000000000000 /* ComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WCMP01B00000000000000000 /* ComposeView.swift */; };
+		WMLS01A00000000000000000 /* MessageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WMLS01B00000000000000000 /* MessageListView.swift */; };
 		136A0BADE21424C318DEFD97 /* WaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7354379C821B3BA96621F06D /* WaterfallView.swift */; };
 		3ADAE0FFB514D7FC85E78D19 /* PackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4061FA3A3FDB6066C0F5E61 /* PackMessage.swift */; };
 		3D41BF98CA1833EA912F7B78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 994344ED8663AD082F19E5F0 /* Assets.xcassets */; };
@@ -148,7 +160,19 @@ ARDP0001B00000000003 /* ARDOPCRC.swift */ = {isa = PBXFileReference; lastKnownFi
 ARDP0001B00000000004 /* ARDOPReedSolomon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPReedSolomon.swift; sourceTree = "<group>"; };
 ARDP0001B00000000005 /* ARDOPModulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPModulator.swift; sourceTree = "<group>"; };
 ARDP0001B00000000006 /* ARDOPDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDOPDemodulator.swift; sourceTree = "<group>"; };
-WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkView.swift"; path = "DigiFox/Views/Winlink/WinlinkView.swift"; sourceTree = SOURCE_ROOT; };
+		LZHF01B00000000000000000 /* LZHUFCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LZHUFCodec.swift"; path = "DigiFox/Codec/ARDOP/LZHUFCodec.swift"; sourceTree = SOURCE_ROOT; };
+		WACT01B00000000000000000 /* WinlinkAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkAccount.swift"; path = "DigiFox/Models/WinlinkAccount.swift"; sourceTree = SOURCE_ROOT; };
+		WMSG01B00000000000000000 /* WinlinkMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkMessage.swift"; path = "DigiFox/Models/WinlinkMessage.swift"; sourceTree = SOURCE_ROOT; };
+		WATT01B00000000000000000 /* WinlinkAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkAttachment.swift"; path = "DigiFox/Models/WinlinkAttachment.swift"; sourceTree = SOURCE_ROOT; };
+		ARQS01B00000000000000000 /* ARDOPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ARDOPSession.swift"; path = "DigiFox/Network/ARDOPSession.swift"; sourceTree = SOURCE_ROOT; };
+		WPR001B00000000000000000 /* WinlinkProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkProtocol.swift"; path = "DigiFox/Network/WinlinkProtocol.swift"; sourceTree = SOURCE_ROOT; };
+		WTEL01B00000000000000000 /* WinlinkTelnet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkTelnet.swift"; path = "DigiFox/Network/WinlinkTelnet.swift"; sourceTree = SOURCE_ROOT; };
+		WCMS01B00000000000000000 /* CMSGatewayAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CMSGatewayAPI.swift"; path = "DigiFox/Network/CMSGatewayAPI.swift"; sourceTree = SOURCE_ROOT; };
+		WPOS01B00000000000000000 /* WinlinkPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkPosition.swift"; path = "DigiFox/Network/WinlinkPosition.swift"; sourceTree = SOURCE_ROOT; };
+		WP2P01B00000000000000000 /* WinlinkP2P.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkP2P.swift"; path = "DigiFox/Network/WinlinkP2P.swift"; sourceTree = SOURCE_ROOT; };
+		WCMP01B00000000000000000 /* ComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ComposeView.swift"; path = "DigiFox/Views/Winlink/ComposeView.swift"; sourceTree = SOURCE_ROOT; };
+		WMLS01B00000000000000000 /* MessageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MessageListView.swift"; path = "DigiFox/Views/Winlink/MessageListView.swift"; sourceTree = SOURCE_ROOT; };
+		WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WinlinkView.swift"; path = "DigiFox/Views/Winlink/WinlinkView.swift"; sourceTree = SOURCE_ROOT; };
 		FA1849AA26D00C6A1AC3A124 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SettingsView.swift"; path = "DigiFox/Views/SettingsView.swift"; sourceTree = SOURCE_ROOT; };
 		5104ACA8BBA24A30B17A891E /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		86CEB297BD5C455ABADCDE45 /* BandPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandPlan.swift; sourceTree = "<group>"; };
@@ -325,6 +349,7 @@ WNLK0001B00000000001 /* WinlinkView.swift */ = {isa = PBXFileReference; lastKnow
 				380B32B34CDD352AAAEDC231 /* CW */,
 				WSPR0001C00000000001 /* WSPR */,
 				WNLK0001C00000000001 /* Winlink */,
+				NETW0001C00000000001 /* Network */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -433,6 +458,19 @@ WNLK0001B00000000001 /* WinlinkView.swift */,
 path = Winlink;
 sourceTree = "<group>";
 };
+		NETW0001C00000000001 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				ARQS01B00000000000000000 /* ARDOPSession.swift */,
+				WPR001B00000000000000000 /* WinlinkProtocol.swift */,
+				WTEL01B00000000000000000 /* WinlinkTelnet.swift */,
+				WCMS01B00000000000000000 /* CMSGatewayAPI.swift */,
+				WPOS01B00000000000000000 /* WinlinkPosition.swift */,
+				WP2P01B00000000000000000 /* WinlinkP2P.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -580,7 +618,19 @@ ARDP0001A00000000003 /* ARDOPCRC.swift in Sources */,
 ARDP0001A00000000004 /* ARDOPReedSolomon.swift in Sources */,
 ARDP0001A00000000005 /* ARDOPModulator.swift in Sources */,
 ARDP0001A00000000006 /* ARDOPDemodulator.swift in Sources */,
-WNLK0001A00000000001 /* WinlinkView.swift in Sources */,);
+WNLK0001A00000000001 /* WinlinkView.swift in Sources */,
+				LZHF01A00000000000000000 /* LZHUFCodec.swift in Sources */,
+				WACT01A00000000000000000 /* WinlinkAccount.swift in Sources */,
+				WMSG01A00000000000000000 /* WinlinkMessage.swift in Sources */,
+				WATT01A00000000000000000 /* WinlinkAttachment.swift in Sources */,
+				ARQS01A00000000000000000 /* ARDOPSession.swift in Sources */,
+				WPR001A00000000000000000 /* WinlinkProtocol.swift in Sources */,
+				WTEL01A00000000000000000 /* WinlinkTelnet.swift in Sources */,
+				WCMS01A00000000000000000 /* CMSGatewayAPI.swift in Sources */,
+				WPOS01A00000000000000000 /* WinlinkPosition.swift in Sources */,
+				WP2P01A00000000000000000 /* WinlinkP2P.swift in Sources */,
+				WCMP01A00000000000000000 /* ComposeView.swift in Sources */,
+				WMLS01A00000000000000000 /* MessageListView.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
