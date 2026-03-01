@@ -275,8 +275,15 @@ TX: Text → Morse timing → Rig CW keying via Hamlib (or direct serial)
 |---------|----------|--------|---------|---------|
 | **Hamlib** | `Frameworks/Hamlib.xcframework` | [github.com/Hamlib/Hamlib](https://github.com/Hamlib/Hamlib) | LGPL-2.1 | CAT control for ~400 rig models |
 | | `vendor/hamlib/` | (headers + static lib) | | |
-| **ft8_lib** | `vendor/ft8_lib/` | [github.com/kgoba/ft8_lib](https://github.com/kgoba/ft8_lib) | MIT | FT8 LDPC decoder, CRC-14, constants |
+| **ft8_lib** | `vendor/ft8_lib/`, `Codec/FT8/ft8_lib/` | [github.com/kgoba/ft8_lib](https://github.com/kgoba/ft8_lib) | MIT | FT8 LDPC decoder (`bp_decode`), CRC-14 (`ftx_compute_crc`), Costas/Gray/parity constants |
 | **ggmorse** | `vendor/ggmorse/` | [github.com/ggerganov/ggmorse](https://github.com/ggerganov/ggmorse) | MIT | CW/Morse audio decoder |
+
+ft8_lib is compiled as C source and called directly from Swift via the
+bridging header (`DigiFox-Bridging-Header.h`). The Swift wrappers
+`FT8LDPC.swift` and `FT8CRC.swift` call into the C functions, applying
+LLR normalization (variance → 24.0) and sign convention correction before
+passing data to `bp_decode()`. This replaced the earlier pure-Swift
+reimplementation to improve decode reliability (see commit `9678877`).
 
 ### 5.2 Ported / Adapted Algorithms
 
@@ -285,9 +292,9 @@ implementations. The original sources are noted so updates can be tracked.
 
 | Algorithm | DigiFox file(s) | Ported from | License | Notes |
 |-----------|----------------|-------------|---------|-------|
-| **LDPC(174,91) decode** | `Codec/FT8/FT8LDPC.swift` | ft8_lib `ldpc.c` / WSJT-X `bpdecode174.f90` | MIT / GPL-3.0 | Sum-product belief propagation; parity check matrix from WSJT-X |
-| **LDPC(174,91) encode** | `Codec/FT8/FT8LDPC.swift` | ft8_lib `constants.c` | MIT | Generator matrix (83×12 bytes bitpacked) |
-| **CRC-14 (FT8/JS8)** | `Codec/FT8/FT8CRC.swift`, `Codec/JS8/JS8CRC.swift` | ft8_lib `crc.c` | MIT | Polynomial 0x2757, adapted from [barrgroup.com CRC reference](https://barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code) |
+| **LDPC(174,91) decode** | `Codec/FT8/FT8LDPC.swift` | ft8_lib `ldpc.c` / WSJT-X `bpdecode174.f90` | MIT / GPL-3.0 | Swift wrapper calling C `bp_decode()`; parity check matrix from WSJT-X |
+| **LDPC(174,91) encode** | `Codec/FT8/FT8LDPC.swift` | ft8_lib `constants.c` | MIT | Generator matrix (83×12 bytes bitpacked); uses C constants directly |
+| **CRC-14 (FT8/JS8)** | `Codec/FT8/FT8CRC.swift`, `Codec/JS8/JS8CRC.swift` | ft8_lib `crc.c` | MIT | FT8: calls C `ftx_compute_crc()`. JS8: Swift reimplementation (same polynomial 0x2757) |
 | **LZHUF compression** | `Codec/ARDOP/LZHUFCodec.swift` | wl2k-go [`lzhuf/lzhuf.go`](https://github.com/la5nta/wl2k-go/blob/master/lzhuf/lzhuf.go) | MIT | Original: Okumura/Yoshizaki (1989); N=2048, F=60, threshold=2 |
 | **B2F protocol** | `Network/WinlinkProtocol.swift` | wl2k-go [`fbb/b2f.go`](https://github.com/la5nta/wl2k-go/blob/master/fbb/b2f.go) | MIT | SID exchange, challenge/response, SOH/STX/EOT framing |
 | **ARDOP modem** | `Codec/ARDOP/ARDOP*.swift` | [pflarue/ardop](https://github.com/pflarue/ardop) | Open source | 4FSK/PSK/QAM multi-carrier, leader tones, frame types |
