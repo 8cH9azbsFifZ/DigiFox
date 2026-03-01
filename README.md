@@ -21,7 +21,7 @@ iOS app for digital amateur radio modes (**FT8**, **JS8Call**, **CW**) with USB-
 
 ### (tr)uSDX
 
-The [(tr)uSDX](https://dl2man.de/) is a compact QRP transceiver. DigiFox supports its `CAT_STREAMING` protocol — **both CAT control and audio over a single USB-C cable**:
+The [(tr)uSDX](https://dl2man.de/) is a compact QRP transceiver. DigiFox supports its `CAT_STREAMING` protocol — **both CAT control and audio over a single USB-C cable**. See [CAT Protocol Reference](doc/trusdx-cat-reference.md) for the full command spec (based on [DL2MAN's documentation](https://dl2man.de/5-trusdx-details/)):
 
 - **CAT control** — Kenwood TS-480 protocol subset (Hamlib model 2028)
 - **RX audio streaming** — Enabled via `UA1;` CAT command:
@@ -33,7 +33,7 @@ The [(tr)uSDX](https://dl2man.de/) is a compact QRP transceiver. DigiFox support
 
 ### Digirig
 
-Standard USB audio interface + separate CAT serial connection to any Hamlib-supported transceiver.
+The [Digirig Mobile](https://digirig.net/) is a standard USB audio interface + separate CAT serial connection to any Hamlib-supported transceiver. See [Digirig Reference](doc/digirig-reference.md) for protocol details.
 
 ## Architecture
 
