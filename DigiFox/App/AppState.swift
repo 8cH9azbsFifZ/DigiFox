@@ -481,9 +481,18 @@ class AppState: ObservableObject {
 
     private func runFT8Demodulation() {
         let samples = audioEngine.getBufferedSamples()
-        guard samples.count > FT8Protocol.symbolSamples * FT8Protocol.symbolCount else { return }
+        let needed = FT8Protocol.symbolSamples * FT8Protocol.symbolCount
+        Log.d("FT8-RX", "runFT8Demodulation: \(samples.count) samples buffered, need \(needed), hwRate=\(audioEngine.hardwareSampleRate)")
+        guard samples.count > needed else {
+            Log.d("FT8-RX", "Not enough samples — skipping decode")
+            return
+        }
+        // Compute RMS to verify audio level
+        let rms = sqrt(samples.reduce(0) { $0 + $1 * $1 } / Float(samples.count))
+        Log.d("FT8-RX", "Audio RMS=\(String(format: "%.6f", rms)) (\(samples.count) samples)")
         Task.detached { [weak self, demodulator = self.ft8Demodulator] in
             let results = demodulator.demodulate(samples)
+            Log.d("FT8-RX", "Demodulator returned \(results.count) decoded messages")
             await MainActor.run {
                 for r in results {
                     let msg = RxMessage(

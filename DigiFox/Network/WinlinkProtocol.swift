@@ -3,102 +3,103 @@
 /// Implementiert das B2F (Binary-2-FBB) Protokoll für den Austausch von
 /// Winlink-Nachrichten zwischen Client und RMS-Gateway (oder P2P).
 ///
-/// Protokollablauf:
-/// 1. Connect + Login (Callsign + Password Challenge/Response)
-/// 2. Proposal Phase — Client schlägt Nachrichten zum Senden vor
-/// 3. Accept/Reject — Server akzeptiert oder lehnt Proposals ab
-/// 4. Data Transfer — Nachrichten werden LZHUF-komprimiert übertragen
-/// 5. Disconnect
+/// Der Protokollablauf folgt exakt der Referenzimplementierung:
+///   https://github.com/la5nta/wl2k-go/blob/master/fbb/b2f.go
 ///
-/// Referenz: https://github.com/la5nta/wl2k-go/tree/master/fbb
+/// Binäre Datenübertragung nutzt SOH/STX/EOT-Framing:
+///   SOH (0x01) + Len + Title + NUL + Offset + NUL    (Header)
+///   STX (0x02) + Len + Data (max 125 Bytes)           (Datenblöcke)
+///   EOT (0x04) + Checksum                              (Abschluss)
+///
 /// Referenz: http://www.intangiblesoftware.com/B2F_protocol.pdf
 
 import Foundation
 
 // MARK: - B2F Protocol Constants
 
-/// B2F Protokollkonstanten
+/// B2F Protokollkonstanten (identisch mit wl2k-go/fbb)
 enum B2FProtocol {
-    /// Protocol version string
-    static let version = "FBB"
-    /// Secure login prompt prefix
-    static let loginPrompt = ";PQ: "
-    /// Proposal prefix for message to send
-    static let proposalPrefix = "FC"
-    /// Proposal acceptance
-    static let proposalAccept = "FS"
-    /// Proposal rejection flag
-    static let proposalReject = "FR"
-    /// Proposal defer
-    static let proposalDefer = "FD"
-    /// Final (no more proposals)
-    static let proposalDone = "FF"
-    /// No proposals
-    static let proposalNone = "FQ"
-    /// B2F message type identifier
-    static let messageTypePrivate = "P"
-    static let messageTypeNTS = "T"
-    static let messageTypeBulletin = "B"
-    /// Maximum uncompressed message size (120 KB default)
-    static let maxMessageSize = 120_000
-    /// Line ending
-    static let crlf = "\r\n"
-    /// SID (System Identifier) string
     static let sid = "[DigiFox-1.0-B2FHIM$]"
+    static let loginPrompt = ";PQ: "
+    static let maxBlockSize = 5
+    static let maxMsgLength = 125  // Max chunk size (AX.25 compatible)
+
+    // Framing bytes
+    static let chrNUL: UInt8 = 0x00
+    static let chrSOH: UInt8 = 0x01
+    static let chrSTX: UInt8 = 0x02
+    static let chrEOT: UInt8 = 0x04
+
+    // Proposal commands
+    static let cmdNoMoreMessages = "FF"
+    static let cmdQuit = "FQ"
 }
 
 // MARK: - B2F Message Proposal
 
 /// Nachrichtenvorschlag (Proposal) im B2F-Protokoll
 struct B2FProposal: Sendable {
-    /// Message type (P=Private, T=NTS, B=Bulletin)
-    let messageType: String
+    /// Proposal code: 'C' = Wl2k B2 extended, 'B' = FBB
+    let code: Character
+    /// Message type (EM=email, P=private)
+    let msgType: String
     /// Source callsign
     let from: String
-    /// Destination (callsign@winlink.org or email)
+    /// Destination
     let to: String
-    /// Message ID (unique, 12 chars max)
+    /// Unique message ID (max 12 chars)
     let messageId: String
+    /// Message title/subject
+    var title: String = ""
     /// Uncompressed size in bytes
     let uncompressedSize: Int
     /// Compressed size in bytes
     let compressedSize: Int
-    /// Offset for partial delivery (0 = full message)
-    let offset: Int
+    /// Offset for resumed transfer
+    var offset: Int = 0
 
-    /// Formatiert als B2F-Proposal-Zeile: "FC EM CALL DEST MID SIZE CSIZE OFFSET"
+    /// Compressed data (filled during send/receive)
+    var compressedData: Data = Data()
+
+    /// Proposal answer from remote
+    var answer: ProposalAnswer = .defer_
+
+    /// Formatiert als B2F-Proposal-Zeile: "FC EM MID SIZE CSIZE 0"
     var proposalLine: String {
-        "\(B2FProtocol.proposalPrefix) \(messageType) \(from) \(to) \(messageId) \(uncompressedSize) \(compressedSize) \(offset)"
+        "F\(code) \(msgType) \(messageId) \(uncompressedSize) \(compressedSize) 0"
     }
 }
 
-/// Antwort auf einen Proposal
-enum ProposalResponse: Character, Sendable {
-    case accept = "+"    // Nachricht senden
-    case reject = "-"    // Nachricht ablehnen
-    case `defer` = "="   // Nachricht später
-    case skip = "!"      // Überspringen (Fehler)
-    case hold = "H"      // Halten
+/// Antwort auf einen Proposal (kompatibel mit wl2k-go)
+enum ProposalAnswer: Character, Sendable {
+    case accept = "+"
+    case reject = "-"
+    case defer_ = "="
+    case hold = "H"
 }
 
-// MARK: - B2F Session Handler
+// MARK: - B2F Transport Protocol
 
-/// Verwaltet eine B2F-Protokollsitzung.
-///
-/// Kann sowohl über ARDOP-ARQ als auch über Telnet verwendet werden.
-/// Der Transport-Layer liefert Daten über das `B2FTransport` Protokoll.
+/// Transport-Abstraktion für B2F (Telnet oder ARDOP).
 protocol B2FTransport: AnyObject, Sendable {
     func sendLine(_ line: String) async throws
     func receiveLine() async throws -> String
     func sendData(_ data: Data) async throws
     func receiveData(count: Int) async throws -> Data
+    func sendByte(_ byte: UInt8) async throws
+    func receiveByte() async throws -> UInt8
     var isConnected: Bool { get }
 }
 
-/// B2F Protokoll-Handler für Winlink-Nachrichtenaustausch.
+// MARK: - B2F Session Handler
+
+/// B2F Protokoll-Handler — vollständiger Nachrichtenaustausch.
 ///
-/// Führt den vollständigen B2F-Protokollablauf durch:
-/// Login → Proposals → Datenübertragung → Disconnect
+/// Implementiert den Ablauf wie in wl2k-go/fbb:
+/// 1. SID-Austausch + Challenge/Response Login
+/// 2. Outbound Proposals + Compressed Data (SOH/STX/EOT)
+/// 3. Inbound Proposals + Compressed Data
+/// 4. FF/FQ Terminierung
 final class B2FSession {
 
     private let transport: B2FTransport
@@ -124,210 +125,473 @@ final class B2FSession {
         self.transport = transport
         self.account = account
         self.mailbox = mailbox
+        Log.d("B2F", "Session erstellt für \(account.callsign)")
     }
 
     // MARK: - Main Protocol Flow
 
-    /// Führt eine vollständige B2F-Sitzung durch.
-    /// Sendet und empfängt alle ausstehenden Nachrichten.
     func exchange() async throws {
-        // 1. Login
-        updateProgress(phase: "Anmeldung", detail: "Sende Callsign...")
+        Log.d("B2F", "=== Sitzung Start ===")
+        updateProgress(phase: "Anmeldung", detail: "Sende SID...")
+
+        // 1. Login (SID exchange + challenge/response)
         try await login()
 
-        // 2. Send our proposals (outgoing messages)
-        updateProgress(phase: "Proposals", detail: "Schlage Nachrichten vor...")
-        try await sendProposals()
+        // 2. Send our proposals (outgoing)
+        updateProgress(phase: "Senden", detail: "Outbound proposals...")
+        let quitSent = try await handleOutbound()
 
-        // 3. Process incoming proposals from remote
-        updateProgress(phase: "Empfang", detail: "Prüfe eingehende Nachrichten...")
-        try await receiveProposals()
+        if !quitSent {
+            // 3. Receive proposals (incoming)
+            updateProgress(phase: "Empfang", detail: "Inbound proposals...")
+            let _ = try await handleInbound()
+        }
 
-        // 4. Signal done
-        try await transport.sendLine(B2FProtocol.proposalDone)
-
+        Log.d("B2F", "=== Sitzung Ende: sent=\(progress.messagesSent) rcvd=\(progress.messagesReceived) ===")
         updateProgress(phase: "Abgeschlossen", detail: "Sitzung beendet")
     }
 
     // MARK: - Login Phase
 
     private func login() async throws {
-        // Send SID
-        try await transport.sendLine(B2FSession.formatSID())
+        // Send our SID
+        let ourSID = B2FProtocol.sid
+        Log.d("B2F", "TX SID: \(ourSID)")
+        try await transport.sendLine(ourSID)
 
         // Read remote SID
         let remoteSID = try await transport.receiveLine()
+        Log.d("B2F", "RX SID: \(remoteSID)")
         guard remoteSID.hasPrefix("[") else {
             throw WinlinkError.protocolError("Ungültiger SID: \(remoteSID)")
         }
 
-        // Handle secure login challenge
+        // Handle challenge/response
         let challengeLine = try await transport.receiveLine()
+        Log.d("B2F", "RX Challenge: \(challengeLine)")
+
         if challengeLine.hasPrefix(B2FProtocol.loginPrompt) {
             let challenge = String(challengeLine.dropFirst(B2FProtocol.loginPrompt.count))
             let response = WinlinkAccountManager.shared.challengeResponse(
                 challenge: challenge,
                 password: account.password
             )
-            try await transport.sendLine(";PR: \(response)")
+            let responseLine = ";PR: \(response)"
+            Log.d("B2F", "TX Response: \(responseLine)")
+            try await transport.sendLine(responseLine)
         }
 
-        // Confirm login
-        let loginResponse = try await transport.receiveLine()
-        guard !loginResponse.contains("*** Denied") else {
+        // Read login confirmation
+        let loginResp = try await transport.receiveLine()
+        Log.d("B2F", "RX Login: \(loginResp)")
+        guard !loginResp.contains("*** Denied") else {
             throw WinlinkError.authenticationFailed
         }
     }
 
-    // MARK: - Proposal Phase (Outgoing)
+    // MARK: - Outbound (Sending)
 
-    private func sendProposals() async throws {
-        let outgoing = mailbox.outboxMessages()
-        guard !outgoing.isEmpty else {
-            try await transport.sendLine(B2FProtocol.proposalNone)
-            return
+    /// Sendet Outbound-Proposals und Daten. Gibt zurück ob FQ gesendet wurde.
+    private func handleOutbound() async throws -> Bool {
+        let outbound = mailbox.outboxMessages()
+
+        if outbound.isEmpty {
+            // No outgoing messages — send FF or FQ
+            let cmd = B2FProtocol.cmdNoMoreMessages  // "FF"
+            Log.d("B2F", "TX: \(cmd) (keine ausgehenden Nachrichten)")
+            try await transport.sendLine(cmd)
+            return false
         }
 
-        for message in outgoing {
-            let compressed = compressMessage(message)
-            let proposal = B2FProposal(
-                messageType: B2FProtocol.messageTypePrivate,
+        // Limit to MaxBlockSize proposals per round
+        let batch = Array(outbound.prefix(B2FProtocol.maxBlockSize))
+        var proposals = [B2FProposal]()
+        var checksum: Int64 = 0
+
+        for message in batch {
+            let compressed = lzhuf.compress(message.rawData)
+            let prop = B2FProposal(
+                code: "C",
+                msgType: "EM",
                 from: account.callsign.uppercased(),
                 to: message.to,
                 messageId: message.messageId,
+                title: message.subject,
                 uncompressedSize: message.rawData.count,
                 compressedSize: compressed.count,
-                offset: 0
+                compressedData: compressed
             )
-            try await transport.sendLine(proposal.proposalLine)
+            proposals.append(prop)
+
+            let line = prop.proposalLine
+            Log.d("B2F", "TX Proposal: \(line)")
+            try await transport.sendLine(line)
+
+            // Accumulate proposal checksum (matches wl2k-go)
+            for c in line.unicodeScalars {
+                checksum += Int64(c.value)
+            }
+            checksum += Int64(Character("\r").asciiValue ?? 13)
+
             progress.messagesProposed += 1
-            updateProgress(phase: "Proposals", detail: "\(progress.messagesProposed) Nachrichten vorgeschlagen")
         }
 
-        try await transport.sendLine(B2FProtocol.proposalDone)
+        // Send prompt with checksum
+        checksum = (-checksum) & 0xFF
+        let prompt = String(format: "F> %02X", checksum)
+        Log.d("B2F", "TX Prompt: \(prompt)")
+        try await transport.sendLine(prompt)
 
-        // Read responses
-        let responseLine = try await transport.receiveLine()
-        guard responseLine.hasPrefix(B2FProtocol.proposalAccept) else {
-            return // All rejected or deferred
-        }
-
-        let responses = String(responseLine.dropFirst(B2FProtocol.proposalAccept.count + 1))
-        for (i, response) in responses.enumerated() {
-            guard i < outgoing.count else { break }
-            if response == ProposalResponse.accept.rawValue {
-                let compressed = compressMessage(outgoing[i])
-                try await sendCompressedMessage(compressed)
-                progress.messagesSent += 1
-                progress.bytesTransferred += compressed.count
-                mailbox.markSent(messageId: outgoing[i].messageId)
-                updateProgress(phase: "Sende", detail: "Nachricht \(progress.messagesSent) gesendet")
-            }
-        }
-    }
-
-    // MARK: - Proposal Phase (Incoming)
-
-    private func receiveProposals() async throws {
-        while true {
+        // Read proposal answer (FS +-=...)
+        var reply = ""
+        while reply.isEmpty {
             let line = try await transport.receiveLine()
+            Log.d("B2F", "RX: \(line)")
+            if line.hasPrefix("FS ") {
+                reply = line
+            } else if line.hasPrefix(";") {
+                continue  // Ignore comments
+            } else {
+                throw WinlinkError.protocolError("Unerwartete Antwort: \(line)")
+            }
+        }
 
-            if line.hasPrefix(B2FProtocol.proposalDone) || line.hasPrefix(B2FProtocol.proposalNone) {
-                break
+        // Parse FS response: "FS ++-=" → individual answers
+        let answers = String(reply.dropFirst(3))  // Drop "FS "
+        for (i, ch) in answers.enumerated() {
+            guard i < proposals.count else { break }
+            switch ch {
+            case "+", "Y", "y":
+                proposals[i].answer = .accept
+            case "-", "N", "n", "R", "r":
+                proposals[i].answer = .reject
+            case "=", "L", "l", "H", "h":
+                proposals[i].answer = .defer_
+            default:
+                Log.d("B2F", "Unbekannte Antwort '\(ch)' für Proposal \(i)")
+                proposals[i].answer = .defer_
+            }
+        }
+
+        // Send accepted messages using SOH/STX/EOT framing
+        for (i, prop) in proposals.enumerated() {
+            switch prop.answer {
+            case .accept:
+                Log.d("B2F", "Sende Nachricht \(prop.messageId) (\(prop.compressedSize) bytes)")
+                try await writeCompressed(proposal: prop)
+                mailbox.markSent(messageId: batch[i].messageId)
+                progress.messagesSent += 1
+                progress.bytesTransferred += prop.compressedSize
+                updateProgress(phase: "Sende", detail: "Nachricht \(progress.messagesSent)/\(proposals.count)")
+            case .reject:
+                Log.d("B2F", "Nachricht \(prop.messageId) abgelehnt (bereits empfangen)")
+                mailbox.markSent(messageId: batch[i].messageId)
+            case .defer_, .hold:
+                Log.d("B2F", "Nachricht \(prop.messageId) zurückgestellt")
+            }
+        }
+
+        return false
+    }
+
+    // MARK: - Inbound (Receiving)
+
+    private func handleInbound() async throws -> Bool {
+        var ourChecksum: Int64 = 0
+        var proposals = [B2FProposal]()
+        var quitReceived = false
+
+        loop: while true {
+            let line = try await transport.receiveLine()
+            Log.d("B2F", "RX: \(line)")
+
+            // Ignore comments
+            if line.isEmpty || line.first == ";" { continue }
+
+            guard line.count >= 2, line.first == "F" else {
+                throw WinlinkError.protocolError("Unerwartete Zeile: \(line)")
             }
 
-            if line.hasPrefix(B2FProtocol.proposalPrefix) {
-                let proposal = try parseProposal(line)
-
-                // Check if we already have this message
-                if mailbox.hasMessage(id: proposal.messageId) {
-                    try await transport.sendLine("\(B2FProtocol.proposalAccept) \(ProposalResponse.reject.rawValue)")
-                } else {
-                    try await transport.sendLine("\(B2FProtocol.proposalAccept) \(ProposalResponse.accept.rawValue)")
-
-                    // Receive compressed data
-                    let compressedData = try await transport.receiveData(count: proposal.compressedSize)
-                    let decompressed = lzhuf.decompress(compressedData)
-
-                    // Parse and store message
-                    if let message = parseReceivedMessage(data: decompressed, proposal: proposal) {
-                        mailbox.storeInbox(message: message)
-                        progress.messagesReceived += 1
-                        progress.bytesTransferred += compressedData.count
-                        updateProgress(phase: "Empfang", detail: "\(progress.messagesReceived) Nachrichten empfangen")
-                    }
+            let cmd = String(line.prefix(2))
+            switch cmd {
+            case "FA", "FB", "FC", "FD":
+                // Proposal line — accumulate checksum
+                for c in line.unicodeScalars {
+                    ourChecksum += Int64(c.value)
                 }
+                ourChecksum += Int64(Character("\r").asciiValue ?? 13)
+
+                let prop = try parseProposal(line)
+                proposals.append(prop)
+                Log.d("B2F", "Proposal: \(prop.messageId) (\(prop.compressedSize) bytes)")
+
+            case "FF":
+                Log.d("B2F", "Remote hat keine weiteren Nachrichten")
+                break loop
+
+            case "FQ":
+                Log.d("B2F", "Remote sendet Quit")
+                quitReceived = true
+                break loop
+
+            case "F>":
+                // Verify proposal block checksum
+                ourChecksum = (-ourChecksum) & 0xFF
+                let theirStr = line.count > 3 ? String(line.dropFirst(3)) : "0"
+                let theirs = Int64(theirStr, radix: 16) ?? 0
+                if theirs != ourChecksum {
+                    throw WinlinkError.protocolError("Checksum-Fehler: erwartet \(ourChecksum), empfangen \(theirs)")
+                }
+                Log.d("B2F", "Proposal-Checksum OK (\(ourChecksum))")
+
+                if proposals.isEmpty { break loop }
+
+                // Send our answers
+                try await writeProposalAnswers(proposals)
+                break loop
+
+            default:
+                throw WinlinkError.protocolError("Unbekanntes Kommando: \(cmd)")
+            }
+        }
+
+        // Receive accepted messages
+        for i in 0..<proposals.count {
+            guard proposals[i].answer == .accept else { continue }
+
+            Log.d("B2F", "Empfange Nachricht \(proposals[i].messageId)...")
+            try await readCompressed(proposal: &proposals[i])
+
+            let decompressed = lzhuf.decompress(proposals[i].compressedData)
+            if let message = parseReceivedMessage(data: decompressed, proposal: proposals[i]) {
+                mailbox.storeInbox(message: message)
+                progress.messagesReceived += 1
+                progress.bytesTransferred += proposals[i].compressedSize
+                updateProgress(phase: "Empfang", detail: "\(progress.messagesReceived) empfangen")
+            }
+        }
+
+        return quitReceived
+    }
+
+    // MARK: - Proposal Answer
+
+    private func writeProposalAnswers(_ proposals: [B2FProposal]) async throws {
+        var answers = ""
+        for prop in proposals {
+            if mailbox.hasMessage(id: prop.messageId) {
+                answers += "-"  // Already have it
+                Log.d("B2F", "Proposal \(prop.messageId) ablehnen (bereits vorhanden)")
+            } else {
+                answers += "+"  // Accept it
+                Log.d("B2F", "Proposal \(prop.messageId) akzeptieren")
+            }
+        }
+        let line = "FS \(answers)"
+        Log.d("B2F", "TX: \(line)")
+        try await transport.sendLine(line)
+    }
+
+    // MARK: - SOH/STX/EOT Compressed Data Transfer (matches wl2k-go writeCompressed)
+
+    /// Sendet komprimierte Daten mit SOH/STX/EOT-Framing.
+    private func writeCompressed(proposal: B2FProposal) async throws {
+        let data = proposal.compressedData
+        guard data.count >= 6 else {
+            throw WinlinkError.protocolError("Komprimierte Daten zu kurz")
+        }
+
+        // SOH header: SOH + headerLen + title + NUL + offset + NUL
+        let title = proposal.title
+        let offsetStr = "0"
+        let headerLen = title.count + offsetStr.count + 2
+
+        try await transport.sendByte(B2FProtocol.chrSOH)
+        try await transport.sendByte(UInt8(headerLen & 0xFF))
+        try await transport.sendData(Data(title.utf8))
+        try await transport.sendByte(B2FProtocol.chrNUL)
+        try await transport.sendData(Data(offsetStr.utf8))
+        try await transport.sendByte(B2FProtocol.chrNUL)
+
+        // Data blocks: STX + len + data (max 125 bytes per chunk)
+        var offset = 0
+        var checksum: Int = 0
+
+        while offset < data.count {
+            let remaining = data.count - offset
+            let chunkLen = min(remaining, B2FProtocol.maxMsgLength)
+
+            try await transport.sendByte(B2FProtocol.chrSTX)
+            try await transport.sendByte(UInt8(chunkLen))
+
+            let chunk = data[offset..<(offset + chunkLen)]
+            try await transport.sendData(chunk)
+
+            for byte in chunk {
+                checksum = (checksum + Int(byte)) % 256
+            }
+
+            offset += chunkLen
+            Log.d("B2F", "TX Block: \(chunkLen) bytes (offset \(offset)/\(data.count))")
+        }
+
+        // EOT + checksum
+        checksum = (-checksum) & 0xFF
+        try await transport.sendByte(B2FProtocol.chrEOT)
+        try await transport.sendByte(UInt8(checksum))
+        Log.d("B2F", "TX EOT, checksum=\(checksum)")
+    }
+
+    /// Empfängt komprimierte Daten mit SOH/STX/EOT-Framing.
+    private func readCompressed(proposal: inout B2FProposal) async throws {
+        // Expect SOH
+        let firstByte = try await transport.receiveByte()
+        guard firstByte == B2FProtocol.chrSOH else {
+            if firstByte == Character("*").asciiValue {
+                let errLine = try await transport.receiveLine()
+                throw WinlinkError.protocolError("CMS-Fehler: \(errLine)")
+            }
+            throw WinlinkError.protocolError("SOH erwartet, erhalten: \(firstByte)")
+        }
+
+        // Read header length
+        let headerLen = Int(try await transport.receiveByte())
+
+        // Read title (until NUL)
+        var titleBytes = Data()
+        while true {
+            let b = try await transport.receiveByte()
+            if b == B2FProtocol.chrNUL { break }
+            titleBytes.append(b)
+        }
+        proposal.title = String(data: titleBytes, encoding: .utf8) ?? ""
+
+        // Read offset (until NUL)
+        var offsetBytes = Data()
+        while true {
+            let b = try await transport.receiveByte()
+            if b == B2FProtocol.chrNUL { break }
+            offsetBytes.append(b)
+        }
+
+        // Verify header length
+        let actualHeaderLen = titleBytes.count + offsetBytes.count + 2
+        if headerLen != actualHeaderLen {
+            Log.d("B2F", "Header-Länge stimmt nicht: erwartet \(headerLen), tatsächlich \(actualHeaderLen)")
+        }
+
+        Log.d("B2F", "Empfange: '\(proposal.title)' offset=\(String(data: offsetBytes, encoding: .utf8) ?? "0")")
+
+        // Read data blocks
+        var buf = Data()
+        var checksum: Int = 0
+
+        while true {
+            let c = try await transport.receiveByte()
+
+            switch c {
+            case B2FProtocol.chrSTX:
+                let lenByte = try await transport.receiveByte()
+                let blockLen = lenByte == 0 ? 256 : Int(lenByte)
+
+                let blockData = try await transport.receiveData(count: blockLen)
+                buf.append(blockData)
+                for byte in blockData {
+                    checksum = (checksum + Int(byte)) % 256
+                }
+                Log.d("B2F", "RX Block: \(blockLen) bytes (total: \(buf.count))")
+
+            case B2FProtocol.chrEOT:
+                let csumByte = try await transport.receiveByte()
+                checksum = (checksum + Int(csumByte)) % 256
+                guard checksum == 0 else {
+                    throw WinlinkError.protocolError("Daten-Checksum falsch")
+                }
+                guard buf.count == proposal.compressedSize else {
+                    throw WinlinkError.protocolError("Datenlänge: erwartet \(proposal.compressedSize), empfangen \(buf.count)")
+                }
+                proposal.compressedData = buf
+                Log.d("B2F", "RX komplett: \(buf.count) bytes, Checksum OK")
+                return
+
+            default:
+                throw WinlinkError.protocolError("Unerwartetes Byte im Datenstrom: \(c)")
             }
         }
     }
 
-    // MARK: - Message Encoding/Decoding
-
-    private func compressMessage(_ message: WinlinkMessage) -> Data {
-        return lzhuf.compress(message.rawData)
-    }
-
-    private func sendCompressedMessage(_ data: Data) async throws {
-        // B2F sends data with checksum
-        var payload = data
-        // Append 2-byte checksum (sum of all bytes mod 65536)
-        let checksum = data.reduce(0) { (sum: UInt32, byte: UInt8) in sum &+ UInt32(byte) }
-        payload.append(UInt8(checksum & 0xFF))
-        payload.append(UInt8((checksum >> 8) & 0xFF))
-        try await transport.sendData(payload)
-    }
+    // MARK: - Proposal Parsing
 
     private func parseProposal(_ line: String) throws -> B2FProposal {
+        // Format: "FC EM MID SIZE CSIZE OFFSET" or "FC P FROM TO MID SIZE CSIZE OFFSET"
         let parts = line.split(separator: " ")
-        guard parts.count >= 7 else {
+        guard parts.count >= 5 else {
             throw WinlinkError.protocolError("Ungültiger Proposal: \(line)")
         }
+
+        let code = line.count > 1 ? line[line.index(line.startIndex, offsetBy: 1)] : "C"
+        let msgType = String(parts[1])
+        let messageId = String(parts[2])
+        let size = Int(parts[3]) ?? 0
+        let compressedSize = Int(parts[4]) ?? 0
+        let offset = parts.count > 5 ? (Int(parts[5]) ?? 0) : 0
+
+        guard size > 0, compressedSize > 0 else {
+            throw WinlinkError.protocolError("Proposal mit ungültiger Größe: \(line)")
+        }
+
         return B2FProposal(
-            messageType: String(parts[1]),
-            from: String(parts[2]),
-            to: String(parts[3]),
-            messageId: String(parts[4]),
-            uncompressedSize: Int(parts[5]) ?? 0,
-            compressedSize: Int(parts[6]) ?? 0,
-            offset: parts.count > 7 ? (Int(parts[7]) ?? 0) : 0
+            code: code,
+            msgType: msgType,
+            from: "",  // Filled from message content
+            to: "",
+            messageId: messageId,
+            uncompressedSize: size,
+            compressedSize: compressedSize,
+            offset: offset
         )
     }
 
+    // MARK: - Message Parsing
+
     private func parseReceivedMessage(data: Data, proposal: B2FProposal) -> WinlinkMessage? {
         guard let body = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) else {
+            Log.d("B2F", "Nachricht konnte nicht dekodiert werden")
             return nil
         }
 
-        // Parse MIME-like headers
+        // Parse MIME-style headers (case-insensitive)
         var headers: [String: String] = [:]
         var messageBody = ""
         let lines = body.components(separatedBy: "\r\n")
-        var inHeaders = true
+        var headerEndIdx = 0
 
-        for line in lines {
-            if inHeaders {
-                if line.isEmpty {
-                    inHeaders = false
-                    continue
-                }
-                if let colonIdx = line.firstIndex(of: ":") {
-                    let key = String(line[..<colonIdx]).trimmingCharacters(in: .whitespaces)
-                    let value = String(line[line.index(after: colonIdx)...]).trimmingCharacters(in: .whitespaces)
-                    headers[key] = value
-                }
-            } else {
-                messageBody += line + "\n"
+        for (idx, line) in lines.enumerated() {
+            if line.trimmingCharacters(in: .whitespaces).isEmpty {
+                headerEndIdx = idx
+                break
+            }
+            if let colonIdx = line.firstIndex(of: ":") {
+                let key = String(line[..<colonIdx]).trimmingCharacters(in: .whitespaces).lowercased()
+                let value = String(line[line.index(after: colonIdx)...]).trimmingCharacters(in: .whitespaces)
+                headers[key] = value
             }
         }
 
+        if headerEndIdx + 1 < lines.count {
+            messageBody = lines[(headerEndIdx + 1)...].joined(separator: "\n")
+        }
+
+        Log.d("B2F", "Nachricht geparst: from=\(headers["from"] ?? "?") subject=\(headers["subject"] ?? "?")")
+
         return WinlinkMessage(
             messageId: proposal.messageId,
-            from: headers["From"] ?? proposal.from,
-            to: headers["To"] ?? proposal.to,
-            subject: headers["Subject"] ?? "(Kein Betreff)",
+            from: headers["from"] ?? proposal.from,
+            to: headers["to"] ?? account.callsign,
+            subject: headers["subject"] ?? "(Kein Betreff)",
             body: messageBody.trimmingCharacters(in: .whitespacesAndNewlines),
             date: Date(),
-            mimeType: headers["Content-Type"] ?? "text/plain",
+            mimeType: headers["content-type"] ?? "text/plain",
             folder: .inbox,
             attachments: [],
             isRead: false,
@@ -336,10 +600,6 @@ final class B2FSession {
     }
 
     // MARK: - Helpers
-
-    private static func formatSID() -> String {
-        return B2FProtocol.sid
-    }
 
     private func updateProgress(phase: String, detail: String) {
         progress.phase = phase

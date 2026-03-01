@@ -1,7 +1,6 @@
 import Foundation
 
 class JS8Demodulator {
-    private let ldpc = LDPCCodec()
     private let fft: FFTProcessor
 
     init(fftSize: Int = 4096) {
@@ -63,13 +62,14 @@ class JS8Demodulator {
             for bit in 0..<3 {
                 var p0: Double = 0, p1: Double = 0
                 for tone in 0..<8 {
-                    if (tone >> (2 - bit)) & 1 == 0 { p0 += energies[tone] } else { p1 += energies[tone] }
+                    let grayVal = JS8Protocol.grayDecode[tone]
+                    if (grayVal >> (2 - bit)) & 1 == 0 { p0 += energies[tone] } else { p1 += energies[tone] }
                 }
                 llr[si * 3 + bit] = log(max(p0, 1e-10) / max(p1, 1e-10))
             }
         }
 
-        guard let decoded = ldpc.decode(llr) else { return nil }
+        guard let decoded = LDPC.decode(llr.map { Float($0) }) else { return nil }
         guard JS8CRC.validate(decoded) else { return nil }
 
         let message = PackMessage.unpack(Array(decoded.prefix(JS8Protocol.payloadBits)))

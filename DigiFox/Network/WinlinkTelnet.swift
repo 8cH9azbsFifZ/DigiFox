@@ -55,6 +55,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 
     /// Verbindung zum CMS-Server herstellen.
     func connect() async throws {
+        Log.d("Telnet", "Verbinde zu \(host):\(port)...")
         let endpoint = NWEndpoint.hostPort(
             host: NWEndpoint.Host(host),
             port: NWEndpoint.Port(rawValue: port)!
@@ -70,6 +71,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
                 switch state {
                 case .ready:
                     self?.isConnected = true
+                    Log.d("Telnet", "Verbunden mit \(self?.host ?? "?"):\(self?.port ?? 0)")
                     continuation.resume()
                 case .failed(let error):
                     self?.isConnected = false
@@ -93,6 +95,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 
     /// Verbindung trennen.
     func disconnect() {
+        Log.d("Telnet", "Disconnect von \(host):\(port)")
         connection?.cancel()
         connection = nil
         isConnected = false
@@ -103,32 +106,34 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 
     /// Eine Textzeile senden (mit CRLF).
     func sendLine(_ line: String) async throws {
-        let data = Data((line + B2FProtocol.crlf).utf8)
+        Log.d("Telnet", "TX: \(line)")
+        let data = Data((line + "\r").utf8)  // B2F uses CR only, not CRLF
         try await sendData(data)
     }
 
-    /// Eine Textzeile empfangen (bis CRLF).
+    /// Eine Textzeile empfangen (bis CR oder LF).
     func receiveLine() async throws -> String {
         while true {
-            // Check if we already have a complete line in the buffer
-            if let range = receiveBuffer.range(of: Data("\r\n".utf8)) {
-                let lineData = receiveBuffer[receiveBuffer.startIndex..<range.lowerBound]
-                receiveBuffer.removeSubrange(receiveBuffer.startIndex...range.upperBound.advanced(by: -1))
-                return String(data: Data(lineData), encoding: .utf8) ?? ""
-            }
-
-            // Also check for just \n
-            if let nlIdx = receiveBuffer.firstIndex(of: 0x0A) {
-                var endIdx = nlIdx
-                if nlIdx > receiveBuffer.startIndex && receiveBuffer[receiveBuffer.index(before: nlIdx)] == 0x0D {
-                    endIdx = receiveBuffer.index(before: nlIdx)
+            // Check for CR or LF in buffer
+            if let crIdx = receiveBuffer.firstIndex(of: 0x0D) {
+                let lineData = receiveBuffer[receiveBuffer.startIndex..<crIdx]
+                receiveBuffer.removeSubrange(receiveBuffer.startIndex...crIdx)
+                // Also consume following LF if present
+                if !receiveBuffer.isEmpty && receiveBuffer[receiveBuffer.startIndex] == 0x0A {
+                    receiveBuffer.removeFirst()
                 }
-                let lineData = receiveBuffer[receiveBuffer.startIndex..<endIdx]
+                let line = String(data: Data(lineData), encoding: .utf8) ?? ""
+                Log.d("Telnet", "RX: \(line)")
+                return line
+            }
+            if let nlIdx = receiveBuffer.firstIndex(of: 0x0A) {
+                let lineData = receiveBuffer[receiveBuffer.startIndex..<nlIdx]
                 receiveBuffer.removeSubrange(receiveBuffer.startIndex...nlIdx)
-                return String(data: Data(lineData), encoding: .utf8) ?? ""
+                let line = String(data: Data(lineData), encoding: .utf8) ?? ""
+                Log.d("Telnet", "RX: \(line)")
+                return line
             }
 
-            // Read more data
             let chunk = try await readFromNetwork()
             receiveBuffer.append(chunk)
         }
@@ -162,6 +167,17 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
         receiveBuffer.removeFirst(count)
         return Data(data)
     }
+
+    func sendByte(_ byte: UInt8) async throws {
+        try await sendData(Data([byte]))
+    }
+
+    func receiveByte() async throws -> UInt8 {
+        let data = try await receiveData(count: 1)
+        return data[0]
+    }
+
+    var onProgress: ((B2FSession.Progress) -> Void)?
 
     // MARK: - Network I/O
 
