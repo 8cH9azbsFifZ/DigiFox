@@ -7,6 +7,15 @@ struct CWView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // CW Waterfall (horizontal, monochrome, bandwidth-adapted)
+                CWWaterfallView(
+                    data: appState.waterfallData,
+                    sampleRate: appState.audioEngine.effectiveSampleRate,
+                    centerFreq: 700,
+                    displayBandwidth: 800
+                )
+                .frame(height: 100)
+
                 // Frequency & speed display
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
@@ -111,8 +120,7 @@ struct CWView: View {
                         .onSubmit { appState.sendCW() }
 
                     Button { appState.sendCW() } label: {
-                        Image(systemName: "bolt.fill")
-                            .foregroundStyle(.white)
+                        MorseKeyIcon(size: 20, color: .white)
                             .padding(8)
                             .background(Circle().fill(.orange))
                     }

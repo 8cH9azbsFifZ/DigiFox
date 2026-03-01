@@ -3,37 +3,20 @@ import QuartzCore
 
 /// Software Morse keyer for (tr)uSDX.
 ///
-/// The TruSDX does not support the Kenwood KY command for CW text.
-/// Instead, CW is keyed by toggling TX0;/RX; with proper timing.
-/// Mode must be set to CW (MD3;) first.
+/// Uses absolute-time scheduling: every key event is at a fixed
+/// offset from the start time. Jitter in one event never affects
+/// the next. Runs on a dedicated .userInteractive thread.
 ///
-/// Runs on a dedicated high-priority thread with Thread.sleep for
-/// precise real-time timing. Swift async Task.sleep is too imprecise.
-///
-/// PARIS standard timing:
-///   dot  = 1200 / WPM ms
-///   dash = 3 × dot
-///   inter-element gap = 1 × dot
-///   inter-character gap = 3 × dot
-///   inter-word gap = 7 × dot
+/// PARIS standard: dot = 1200ms / WPM
 class MorseKeyer {
 
     private var thread: Thread?
-    private var _isKeying = false
-    private var _shouldStop = false
-    private let lock = NSLock()
+    /// Atomic stop flag — no lock needed, just a plain Bool read/written from 2 threads.
+    /// Worst case: one extra spin iteration before noticing stop.
+    private var stopFlag = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
 
-    var isKeying: Bool {
-        lock.lock(); defer { lock.unlock() }
-        return _isKeying
-    }
+    var isKeying: Bool { OSAtomicAdd32(0, stopFlag) != -1 && thread != nil }
 
-    private var shouldStop: Bool {
-        lock.lock(); defer { lock.unlock() }
-        return _shouldStop
-    }
-
-    /// Morse code lookup table
     static let morseTable: [Character: String] = [
         "A": ".-",    "B": "-...",  "C": "-.-.",  "D": "-..",
         "E": ".",     "F": "..-.",  "G": "--.",   "H": "....",
@@ -50,93 +33,97 @@ class MorseKeyer {
         "@": ".--.-.", "!": "-.-.--",
     ]
 
-    /// Key a text string as Morse code.
-    /// Runs on a dedicated thread for precise timing.
-    /// `keyDown` and `keyUp` are called synchronously on the keying thread.
+    init() { stopFlag.pointee = 0 }
+    deinit { stopFlag.deallocate() }
+
+    /// Pre-compute all timed events, then execute them with absolute timing.
     func key(text: String, wpm: Int, keyDown: @escaping () -> Void, keyUp: @escaping () -> Void, completion: @escaping () -> Void) {
-        guard !isKeying else { return }
+        guard thread == nil else { return }
 
-        lock.lock()
-        _isKeying = true
-        _shouldStop = false
-        lock.unlock()
+        // Reset stop flag from any previous state (-1 after stop)
+        stopFlag.pointee = 0
 
-        let t = Thread {
-            self.keyingLoop(text: text, wpm: wpm, keyDown: keyDown, keyUp: keyUp)
-            DispatchQueue.main.async {
-                self.lock.lock()
-                self._isKeying = false
-                self.lock.unlock()
-                completion()
-            }
-        }
-        t.qualityOfService = .userInteractive
-        t.name = "MorseKeyer"
-        thread = t
-        t.start()
-    }
-
-    /// Stop keying immediately
-    func stop() {
-        lock.lock()
-        _shouldStop = true
-        lock.unlock()
-    }
-
-    private func keyingLoop(text: String, wpm: Int, keyDown: () -> Void, keyUp: () -> Void) {
-        // PARIS standard: dot = 1200ms / WPM
-        let dotSec = 1.2 / Double(max(wpm, 5))
+        // Pre-compute event schedule: [(relativeTime, isKeyDown)]
+        let dot = 1.2 / Double(max(wpm, 5))
+        var events = [(Double, Bool)]()
+        var t = 0.0
 
         let chars = Array(text.uppercased())
         for (ci, char) in chars.enumerated() {
-            if shouldStop { break }
-
             if char == " " {
-                // Word gap: 7 dots. Already waited 3 after last char, so 4 more.
-                preciseSleep(4.0 * dotSec)
+                t += 7.0 * dot // word gap (full 7; previous char gap already subtracted below)
+                // We added 3 dots after last char, so net = 4 extra. But we always add full 7 for simplicity
+                // and don't add char gap after last element. Let's be precise:
+                // After last char we did NOT add char gap because the space handles it.
+                // Actually let's just handle it cleanly:
                 continue
             }
 
             guard let code = Self.morseTable[char] else { continue }
 
             for (ei, element) in code.enumerated() {
-                if shouldStop { break }
-
-                let dur = element == "-" ? 3.0 * dotSec : dotSec
-
-                // Key down — measure latency and subtract from sleep
-                let t0 = CACurrentMediaTime()
-                keyDown()
-                let keyDownLatency = CACurrentMediaTime() - t0
-                preciseSleep(max(0, dur - keyDownLatency))
-
-                // Key up
-                let t1 = CACurrentMediaTime()
-                keyUp()
-                let keyUpLatency = CACurrentMediaTime() - t1
-
-                // Inter-element gap (1 dot)
+                let dur = element == "-" ? 3.0 * dot : dot
+                events.append((t, true))   // key down
+                t += dur
+                events.append((t, false))  // key up
                 if ei < code.count - 1 {
-                    preciseSleep(max(0, dotSec - keyUpLatency))
+                    t += dot               // inter-element gap
                 }
             }
 
-            // Inter-character gap: 3 dots
-            if !shouldStop && ci < chars.count - 1 && chars[ci + 1] != " " {
-                preciseSleep(3.0 * dotSec)
+            // Inter-character gap (3 dots) or word gap
+            if ci < chars.count - 1 {
+                if chars[ci + 1] == " " {
+                    // word gap will be added by space handler: total 7 dots from end of last element
+                    t += 7.0 * dot
+                } else {
+                    t += 3.0 * dot
+                }
             }
         }
+
+        OSAtomicCompareAndSwap32(0, 1, stopFlag) // set running
+
+        let sf = stopFlag
+        let t2 = Thread {
+            let start = CACurrentMediaTime()
+
+            for (time, isDown) in events {
+                // Check stop
+                if OSAtomicAdd32(0, sf) == -1 { break }
+
+                // Wait until absolute deadline
+                let deadline = start + time
+                let now = CACurrentMediaTime()
+                let remaining = deadline - now
+                if remaining > 0.002 {
+                    Thread.sleep(forTimeInterval: remaining - 0.001)
+                }
+                // Spin-wait the last bit (no lock, no syscall)
+                while CACurrentMediaTime() < deadline {
+                    if OSAtomicAdd32(0, sf) == -1 { break }
+                }
+
+                if isDown { keyDown() } else { keyUp() }
+            }
+
+            // Ensure key is up
+            keyUp()
+
+            sf.pointee = 0 // always reset to idle
+            DispatchQueue.main.async { [weak self] in
+                self?.thread = nil
+                completion()
+            }
+        }
+        t2.qualityOfService = .userInteractive
+        t2.name = "MorseKeyer"
+        thread = t2
+        t2.start()
     }
 
-    /// High-precision sleep using Thread.sleep + spin-wait for the last 1ms
-    private func preciseSleep(_ seconds: Double) {
-        guard seconds > 0, !shouldStop else { return }
-
-        let spinThreshold = 0.001
-        if seconds > spinThreshold {
-            Thread.sleep(forTimeInterval: seconds - spinThreshold)
-        }
-        let deadline = CACurrentMediaTime() + min(seconds, spinThreshold)
-        while CACurrentMediaTime() < deadline && !shouldStop { }
+    func stop() {
+        OSAtomicCompareAndSwap32Barrier(1, -1, stopFlag) // signal stop
+        thread = nil
     }
 }

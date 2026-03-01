@@ -3,6 +3,8 @@
 
 #import "IOKitUSBSerial.h"
 #include <hamlib/rig.h>
-#include "cw_decoder.h"
+// Old CW decoder disabled — replaced by ggmorse
+// #include "cw_decoder.h"
+#include "ggmorse_c_api.h"
 
 #endif

@@ -60,6 +60,10 @@ actor CATController {
 
     var isConnected: Bool { state.isConnected }
 
+    /// Direct access to HamlibRig for fire-and-forget CW keying.
+    /// Caller is responsible for thread safety (use a serial queue).
+    func getHamlibRig() -> HamlibRig? { hamlibRig }
+
     // MARK: - PTT
 
     func pttOn() throws {

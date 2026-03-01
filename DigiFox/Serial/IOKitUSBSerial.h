@@ -75,6 +75,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Current baud rate
 @property (nonatomic, readonly) NSUInteger baudRate;
 
+/// Raw file descriptor for direct POSIX write (used by CW keyer for zero-latency writes)
+@property (nonatomic, readonly) int fileDescriptor;
+
 @end
 
 NS_ASSUME_NONNULL_END
