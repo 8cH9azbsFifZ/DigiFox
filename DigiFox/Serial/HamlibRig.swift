@@ -247,6 +247,16 @@ final class HamlibRig {
         let rate = Int(capsPtr.pointee.serial_rate_max)
         return rate > 0 ? rate : 9600
     }
+
+    /// Query the default baud rate for a given Hamlib model ID.
+    /// Temporarily initializes the rig to read the backend's default serial rate.
+    static func defaultBaudRate(for modelId: Int) -> Int {
+        loadBackends()
+        guard modelId > 0, let rig = rig_init(rig_model_t(modelId)) else { return 9600 }
+        let rate = Int(rig.pointee.state.rigport.parm.serial.rate)
+        rig_cleanup(rig)
+        return rate > 0 ? rate : 9600
+    }
 }
 
 // MARK: - Hamlib Mode Helpers

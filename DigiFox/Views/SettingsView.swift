@@ -128,7 +128,13 @@ struct SettingsView: View {
 
                 Section("Rig (Hamlib)") {
                     NavigationLink {
-                        RigModelPicker(models: filteredModels, selectedModel: $settings.rigModel, searchText: $searchText)
+                        RigModelPicker(models: filteredModels, selectedModel: $settings.rigModel, searchText: $searchText) { modelId in
+                            guard modelId > 0, settings.radioProfile == .digirig else { return }
+                            Task.detached {
+                                let rate = HamlibRig.defaultBaudRate(for: modelId)
+                                await MainActor.run { settings.rigSerialRate = rate }
+                            }
+                        }
                     } label: {
                         HStack {
                             Text("Rig Model"); Spacer()
@@ -267,6 +273,7 @@ struct RigModelPicker: View {
     let models: [HamlibModelInfo]
     @Binding var selectedModel: Int
     @Binding var searchText: String
+    var onModelSelected: ((Int) -> Void)?
 
     private var manufacturers: [String] {
         Array(Set(models.map { $0.manufacturer })).sorted()
@@ -275,7 +282,10 @@ struct RigModelPicker: View {
     var body: some View {
         List {
             Section {
-                Button("No rig (disabled)") { selectedModel = 0 }
+                Button("No rig (disabled)") {
+                    selectedModel = 0
+                    onModelSelected?(0)
+                }
                     .foregroundStyle(selectedModel == 0 ? .blue : .primary)
             }
             ForEach(manufacturers, id: \.self) { mfg in
@@ -283,6 +293,7 @@ struct RigModelPicker: View {
                     ForEach(models.filter { $0.manufacturer == mfg }) { model in
                         Button {
                             selectedModel = model.id
+                            onModelSelected?(model.id)
                         } label: {
                             HStack {
                                 Text(model.name)
