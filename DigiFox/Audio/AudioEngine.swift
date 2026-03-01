@@ -240,7 +240,8 @@ class AudioEngine: ObservableObject {
         // Use the engine's output format for the player connection
         let mixerFormat = engine.mainMixerNode.outputFormat(forBus: 0)
         let outputRate = mixerFormat.sampleRate > 0 ? mixerFormat.sampleRate : 12000.0
-        Log.d("Audio", "transmit: \(samples.count) samples at 12kHz, mixer at \(outputRate)Hz")
+        let outputChannels = mixerFormat.channelCount > 0 ? mixerFormat.channelCount : 1
+        Log.d("Audio", "transmit: \(samples.count) samples at 12kHz, mixer at \(outputRate)Hz ch=\(outputChannels)")
 
         // Resample TX audio from 12 kHz to engine output rate if needed
         let txSamples: [Float]
@@ -261,21 +262,22 @@ class AudioEngine: ObservableObject {
             txSamples = samples
         }
 
-        guard let format = AVAudioFormat(standardFormatWithSampleRate: outputRate, channels: 1) else {
-            DispatchQueue.main.async { self.isTransmitting = false }
-            completion?()
-            return
-        }
+        // Use the mixer's own format to avoid format mismatch crashes
+        let format = mixerFormat
         let count = AVAudioFrameCount(txSamples.count)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: count) else {
+            Log.d("Audio", "transmit: failed to create buffer")
             DispatchQueue.main.async { self.isTransmitting = false }
             completion?()
             return
         }
         buffer.frameLength = count
-        if let cd = buffer.floatChannelData?[0] {
-            txSamples.withUnsafeBufferPointer { src in
-                cd.update(from: src.baseAddress!, count: txSamples.count)
+        // Fill channel 0; if stereo, channel 1 gets the same data
+        for ch in 0..<Int(outputChannels) {
+            if let cd = buffer.floatChannelData?[ch] {
+                txSamples.withUnsafeBufferPointer { src in
+                    cd.update(from: src.baseAddress!, count: txSamples.count)
+                }
             }
         }
 
@@ -290,6 +292,15 @@ class AudioEngine: ObservableObject {
                 self?.engine.detach(player)
                 completion?()
             }
+        }
+        // Guard against crash if engine stopped between schedule and play
+        guard engine.isRunning else {
+            Log.d("Audio", "transmit: engine stopped before play, aborting")
+            engine.detach(player)
+            monitorPlayer = nil
+            DispatchQueue.main.async { self.isTransmitting = false }
+            completion?()
+            return
         }
         player.play()
     }
