@@ -19,8 +19,9 @@ digital modes, plus Winlink email on iPhone/iPad.
 6. [Codec Details](#6-codec-details)
 7. [Hardware Integration](#7-hardware-integration)
 8. [Winlink / ARDOP Networking](#8-winlink--ardop-networking)
-9. [Build System](#9-build-system)
-10. [Conventions](#10-conventions)
+9. [Spot Reporters](#9-spot-reporters)
+10. [Build System](#10-build-system)
+11. [Conventions](#11-conventions)
 
 ---
 
@@ -318,6 +319,9 @@ implementations. The original sources are noted so updates can be tracked.
 | **WSPR message packing** | `Codec/WSPR/WSPRMessagePack.swift` | WSJT-X | GPL-3.0 | Callsign/grid encoding with standard character mapping |
 | **Winlink Telnet transport** | `Network/WinlinkTelnet.swift` | wl2k-go [`transport/telnet`](https://github.com/la5nta/wl2k-go/tree/master/transport/telnet) | MIT | TCP connection to CMS servers |
 | **Winlink P2P mode** | `Network/WinlinkP2P.swift` | [la5nta/pat](https://github.com/la5nta/pat) | MIT | Direct station-to-station messaging |
+| **PSK Reporter** | `Network/PSKReporter.swift` | [wave-owl `psk_reporter.py`](https://github.com/gerolfziegenhain/wave-owl/blob/main/src/psk_reporter.py) | MIT | IPFIX/UDP binary protocol (RFC 5101), enterprise #30351 |
+| **RBN Reporter** | `Network/RBNReporter.swift` | [wave-owl `rbn_reporter.py`](https://github.com/gerolfziegenhain/wave-owl/blob/main/src/rbn_reporter.py) | MIT | HTTP POST JSON, reverse-engineered from RBN Aggregator v6.7 |
+| **WSPRNet Reporter** | `Network/WSPRNetReporter.swift` | [wave-owl `wsprnet_reporter.py`](https://github.com/gerolfziegenhain/wave-owl/blob/main/src/wsprnet_reporter.py) | MIT | HTTP POST URL-encoded, based on WSJT-X reference |
 | **Winlink position reports** | `Network/WinlinkPosition.swift` | la5nta/pat | MIT | GPS position report format |
 | **CMS Gateway API** | `Network/CMSGatewayAPI.swift` | la5nta/pat | MIT | RMS gateway directory lookup |
 | **CW decoder** | `Codec/CW/GGMorseDecoder.swift` + C files | ggmorse | MIT | Bandpass → envelope → Kalman timing → Morse decode |
@@ -558,7 +562,46 @@ descriptor for direct POSIX writes, bypassing the actor isolation.
 
 ---
 
-## 9. Build System
+## 9. Spot Reporters
+
+Decoded messages (FT8, JS8, WSPR) are automatically reported to external
+spotting networks when enabled. All reporters are disabled by default and
+can be toggled individually in Settings. They use the station's callsign
+and grid locator from the global settings — no separate login required.
+
+Ported from [wave-owl](https://github.com/gerolfziegenhain/wave-owl)
+(Python → Swift). See section 5.2 for origin references.
+
+### 9.1 Supported Networks
+
+| Network | Protocol | File | Flush interval |
+|---------|----------|------|---------------|
+| **PSK Reporter** | IPFIX/UDP binary (RFC 5101) | `Network/PSKReporter.swift` | 5 min |
+| **Reverse Beacon Network** | HTTP POST JSON (Aggregator v6.7) | `Network/RBNReporter.swift` | 10 s |
+| **WSPRnet** | HTTP POST URL-encoded | `Network/WSPRNetReporter.swift` | 200 ms delay between POSTs |
+
+### 9.2 Data Flow
+
+```
+Demodulator → RxMessage → AppState.reportSpot()
+                              ├── PSKReporter.report(spot)   → UDP to pskreporter.info:4739
+                              ├── RBNReporter.report(spot)   → HTTP to reversebeacon.net
+                              └── WSPRNetReporter.reportWSPR() → HTTP to wsprnet.org/post/
+```
+
+### 9.3 Settings
+
+| Setting | Key | Default | Scope |
+|---------|-----|---------|-------|
+| PSK Reporter enabled | `pskReporterEnabled` | `false` | Per-reporter toggle |
+| RBN enabled | `rbnReporterEnabled` | `false` | Per-reporter toggle |
+| WSPRnet enabled | `wsprNetReporterEnabled` | `false` | Per-reporter toggle |
+| TX Power (W) | `txPowerWatts` | `5` | Global station info |
+| Antenna | `antenna` | `""` | Global station info (sent to PSK Reporter) |
+
+---
+
+## 10. Build System
 
 **XcodeGen** generates the Xcode project from `project.yml`.
 
@@ -574,7 +617,7 @@ xcodebuild -project DigiFox.xcodeproj -scheme DigiFox -sdk iphoneos build
 
 ---
 
-## 10. Conventions
+## 11. Conventions
 
 - **Language:** Swift 5.9, iOS 17+
 - **UI:** SwiftUI + Combine + async/await
