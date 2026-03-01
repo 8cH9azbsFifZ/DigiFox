@@ -97,6 +97,9 @@ WNLK0001A00000000001 /* WinlinkView.swift in Sources */ = {isa = PBXBuildFile; f
 		ED920B204863FC2595479B13 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0A20C208CB0CC2881BF3557 /* LogManager.swift */; };
 		77F0218DF3DE148ABBEEF7A0 /* LogOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */; };
 		3F51AFAC585AA3A0FBA691A0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */; };
+FT8L000000000000000012 /* constants.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000002 /* constants.c */; };
+FT8L000000000000000014 /* ldpc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000004 /* ldpc.c */; };
+FT8L000000000000000016 /* crc.c in Sources */ = {isa = PBXBuildFile; fileRef = FT8L000000000000000006 /* crc.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -205,6 +208,12 @@ ARDP0001B00000000006 /* ARDOPDemodulator.swift */ = {isa = PBXFileReference; las
 		E0A20C208CB0CC2881BF3557 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		9D00AF507B0387A27F88BCC6 /* LogOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogOutputView.swift; sourceTree = "<group>"; };
 		B9C4F99712BE20ADA3D87F0A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+FT8L000000000000000002 /* constants.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = constants.c; sourceTree = "<group>"; };
+FT8L000000000000000003 /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
+FT8L000000000000000004 /* ldpc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ldpc.c; sourceTree = "<group>"; };
+FT8L000000000000000005 /* ldpc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ldpc.h; sourceTree = "<group>"; };
+FT8L000000000000000006 /* crc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = crc.c; sourceTree = "<group>"; };
+FT8L000000000000000007 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crc.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -231,7 +240,8 @@ ARDP0001B00000000006 /* ARDOPDemodulator.swift */ = {isa = PBXFileReference; las
 				B487AE99DA9A72024D0BC911 /* FT8MessagePack.swift */,
 				529893966F36D4348C07DF45 /* FT8Modulator.swift */,
 				02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */,
-			);
+			
+				FT8L000000000000000001 /* ft8_lib */,);
 			path = FT8;
 			sourceTree = "<group>";
 		};
@@ -471,6 +481,19 @@ sourceTree = "<group>";
 			path = Network;
 			sourceTree = "<group>";
 		};
+FT8L000000000000000001 /* ft8_lib */ = {
+isa = PBXGroup;
+children = (
+FT8L000000000000000002 /* constants.c */,
+FT8L000000000000000003 /* constants.h */,
+FT8L000000000000000004 /* ldpc.c */,
+FT8L000000000000000005 /* ldpc.h */,
+FT8L000000000000000006 /* crc.c */,
+FT8L000000000000000007 /* crc.h */,
+);
+path = ft8_lib;
+sourceTree = "<group>";
+};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -630,7 +653,10 @@ WNLK0001A00000000001 /* WinlinkView.swift in Sources */,
 				WPOS01A00000000000000000 /* WinlinkPosition.swift in Sources */,
 				WP2P01A00000000000000000 /* WinlinkP2P.swift in Sources */,
 				WCMP01A00000000000000000 /* ComposeView.swift in Sources */,
-				WMLS01A00000000000000000 /* MessageListView.swift in Sources */,);
+				WMLS01A00000000000000000 /* MessageListView.swift in Sources */,
+FT8L000000000000000012 /* constants.c in Sources */,
+FT8L000000000000000014 /* ldpc.c in Sources */,
+FT8L000000000000000016 /* crc.c in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

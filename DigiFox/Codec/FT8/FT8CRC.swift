@@ -1,31 +1,26 @@
 import Foundation
 
 /// CRC-14 used in FT8 message integrity checks.
+/// Uses the reference C implementation from kgoba/ft8_lib (MIT license).
 /// Polynomial: 0x2757 (x^14 + x^13 + x^10 + x^9 + x^8 + x^6 + x^4 + x^2 + x + 1).
 enum FT8CRC {
 
     static let polynomial: UInt16 = 0x2757
     static let bits: Int = 14
 
-    /// Compute the 14-bit CRC of `payload` (array of 0/1 UInt8 values).
+    /// Compute the 14-bit CRC of `payload` (array of 0/1 UInt8 values, 77 bits).
+    /// Uses the ft8_lib reference: CRC is computed over 82 bits (77 payload + 5 zeros).
     static func compute(_ payload: [UInt8]) -> UInt16 {
-        var crc: UInt16 = 0
-        for bit in payload {
-            let msb = (crc >> 13) & 1
-            crc = (crc << 1) | UInt16(bit & 1)
-            if msb != 0 {
-                crc ^= polynomial
+        // Pack bit array into bytes (MSB first) — ft8_lib expects packed format
+        var packed = [UInt8](repeating: 0, count: 13) // 82 bits → 11 bytes needed, pad to 13
+        for i in 0..<min(payload.count, 77) {
+            if payload[i] != 0 {
+                packed[i / 8] |= UInt8(0x80 >> (i % 8))
             }
         }
-        // Flush 14 zero bits
-        for _ in 0..<bits {
-            let msb = (crc >> 13) & 1
-            crc <<= 1
-            if msb != 0 {
-                crc ^= polynomial
-            }
-        }
-        return crc & 0x3FFF
+        // Bits 77-81 are zero (already initialized to 0)
+        // "The CRC is calculated on the source-encoded message, zero-extended from 77 to 82 bits"
+        return ftx_compute_crc(packed, 82)
     }
 
     /// Append 14 CRC bits to `payload`, returning a 91-bit array.
@@ -42,12 +37,23 @@ enum FT8CRC {
     /// of the leading 77 payload bits.
     static func validate(_ message: [UInt8]) -> Bool {
         guard message.count >= FT8Protocol.messageBits else { return false }
-        let payload = Array(message[0..<FT8Protocol.payloadBits])
-        let expected = compute(payload)
-        var received: UInt16 = 0
-        for i in 0..<bits {
-            received = (received << 1) | UInt16(message[FT8Protocol.payloadBits + i] & 1)
+
+        // Pack 91 bits into bytes (MSB first)
+        var a91 = [UInt8](repeating: 0, count: 12) // FTX_LDPC_K_BYTES = 12
+        for i in 0..<min(message.count, 91) {
+            if message[i] != 0 {
+                a91[i / 8] |= UInt8(0x80 >> (i % 8))
+            }
         }
-        return expected == received
+
+        // Extract CRC from bits 77-90 using ft8_lib
+        let extracted = ftx_extract_crc(a91)
+
+        // Zero out CRC bits, compute CRC over 82 bits (77 payload + 5 zeros)
+        a91[9] &= 0xF8
+        a91[10] = 0
+        let calculated = ftx_compute_crc(a91, 82)
+
+        return extracted == calculated
     }
 }

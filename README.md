@@ -42,7 +42,7 @@ DigiFox/
 ├── App/           DigiFoxApp, AppState (unified), ContentView
 ├── Audio/         AudioEngine, FFTProcessor, TruSDXSerialAudio
 ├── Codec/
-│   ├── FT8/       FT8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, MessagePack
+│   ├── FT8/       FT8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, MessagePack, ft8_lib/
 │   ├── JS8/       JS8Protocol, Modulator, Demodulator, LDPC, CRC, CostasSync, PackMessage
 │   └── CW/        GGMorseDecoder (ggmorse wrapper), MorseKeyer
 ├── CAT/           CATController (Kenwood TS-480 direct protocol)
@@ -72,7 +72,8 @@ This project was generated with the assistance of various AI models and is exper
 DigiFox builds on the work of several open-source projects:
 
 - **[ggmorse](https://github.com/ggerganov/ggmorse)** by Georgi Gerganov — CW/Morse code decoder with automatic pitch and speed detection (MIT license)
-- **[WSJT-X](https://wsjt.sourceforge.io/)** by Joe Taylor (K1JT) et al. — FT8 protocol design and reference implementation (GPL v3). DigiFox contains a clean-room Swift port of the FT8 modulator/demodulator.
+- **[ft8_lib](https://github.com/kgoba/ft8_lib)** by Karlis Goba — portable C implementation of FT8/FT4 encoding and decoding (MIT license). DigiFox uses ft8_lib's LDPC decoder (`bp_decode`), CRC-14, and encoding constants directly via C interop.
+- **[WSJT-X](https://wsjt.sourceforge.io/)** by Joe Taylor (K1JT) et al. — FT8 protocol design and reference implementation (GPL v3). DigiFox uses a Swift modulator/demodulator based on the FT8 protocol specification.
 - **[JS8Call](http://js8call.com/)** by Jordan Sherer (KN4CRD) — JS8 protocol design and reference implementation (GPL v3). DigiFox contains a clean-room Swift port of the JS8 modulator/demodulator.
 - **[Hamlib](https://hamlib.github.io/)** — CAT control library supporting ~400 transceiver models (LGPL)
 
