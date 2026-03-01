@@ -1,38 +1,38 @@
-/// Winlink Position Reports — GPS-Positionsberichte.
+/// Winlink Position Reports — GPS position reports.
 ///
-/// Sendet GPS-basierte Positionsberichte über Winlink.
-/// Nutzt den bereits vorhandenen LocationManager der App.
+/// Sends GPS-based position reports via Winlink.
+/// Uses the app's existing LocationManager.
 ///
-/// Positionsberichte werden im Winlink-Standardformat gesendet:
+/// Position reports are sent in Winlink standard format:
 /// ;PRIOR:ROUTINE;LAT:48.1234N;LON:011.5678E;ALT:520;COMMENT:DigiFox
 ///
-/// Referenz: https://github.com/la5nta/pat (position reporting)
+/// Reference: https://github.com/la5nta/pat (position reporting)
 
 import Foundation
 import CoreLocation
 
 // MARK: - Position Report Model
 
-/// Winlink-Positionsbericht
+/// Winlink position report
 struct WinlinkPositionReport: Codable, Sendable {
-    /// Breitengrad
+    /// Latitude
     let latitude: Double
-    /// Längengrad
+    /// Longitude
     let longitude: Double
-    /// Höhe über Meeresspiegel in Metern
+    /// Altitude above sea level in meters
     let altitude: Double?
-    /// Geschwindigkeit in km/h
+    /// Speed in km/h
     let speed: Double?
-    /// Kurs in Grad
+    /// Course in degrees
     let course: Double?
-    /// Zeitstempel
+    /// Timestamp
     let timestamp: Date
-    /// Kommentar (max 80 Zeichen)
+    /// Comment (max 80 characters)
     let comment: String
-    /// Priorität
+    /// Priority
     let priority: PositionPriority
 
-    /// Formatiert als Winlink-Position-Report
+    /// Formatted as Winlink position report
     var formattedReport: String {
         let latDir = latitude >= 0 ? "N" : "S"
         let lonDir = longitude >= 0 ? "E" : "W"
@@ -59,7 +59,7 @@ struct WinlinkPositionReport: Codable, Sendable {
         return report
     }
 
-    /// Grid-Locator aus den Koordinaten berechnen (Maidenhead)
+    /// Calculate grid locator from coordinates (Maidenhead)
     var gridLocator: String {
         let lon = longitude + 180.0
         let lat = latitude + 90.0
@@ -80,7 +80,7 @@ struct WinlinkPositionReport: Codable, Sendable {
     }
 }
 
-/// Priorität des Positionsberichts
+/// Position report priority
 enum PositionPriority: String, Codable, CaseIterable, Sendable {
     case routine = "ROUTINE"
     case welfare = "WELFARE"
@@ -108,19 +108,19 @@ enum PositionPriority: String, Codable, CaseIterable, Sendable {
 
 // MARK: - Position Report Manager
 
-/// Verwaltet das Senden von Positionsberichten über Winlink.
+/// Manages sending position reports via Winlink.
 final class WinlinkPositionManager {
 
     static let shared = WinlinkPositionManager()
 
     private let mailbox = WinlinkMailbox.shared
 
-    /// Winlink Position Report Empfänger
+    /// Winlink position report recipient
     private let positionReportTo = "QTH"
 
     private init() {}
 
-    /// Erstellt einen Positionsbericht aus CLLocation.
+    /// Creates a position report from CLLocation.
     func createReport(
         from location: CLLocation,
         comment: String = "DigiFox Position Report",
@@ -138,14 +138,14 @@ final class WinlinkPositionManager {
         )
     }
 
-    /// Sendet einen Positionsbericht als Winlink-Nachricht.
-    /// Die Nachricht wird in den Postausgang gelegt und beim nächsten
-    /// Gateway-Connect automatisch gesendet.
+    /// Sends a position report as a Winlink message.
+    /// The message is placed in the outbox and automatically
+    /// sent on the next gateway connect.
     func sendPositionReport(
         report: WinlinkPositionReport,
         callsign: String
     ) {
-        Log.d("Position", "Positionsbericht: lat=\(report.latitude) lon=\(report.longitude) grid=\(report.gridLocator)")
+        Log.d("Position", "Position report: lat=\(report.latitude) lon=\(report.longitude) grid=\(report.gridLocator)")
         let subject = "POSITION REPORT"
         let body = report.formattedReport
 
@@ -166,7 +166,7 @@ final class WinlinkPositionManager {
         mailbox.storeOutbox(message: message)
     }
 
-    /// Letzter gesendeter Positionsbericht (aus Sent-Ordner).
+    /// Last sent position report (from Sent folder).
     func lastSentPosition() -> WinlinkMessage? {
         return mailbox.messages(in: .sent)
             .filter { $0.subject == "POSITION REPORT" }

@@ -268,7 +268,7 @@ final class B2FSession {
             case "=", "L", "l", "H", "h":
                 proposals[i].answer = .defer_
             default:
-                Log.d("B2F", "Unbekannte Antwort '\(ch)' für Proposal \(i)")
+                Log.d("B2F", "Unknown answer '\(ch)' for proposal \(i)")
                 proposals[i].answer = .defer_
             }
         }
@@ -277,17 +277,17 @@ final class B2FSession {
         for (i, prop) in proposals.enumerated() {
             switch prop.answer {
             case .accept:
-                Log.d("B2F", "Sende Nachricht \(prop.messageId) (\(prop.compressedSize) bytes)")
+                Log.d("B2F", "Sending message \(prop.messageId) (\(prop.compressedSize) bytes)")
                 try await writeCompressed(proposal: prop)
                 mailbox.markSent(messageId: batch[i].messageId)
                 progress.messagesSent += 1
                 progress.bytesTransferred += prop.compressedSize
                 updateProgress(phase: "Sende", detail: "Nachricht \(progress.messagesSent)/\(proposals.count)")
             case .reject:
-                Log.d("B2F", "Nachricht \(prop.messageId) abgelehnt (bereits empfangen)")
+                Log.d("B2F", "Message \(prop.messageId) rejected (already received)")
                 mailbox.markSent(messageId: batch[i].messageId)
             case .defer_, .hold:
-                Log.d("B2F", "Nachricht \(prop.messageId) zurückgestellt")
+                Log.d("B2F", "Message \(prop.messageId) deferred")
             }
         }
 
@@ -326,11 +326,11 @@ final class B2FSession {
                 Log.d("B2F", "Proposal: \(prop.messageId) (\(prop.compressedSize) bytes)")
 
             case "FF":
-                Log.d("B2F", "Remote hat keine weiteren Nachrichten")
+                Log.d("B2F", "Remote has no more messages")
                 break loop
 
             case "FQ":
-                Log.d("B2F", "Remote sendet Quit")
+                Log.d("B2F", "Remote sends quit")
                 quitReceived = true
                 break loop
 
@@ -381,10 +381,10 @@ final class B2FSession {
         for prop in proposals {
             if mailbox.hasMessage(id: prop.messageId) {
                 answers += "-"  // Already have it
-                Log.d("B2F", "Proposal \(prop.messageId) ablehnen (bereits vorhanden)")
+                Log.d("B2F", "Proposal \(prop.messageId) reject (already exists)")
             } else {
                 answers += "+"  // Accept it
-                Log.d("B2F", "Proposal \(prop.messageId) akzeptieren")
+                Log.d("B2F", "Proposal \(prop.messageId) accept")
             }
         }
         let line = "FS \(answers)"
@@ -394,7 +394,7 @@ final class B2FSession {
 
     // MARK: - SOH/STX/EOT Compressed Data Transfer (matches wl2k-go writeCompressed)
 
-    /// Sendet komprimierte Daten mit SOH/STX/EOT-Framing.
+    /// Sends compressed data with SOH/STX/EOT framing.
     private func writeCompressed(proposal: B2FProposal) async throws {
         let data = proposal.compressedData
         guard data.count >= 6 else {
@@ -442,7 +442,7 @@ final class B2FSession {
         Log.d("B2F", "TX EOT, checksum=\(checksum)")
     }
 
-    /// Empfängt komprimierte Daten mit SOH/STX/EOT-Framing.
+    /// Receives compressed data with SOH/STX/EOT framing.
     private func readCompressed(proposal: inout B2FProposal) async throws {
         // Expect SOH
         let firstByte = try await transport.receiveByte()
@@ -477,10 +477,10 @@ final class B2FSession {
         // Verify header length
         let actualHeaderLen = titleBytes.count + offsetBytes.count + 2
         if headerLen != actualHeaderLen {
-            Log.d("B2F", "Header-Länge stimmt nicht: erwartet \(headerLen), tatsächlich \(actualHeaderLen)")
+            Log.d("B2F", "Header length mismatch: expected \(headerLen), actual \(actualHeaderLen)")
         }
 
-        Log.d("B2F", "Empfange: '\(proposal.title)' offset=\(String(data: offsetBytes, encoding: .utf8) ?? "0")")
+        Log.d("B2F", "Receiving: '\(proposal.title)' offset=\(String(data: offsetBytes, encoding: .utf8) ?? "0")")
 
         // Read data blocks
         var buf = Data()
@@ -511,7 +511,7 @@ final class B2FSession {
                     throw WinlinkError.protocolError("Datenlänge: erwartet \(proposal.compressedSize), empfangen \(buf.count)")
                 }
                 proposal.compressedData = buf
-                Log.d("B2F", "RX komplett: \(buf.count) bytes, Checksum OK")
+                Log.d("B2F", "RX complete: \(buf.count) bytes, checksum OK")
                 return
 
             default:
@@ -556,7 +556,7 @@ final class B2FSession {
 
     private func parseReceivedMessage(data: Data, proposal: B2FProposal) -> WinlinkMessage? {
         guard let body = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) else {
-            Log.d("B2F", "Nachricht konnte nicht dekodiert werden")
+            Log.d("B2F", "Message could not be decoded")
             return nil
         }
 
@@ -582,7 +582,7 @@ final class B2FSession {
             messageBody = lines[(headerEndIdx + 1)...].joined(separator: "\n")
         }
 
-        Log.d("B2F", "Nachricht geparst: from=\(headers["from"] ?? "?") subject=\(headers["subject"] ?? "?")")
+        Log.d("B2F", "Message parsed: from=\(headers["from"] ?? "?") subject=\(headers["subject"] ?? "?")")
 
         return WinlinkMessage(
             messageId: proposal.messageId,

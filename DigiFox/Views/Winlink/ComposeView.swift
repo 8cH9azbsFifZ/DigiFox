@@ -1,7 +1,7 @@
-/// Winlink Nachrichten-Composer — Neue Nachricht verfassen.
+/// Winlink message composer — compose a new message.
 ///
-/// SwiftUI-View zum Erstellen und Senden von Winlink-E-Mails.
-/// Unterstützt To, CC, Subject, Body und Anhänge.
+/// SwiftUI view for creating and sending Winlink emails.
+/// Supports To, CC, Subject, Body and attachments.
 
 import SwiftUI
 
@@ -18,13 +18,13 @@ struct ComposeView: View {
     @State private var isSending = false
     @State private var errorMessage: String?
 
-    /// Optional: Vorausgefüllte Antwort
+    /// Optional: pre-filled reply
     var replyTo: WinlinkMessage?
 
     var body: some View {
         NavigationView {
             Form {
-                // MARK: - Empfänger
+                // MARK: - Recipients
                 Section(header: Text("Empfänger")) {
                     HStack {
                         Text("An:")
@@ -46,18 +46,18 @@ struct ComposeView: View {
                     }
                 }
 
-                // MARK: - Betreff
+                // MARK: - Subject
                 Section(header: Text("Betreff")) {
                     TextField("Betreff eingeben", text: $subject)
                 }
 
-                // MARK: - Nachrichtentext
+                // MARK: - Message Body
                 Section(header: Text("Nachricht")) {
                     TextEditor(text: $messageBody)
                         .frame(minHeight: 200)
                 }
 
-                // MARK: - Anhänge
+                // MARK: - Attachments
                 Section(header: Text("Anhänge (\(attachments.count))")) {
                     ForEach(attachments) { attachment in
                         HStack {
@@ -83,7 +83,7 @@ struct ComposeView: View {
                     }
                 }
 
-                // MARK: - Fehler
+                // MARK: - Error
                 if let error = errorMessage {
                     Section {
                         Text(error)
@@ -148,7 +148,7 @@ struct ComposeView: View {
             rawData: Data()
         )
 
-        // In Postausgang speichern
+        // Save to outbox
         WinlinkMailbox.shared.storeOutbox(message: message)
 
         isSending = false
