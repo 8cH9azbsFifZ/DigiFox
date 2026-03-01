@@ -216,6 +216,9 @@ class AudioEngine: ObservableObject {
 
         DispatchQueue.main.async { self.isTransmitting = true }
 
+        // Capture mixer format BEFORE stopping engine (valid topology)
+        let preStopFormat = engine.mainMixerNode.outputFormat(forBus: 0)
+
         // Stop engine to avoid "player disconnected" crash from async IO pauses
         engine.stop()
 
@@ -233,10 +236,19 @@ class AudioEngine: ObservableObject {
             return
         }
 
-        // Get mixer format while engine is stopped (topology is still valid)
-        let mixerFormat = engine.mainMixerNode.outputFormat(forBus: 0)
-        let outputRate = mixerFormat.sampleRate > 0 ? mixerFormat.sampleRate : 48000.0
-        let outputChannels = mixerFormat.channelCount > 0 ? mixerFormat.channelCount : 1
+        // Use pre-stop format, fall back to 48kHz stereo if invalid
+        let outputRate: Double
+        let outputChannels: AVAudioChannelCount
+        let format: AVAudioFormat
+        if preStopFormat.sampleRate > 0 && preStopFormat.channelCount > 0 {
+            outputRate = preStopFormat.sampleRate
+            outputChannels = preStopFormat.channelCount
+            format = preStopFormat
+        } else {
+            outputRate = 48000.0
+            outputChannels = 1
+            format = AVAudioFormat(standardFormatWithSampleRate: outputRate, channels: outputChannels)!
+        }
         Log.d("Audio", "transmit: \(samples.count) samples at 12kHz → \(outputRate)Hz ch=\(outputChannels)")
 
         // Resample TX audio from 12 kHz to engine output rate
@@ -258,7 +270,6 @@ class AudioEngine: ObservableObject {
             txSamples = samples
         }
 
-        let format = mixerFormat
         let count = AVAudioFrameCount(txSamples.count)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: count) else {
             Log.d("Audio", "transmit: failed to create buffer")
@@ -274,6 +285,9 @@ class AudioEngine: ObservableObject {
                 }
             }
         }
+
+        // Calculate expected TX duration for safety timeout
+        let txDurationSec = Double(samples.count) / 12000.0
 
         // Attach player while engine is stopped — no race with IO unit pauses
         let player = AVAudioPlayerNode()
@@ -293,7 +307,18 @@ class AudioEngine: ObservableObject {
         do {
             try engine.start()
             player.play()
-            Log.d("Audio", "transmit: playing")
+            Log.d("Audio", "transmit: playing (\(String(format: "%.1f", txDurationSec))s)")
+
+            // Safety timeout: force TX end if completion never fires
+            DispatchQueue.main.asyncAfter(deadline: .now() + txDurationSec + 2.0) { [weak self] in
+                guard let self = self, self.isTransmitting, self.monitorPlayer === player else { return }
+                Log.d("Audio", "transmit: safety timeout — forcing TX end")
+                player.stop()
+                self.engine.detach(player)
+                self.isTransmitting = false
+                self.monitorPlayer = nil
+                completion?()
+            }
         } catch {
             Log.d("Audio", "transmit engine start error: \(error)")
             engine.detach(player)
