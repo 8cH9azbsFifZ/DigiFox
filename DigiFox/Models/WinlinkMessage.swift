@@ -36,26 +36,26 @@ struct WinlinkMessage: Identifiable, Codable, Sendable {
     let to: String
     /// CC recipients
     var cc: String?
-    /// Betreff
+    /// Subject
     let subject: String
-    /// Nachrichtentext
+    /// Message body
     let body: String
-    /// Zeitstempel
+    /// Timestamp
     let date: Date
     /// MIME-Type
     var mimeType: String = "text/plain"
-    /// Ordner
+    /// Folder
     var folder: WinlinkFolder
-    /// Anhänge
+    /// Attachments
     var attachments: [WinlinkAttachment]
-    /// Gelesen-Status
+    /// Read status
     var isRead: Bool
-    /// Rohdaten (für B2F-Übertragung)
+    /// Raw data (for B2F transfer)
     var rawData: Data
 
     var id: String { messageId }
 
-    /// Formatiert die Nachricht als MIME-Daten für B2F-Übertragung
+    /// Formats the message as MIME data for B2F transfer
     var mimeData: Data {
         var mime = "Mid: \(messageId)\r\n"
         mime += "From: \(from)\r\n"
@@ -71,7 +71,7 @@ struct WinlinkMessage: Identifiable, Codable, Sendable {
         return Data(mime.utf8)
     }
 
-    /// Erzeugt eine neue Nachrichten-ID (12 Zeichen, alphanumerisch)
+    /// Generates a new message ID (12 characters, alphanumeric)
     static func generateId(callsign: String) -> String {
         let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         let random = String((0..<6).map { _ in chars.randomElement()! })
@@ -80,7 +80,7 @@ struct WinlinkMessage: Identifiable, Codable, Sendable {
     }
 }
 
-/// Nachrichtenanhang
+/// Message attachment
 struct WinlinkAttachment: Identifiable, Codable, Sendable {
     let id: String
     let filename: String
@@ -101,23 +101,23 @@ struct WinlinkAttachment: Identifiable, Codable, Sendable {
 
 // MARK: - Mailbox Storage
 
-/// Lokale Winlink-Mailbox.
+/// Local Winlink mailbox.
 ///
-/// Speichert Nachrichten als JSON-Dateien im App-Dokumentenverzeichnis.
-/// Thread-sicher über serielle DispatchQueue.
+/// Stores messages as JSON files in the app's documents directory.
+/// Thread-safe via serial DispatchQueue.
 final class WinlinkMailbox {
 
     private let storageQueue = DispatchQueue(label: "com.digifox.winlink.mailbox")
     private let mailboxDir: URL
 
-    /// Singleton-Instanz
+    /// Singleton instance
     static let shared = WinlinkMailbox()
 
     private init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         mailboxDir = docs.appendingPathComponent("WinlinkMailbox", isDirectory: true)
 
-        // Ordner anlegen
+        // Create folders
         for folder in WinlinkFolder.allCases {
             let folderDir = mailboxDir.appendingPathComponent(folder.rawValue, isDirectory: true)
             try? FileManager.default.createDirectory(at: folderDir, withIntermediateDirectories: true)
@@ -126,24 +126,24 @@ final class WinlinkMailbox {
 
     // MARK: - CRUD Operations
 
-    /// Alle Nachrichten in einem Ordner abrufen.
+    /// Retrieve all messages in a folder.
     func messages(in folder: WinlinkFolder) -> [WinlinkMessage] {
         return storageQueue.sync {
             loadMessages(folder: folder)
         }
     }
 
-    /// Nachrichten im Postausgang (zum Senden bereit).
+    /// Messages in the outbox (ready to send).
     func outboxMessages() -> [WinlinkMessage] {
         return messages(in: .outbox)
     }
 
-    /// Anzahl ungelesener Nachrichten im Posteingang.
+    /// Number of unread messages in the inbox.
     func unreadCount() -> Int {
         return messages(in: .inbox).filter { !$0.isRead }.count
     }
 
-    /// Nachricht im Posteingang speichern.
+    /// Store a message in the inbox.
     func storeInbox(message: WinlinkMessage) {
         var msg = message
         msg.folder = .inbox
@@ -151,7 +151,7 @@ final class WinlinkMailbox {
         saveMessage(msg)
     }
 
-    /// Nachricht zum Senden in den Postausgang legen.
+    /// Place a message in the outbox for sending.
     func storeOutbox(message: WinlinkMessage) {
         var msg = message
         msg.folder = .outbox
@@ -159,7 +159,7 @@ final class WinlinkMailbox {
         saveMessage(msg)
     }
 
-    /// Nachricht als gesendet markieren (Postausgang → Gesendet).
+    /// Mark a message as sent (outbox → sent).
     func markSent(messageId: String) {
         Log.d("Mailbox", "markSent: id=\(messageId)")
         storageQueue.sync {
@@ -171,7 +171,7 @@ final class WinlinkMailbox {
         }
     }
 
-    /// Nachricht als gelesen markieren.
+    /// Mark a message as read.
     func markRead(messageId: String) {
         storageQueue.sync {
             if var msg = loadMessage(id: messageId, folder: .inbox) {
@@ -181,7 +181,7 @@ final class WinlinkMailbox {
         }
     }
 
-    /// Nachricht in Archiv verschieben.
+    /// Move a message to the archive.
     func archive(messageId: String, from folder: WinlinkFolder) {
         storageQueue.sync {
             if var msg = loadMessage(id: messageId, folder: folder) {
@@ -192,14 +192,14 @@ final class WinlinkMailbox {
         }
     }
 
-    /// Nachricht löschen.
+    /// Delete a message.
     func delete(messageId: String, folder: WinlinkFolder) {
         storageQueue.sync {
             deleteMessage(id: messageId, folder: folder)
         }
     }
 
-    /// Prüft ob eine Nachricht bereits existiert (in irgendeinem Ordner).
+    /// Checks whether a message already exists (in any folder).
     func hasMessage(id: String) -> Bool {
         return storageQueue.sync {
             WinlinkFolder.allCases.contains { folder in
@@ -259,7 +259,7 @@ final class WinlinkMailbox {
 
     // MARK: - Statistics
 
-    /// Mailbox-Statistik
+    /// Mailbox statistics
     struct MailboxStats {
         let inboxCount: Int
         let unreadCount: Int

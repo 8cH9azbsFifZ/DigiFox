@@ -1,11 +1,11 @@
-/// Winlink Attachment Support — Dateianhänge für Winlink-Nachrichten.
+/// Winlink Attachment Support — file attachments for Winlink messages.
 ///
-/// Unterstützt Bilder (mit Auto-Shrink für HF-Tauglichkeit), Text, PDF
-/// und andere Dateitypen. Bilder werden automatisch auf eine für HF
-/// akzeptable Größe komprimiert.
+/// Supports images (with auto-shrink for HF suitability), text, PDF
+/// and other file types. Images are automatically compressed to an
+/// HF-acceptable size.
 ///
-/// Maximale empfohlene Nachrichtengröße über HF: ~50 KB (komprimiert)
-/// Über Telnet: ~120 KB (komprimiert)
+/// Maximum recommended message size over HF: ~50 KB (compressed)
+/// Over Telnet: ~120 KB (compressed)
 ///
 /// Referenz: https://github.com/la5nta/pat (attachment handling)
 
@@ -14,23 +14,23 @@ import UIKit
 
 // MARK: - Attachment Constants
 
-/// Attachment-Limits und Konfiguration
+/// Attachment limits and configuration
 enum WinlinkAttachmentConfig {
-    /// Maximale Gesamtgröße aller Anhänge für HF-Übertragung (unkomprimiert)
+    /// Maximum total size of all attachments for HF transmission (uncompressed)
     static let maxHFSize = 50_000
-    /// Maximale Gesamtgröße für Telnet-Übertragung
+    /// Maximum total size for Telnet transmission
     static let maxTelnetSize = 120_000
-    /// Maximale Bildauflösung für HF (Breite × Höhe)
+    /// Maximum image resolution for HF (width × height)
     static let maxHFImageWidth: CGFloat = 320
     static let maxHFImageHeight: CGFloat = 240
-    /// Maximale Bildauflösung für Telnet
+    /// Maximum image resolution for Telnet
     static let maxTelnetImageWidth: CGFloat = 800
     static let maxTelnetImageHeight: CGFloat = 600
-    /// JPEG-Qualität für HF
+    /// JPEG quality for HF
     static let hfJPEGQuality: CGFloat = 0.3
-    /// JPEG-Qualität für Telnet
+    /// JPEG quality for Telnet
     static let telnetJPEGQuality: CGFloat = 0.6
-    /// Erlaubte MIME-Types
+    /// Allowed MIME types
     static let allowedMimeTypes = [
         "text/plain",
         "text/html",
@@ -44,16 +44,16 @@ enum WinlinkAttachmentConfig {
 
 // MARK: - Attachment Builder
 
-/// Erstellt und verarbeitet Anhänge für Winlink-Nachrichten.
+/// Creates and processes attachments for Winlink messages.
 ///
-/// Bilder werden automatisch verkleinert und komprimiert.
-/// Andere Dateitypen werden unverändert angehängt.
+/// Images are automatically resized and compressed.
+/// Other file types are attached unchanged.
 final class WinlinkAttachmentBuilder {
 
-    /// Transport-Modus beeinflusst die maximale Größe
+    /// Transport mode affects the maximum size
     enum TransportMode {
-        case hf      // ARDOP über Funk — strenge Limits
-        case telnet  // Internet — größere Dateien erlaubt
+        case hf      // ARDOP over radio — strict limits
+        case telnet  // Internet — larger files allowed
     }
 
     private let transportMode: TransportMode
@@ -64,7 +64,7 @@ final class WinlinkAttachmentBuilder {
 
     // MARK: - Image Attachment
 
-    /// Erstellt einen Bildanhang mit automatischer Größenanpassung.
+    /// Creates an image attachment with automatic resizing.
     func createImageAttachment(
         image: UIImage,
         filename: String = "bild.jpg"
@@ -105,7 +105,7 @@ final class WinlinkAttachmentBuilder {
 
     // MARK: - File Attachment
 
-    /// Erstellt einen Anhang aus Dateidaten.
+    /// Creates an attachment from file data.
     func createFileAttachment(
         data: Data,
         filename: String,
@@ -116,7 +116,7 @@ final class WinlinkAttachmentBuilder {
             : WinlinkAttachmentConfig.maxTelnetSize
 
         guard data.count <= maxSize else {
-            return nil // Zu groß
+            return nil // Too large
         }
 
         return WinlinkAttachment(
@@ -126,7 +126,7 @@ final class WinlinkAttachmentBuilder {
         )
     }
 
-    /// Erstellt einen Textanhang.
+    /// Creates a text attachment.
     func createTextAttachment(
         text: String,
         filename: String = "anhang.txt"
@@ -140,7 +140,7 @@ final class WinlinkAttachmentBuilder {
 
     // MARK: - Validation
 
-    /// Prüft ob die Gesamtgröße aller Anhänge im Limit liegt.
+    /// Checks whether the total size of all attachments is within the limit.
     func validateTotalSize(_ attachments: [WinlinkAttachment]) -> AttachmentValidation {
         let totalSize = attachments.reduce(0) { $0 + $1.data.count }
         let maxSize = transportMode == .hf
@@ -181,7 +181,7 @@ final class WinlinkAttachmentBuilder {
 
     // MARK: - MIME Encoding
 
-    /// Kodiert Anhänge als MIME multipart für B2F-Übertragung.
+    /// Encodes attachments as MIME multipart for B2F transmission.
     static func encodeMIME(
         body: String,
         attachments: [WinlinkAttachment]
@@ -217,7 +217,7 @@ final class WinlinkAttachmentBuilder {
         return ("multipart/mixed; boundary=\"\(boundary)\"", Data(mime.utf8))
     }
 
-    /// Dekodiert MIME multipart Anhänge.
+    /// Decodes MIME multipart attachments.
     static func decodeMIME(data: Data, contentType: String) -> (body: String, attachments: [WinlinkAttachment]) {
         guard contentType.contains("multipart/mixed"),
               let boundaryRange = contentType.range(of: "boundary=\""),
