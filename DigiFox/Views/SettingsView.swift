@@ -209,6 +209,21 @@ struct SettingsView: View {
                     HStack { Text("TX Leistung"); Slider(value: $settings.txPower, in: 0...1) }
                 }
 
+                Section("Diagnose") {
+                    NavigationLink {
+                        LogOutputView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "terminal").foregroundStyle(.green)
+                            Text("Log Output")
+                            Spacer()
+                            Text("\(LogManager.shared.entries.count)")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                }
+
                 Section("Info") {
                     HStack { Text("Version"); Spacer(); Text("1.0.0").foregroundStyle(.secondary) }
                     HStack { Text("Hamlib"); Spacer(); Text("4.7.1").foregroundStyle(.secondary) }

@@ -18,7 +18,6 @@ enum JS8CostasSync {
         toneSpacing: Double,
         freqRange: ClosedRange<Double>
     ) -> [(timeOffset: Int, freqOffset: Double, score: Double)] {
-        var candidates = [(Int, Double, Double)]()
         let nTime = spectrum.count
         guard nTime >= JS8Protocol.symbolCount, let nFreq = spectrum.first?.count, nFreq > 0 else { return [] }
 
@@ -28,7 +27,15 @@ enum JS8CostasSync {
         let maxBin = min(nFreq - 8 * toneBins, Int(freqRange.upperBound / freqBinWidth))
         guard maxBin > minBin else { return [] }
 
-        for t0 in 0..<(nTime - JS8Protocol.symbolCount + 1) {
+        let timeCount = nTime - JS8Protocol.symbolCount + 1
+        guard timeCount > 0 else { return [] }
+
+        // Parallel sync search across time offsets
+        let lock = NSLock()
+        var candidates = [(Int, Double, Double)]()
+
+        DispatchQueue.concurrentPerform(iterations: timeCount) { t0 in
+            var localCandidates = [(Int, Double, Double)]()
             for f0 in stride(from: minBin, to: max(minBin + 1, maxBin), by: 1) {
                 var score: Double = 0
                 var count = 0
@@ -44,8 +51,13 @@ enum JS8CostasSync {
                 }
                 if count > 0 {
                     let avg = score / Double(count)
-                    if avg > 0.5 { candidates.append((t0, Double(f0) * freqBinWidth, avg)) }
+                    if avg > 0.5 { localCandidates.append((t0, Double(f0) * freqBinWidth, avg)) }
                 }
+            }
+            if !localCandidates.isEmpty {
+                lock.lock()
+                candidates.append(contentsOf: localCandidates)
+                lock.unlock()
             }
         }
         return candidates.sorted { $0.2 > $1.2 }.prefix(10).map { ($0.0, $0.1, $0.2) }

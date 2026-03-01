@@ -73,7 +73,9 @@ actor SerialPort {
 
     /// Whether IOKit serial is available on this iOS device
     static var isAvailable: Bool {
-        IOKitUSBSerial.isAvailable()
+        let avail = IOKitUSBSerial.isAvailable()
+        Log.d("Serial", "IOKit available: \(avail)")
+        return avail
     }
 
     /// Discover all connected USB serial devices.
@@ -142,11 +144,14 @@ actor SerialPort {
     /// Open a serial port
     func open(path: String, baudRate: UInt = 9600) throws {
         close()
+        Log.d("Serial", "Opening port \(path) @ \(baudRate) baud")
         do {
             let p = try IOKitUSBSerial(path: path, baudRate: baudRate)
             port = p
             rawFD = p.fileDescriptor
+            Log.d("Serial", "Port opened: fd=\(p.fileDescriptor)")
         } catch {
+            Log.d("Serial-ERROR", "Open failed: \(error.localizedDescription)")
             throw SerialPortError.openFailed(error.localizedDescription)
         }
     }
@@ -161,6 +166,7 @@ actor SerialPort {
 
     /// Close the port
     func close() {
+        if port != nil { Log.d("Serial", "Closing port") }
         port?.close()
         port = nil
         rawFD = -1
@@ -206,6 +212,7 @@ actor SerialPort {
     /// Activate PTT (key transmitter) via RTS line
     func pttOn() throws {
         guard let port, port.isOpen else { throw SerialPortError.notOpen }
+        Log.d("Serial", "PTT ON (RTS high)")
         do { try port.setRTS(true) }
         catch { throw SerialPortError.controlFailed(error.localizedDescription) }
     }
@@ -213,6 +220,7 @@ actor SerialPort {
     /// Deactivate PTT (unkey transmitter) via RTS line
     func pttOff() throws {
         guard let port, port.isOpen else { throw SerialPortError.notOpen }
+        Log.d("Serial", "PTT OFF (RTS low)")
         do { try port.setRTS(false) }
         catch { throw SerialPortError.controlFailed(error.localizedDescription) }
     }

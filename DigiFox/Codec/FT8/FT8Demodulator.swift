@@ -49,54 +49,57 @@ final class FT8Demodulator {
             maxCandidates: maxCandidates
         )
 
-        var decoded = [DecodedMessage]()
-        var usedOffsets = Set<Int>()   // prevent duplicate decodes at same time/freq
+        // Parallel candidate decoding (LDPC is the bottleneck)
+        struct IndexedDecode {
+            let index: Int
+            let key: Int
+            let message: DecodedMessage
+        }
+        let lock = NSLock()
+        var parallelResults = [IndexedDecode]()
 
-        for candidate in candidates {
-            // Deduplicate: skip if we already decoded near this time/freq
+        DispatchQueue.concurrentPerform(iterations: candidates.count) { idx in
+            let candidate = candidates[idx]
             let key = (candidate.timeOffset / FT8Protocol.symbolSamples) * 1000 + candidate.freqBin
-            if usedOffsets.contains(key) { continue }
 
-            // Extract soft symbols
             let symbolStart = candidate.timeOffset / FT8Protocol.symbolSamples
-            guard let softBits = extractSoftBits(
+            guard let softBits = self.extractSoftBits(
                 spectrogram: spec,
                 timeStart: symbolStart,
                 freqBin: candidate.freqBin,
                 freqBins: freqBins
-            ) else { continue }
+            ) else { return }
 
-            // LDPC decode
-            guard let decoded91 = LDPC.decode(softBits) else { continue }
+            guard let decoded91 = LDPC.decode(softBits) else { return }
 
-            // CRC validate
             let message91 = decoded91.map { $0 }
-            guard FT8CRC.validate(message91) else { continue }
+            guard FT8CRC.validate(message91) else { return }
 
-            // Extract 77 payload bits
             let payload = Array(message91[0..<FT8Protocol.payloadBits])
-
-            // Unpack message
             let msg = FT8MessagePack.unpack(payload)
-
-            // Estimate SNR
-            let snr = estimateSNR(spectrogram: spec, candidate: candidate, freqBins: freqBins)
-
-            // Refine frequency
+            let snr = self.estimateSNR(spectrogram: spec, candidate: candidate, freqBins: freqBins)
             let refinedFreq = FT8CostasSync.refineFrequency(
                 spectrogram: spec, candidate: candidate, freqBins: freqBins
             )
-
             let timeOffsetSec = Double(candidate.timeOffset) / FT8Protocol.sampleRate
 
-            decoded.append(DecodedMessage(
-                message: msg,
-                snr: snr,
-                frequency: refinedFreq,
-                timeOffset: timeOffsetSec
-            ))
+            let result = DecodedMessage(
+                message: msg, snr: snr, frequency: refinedFreq, timeOffset: timeOffsetSec
+            )
+            lock.lock()
+            parallelResults.append(IndexedDecode(index: idx, key: key, message: result))
+            lock.unlock()
+        }
 
-            usedOffsets.insert(key)
+        // Deduplicate preserving priority order (lower index = higher score)
+        parallelResults.sort { $0.index < $1.index }
+        var decoded = [DecodedMessage]()
+        var usedOffsets = Set<Int>()
+        for r in parallelResults {
+            if !usedOffsets.contains(r.key) {
+                decoded.append(r.message)
+                usedOffsets.insert(r.key)
+            }
         }
 
         return decoded
