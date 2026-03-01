@@ -125,7 +125,8 @@ final class WinlinkTests: XCTestCase {
 
     func testB2FProposalLine() {
         let proposal = B2FProposal(
-            messageType: "P",
+            code: "C",
+            msgType: "EM",
             from: "DL1ABC",
             to: "DL2XYZ@winlink.org",
             messageId: "DL1ATEST01",
@@ -136,8 +137,8 @@ final class WinlinkTests: XCTestCase {
 
         let line = proposal.proposalLine
         XCTAssertTrue(line.hasPrefix("FC "), "Proposal beginnt mit FC")
-        XCTAssertTrue(line.contains("DL1ABC"), "Proposal enthält Absender")
         XCTAssertTrue(line.contains("DL1ATEST01"), "Proposal enthält Message-ID")
+        XCTAssertTrue(line.contains("1024"), "Proposal enthält Größe")
     }
 
     func testB2FSIDFormat() {

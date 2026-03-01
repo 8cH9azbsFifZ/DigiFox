@@ -1,15 +1,15 @@
-/// Winlink-Nachrichtenmodell und Mailbox-Verwaltung.
+/// Winlink message model and mailbox management.
 ///
-/// Lokale Speicherung und Verwaltung von Winlink-Nachrichten.
-/// Nachrichten werden als JSON-Dateien im App-Dokumentenverzeichnis gespeichert.
+/// Local storage and management of Winlink messages.
+/// Messages are stored as JSON files in the app's documents directory.
 ///
-/// Referenz: https://github.com/la5nta/pat (mailbox package)
+/// Reference: https://github.com/la5nta/pat (mailbox package)
 
 import Foundation
 
 // MARK: - Message Model
 
-/// Ordner für Winlink-Nachrichten
+/// Folder for Winlink messages
 enum WinlinkFolder: String, Codable, CaseIterable, Sendable {
     case inbox = "Posteingang"
     case outbox = "Postausgang"
@@ -26,15 +26,15 @@ enum WinlinkFolder: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// Eine Winlink-E-Mail-Nachricht
+/// A Winlink email message
 struct WinlinkMessage: Identifiable, Codable, Sendable {
-    /// Eindeutige Nachrichten-ID (max 12 Zeichen, B2F-kompatibel)
+    /// Unique message ID (max 12 characters, B2F-compatible)
     let messageId: String
-    /// Absender (Callsign oder E-Mail)
+    /// Sender (callsign or email)
     let from: String
-    /// Empfänger (Callsign@winlink.org oder E-Mail)
+    /// Recipient (callsign@winlink.org or email)
     let to: String
-    /// CC-Empfänger
+    /// CC recipients
     var cc: String?
     /// Betreff
     let subject: String
@@ -147,6 +147,7 @@ final class WinlinkMailbox {
     func storeInbox(message: WinlinkMessage) {
         var msg = message
         msg.folder = .inbox
+        Log.d("Mailbox", "storeInbox: id=\(msg.messageId) from=\(msg.from) subject=\(msg.subject)")
         saveMessage(msg)
     }
 
@@ -154,11 +155,13 @@ final class WinlinkMailbox {
     func storeOutbox(message: WinlinkMessage) {
         var msg = message
         msg.folder = .outbox
+        Log.d("Mailbox", "storeOutbox: id=\(msg.messageId) to=\(msg.to) subject=\(msg.subject)")
         saveMessage(msg)
     }
 
     /// Nachricht als gesendet markieren (Postausgang → Gesendet).
     func markSent(messageId: String) {
+        Log.d("Mailbox", "markSent: id=\(messageId)")
         storageQueue.sync {
             if var msg = loadMessage(id: messageId, folder: .outbox) {
                 deleteMessage(id: messageId, folder: .outbox)

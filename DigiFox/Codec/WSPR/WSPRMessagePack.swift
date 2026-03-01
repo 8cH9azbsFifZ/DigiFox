@@ -24,7 +24,10 @@ enum WSPRMessagePack {
 
     /// Encode callsign to 28-bit integer.
     /// Callsign format: up to 6 chars, 3rd char must be digit.
-    /// Characters: space=0, A-Z=1-26, 0-9=27-36
+    /// Character encoding (WSJT-X compatible):
+    ///   Positions 1-2: 0-9 → 0-9, A-Z → 10-35, space → 36
+    ///   Position 3: digit 0-9
+    ///   Positions 4-6: A-Z → 0-25, space → 26
     static func encodeCallsign(_ call: String) -> UInt32 {
         var c = Array(call.uppercased())
 
@@ -40,19 +43,19 @@ enum WSPRMessagePack {
         // Safety: if 3rd char still not digit, treat as 0
         let digit2: UInt32 = c[2].isNumber ? UInt32(c[2].asciiValue! - 48) : 0
 
-        func charVal(_ ch: Character) -> UInt32 {
-            if ch == " " { return 0 }
-            if ch >= "A" && ch <= "Z" { return UInt32(ch.asciiValue! - 65 + 1) }
-            if ch >= "0" && ch <= "9" { return UInt32(ch.asciiValue! - 48 + 27) }
-            return 0
+        /// WSJT-X character value: 0-9 → 0-9, A-Z → 10-35, space → 36
+        func charn(_ ch: Character) -> UInt32 {
+            if ch >= "0" && ch <= "9" { return UInt32(ch.asciiValue! - 48) }
+            if ch >= "A" && ch <= "Z" { return UInt32(ch.asciiValue! - 65 + 10) }
+            return 36 // space or invalid
         }
 
-        let n1 = charVal(c[0])
-        let n2 = charVal(c[1])
+        let n1 = charn(c[0])
+        let n2 = charn(c[1])
         let n3 = digit2
-        let n4 = charVal(c[3])
-        let n5 = charVal(c[4])
-        let n6 = charVal(c[5])
+        let n4 = charn(c[3]) - 10  // A-Z/space only: 0-26
+        let n5 = charn(c[4]) - 10
+        let n6 = charn(c[5]) - 10
 
         // n = n1*36*10*27*27*27 + n2*10*27*27*27 + n3*27*27*27 + n4*27*27 + n5*27 + n6
         var n = n1
@@ -68,11 +71,17 @@ enum WSPRMessagePack {
     static func decodeCallsign(_ n: UInt32) -> String {
         var val = n
 
-        func valToChar(_ v: UInt32, space: Bool = true) -> Character {
-            if v == 0 && space { return " " }
-            if v >= 1 && v <= 26 { return Character(UnicodeScalar(64 + v)!) }
-            if v >= 27 && v <= 36 { return Character(UnicodeScalar(48 + v - 27)!) }
-            return " "
+        /// Reverse of charn: 0-9 → '0'-'9', 10-35 → 'A'-'Z', 36 → ' '
+        func valToChar(_ v: UInt32) -> Character {
+            if v <= 9 { return Character(UnicodeScalar(48 + v)!) }
+            if v >= 10 && v <= 35 { return Character(UnicodeScalar(65 + v - 10)!) }
+            return " " // 36 = space
+        }
+
+        /// Positions 4-6: 0-25 → 'A'-'Z', 26 → ' '
+        func valToSuffix(_ v: UInt32) -> Character {
+            if v <= 25 { return Character(UnicodeScalar(65 + v)!) }
+            return " " // 26 = space
         }
 
         let n6 = val % 27; val /= 27
@@ -82,10 +91,10 @@ enum WSPRMessagePack {
         let n2 = val % 36; val /= 36
         let n1 = val
 
-        var chars: [Character] = [
+        let chars: [Character] = [
             valToChar(n1), valToChar(n2),
             Character(UnicodeScalar(48 + n3)!),
-            valToChar(n4), valToChar(n5), valToChar(n6)
+            valToSuffix(n4), valToSuffix(n5), valToSuffix(n6)
         ]
 
         // Trim leading/trailing spaces
@@ -94,7 +103,7 @@ enum WSPRMessagePack {
 
     // MARK: - Grid Encoding (15 bits)
 
-    /// Encode 4-character Maidenhead grid to 15-bit integer
+    /// Encode 4-character Maidenhead grid to 15-bit integer (WSJT-X compatible)
     static func encodeGrid(_ grid: String) -> Int {
         let g = Array(grid.uppercased())
         guard g.count >= 4,
@@ -105,13 +114,13 @@ enum WSPRMessagePack {
 
         let lon = Int(g[0].asciiValue! - 65) * 10 + Int(g[2].asciiValue! - 48)
         let lat = Int(g[1].asciiValue! - 65) * 10 + Int(g[3].asciiValue! - 48)
-        return lon * 180 + lat
+        return (179 - lon) * 180 + lat
     }
 
     /// Decode 15-bit integer to 4-character grid
     static func decodeGrid(_ n: Int) -> String {
         let lat = n % 180
-        let lon = n / 180
+        let lon = 179 - n / 180
         let c0 = Character(UnicodeScalar(65 + lon / 10)!)
         let c1 = Character(UnicodeScalar(65 + lat / 10)!)
         let c2 = Character(UnicodeScalar(48 + lon % 10)!)

@@ -1,23 +1,23 @@
-/// Winlink B2F/FBB Nachrichtenaustausch-Protokoll.
+/// Winlink B2F/FBB message exchange protocol.
 ///
-/// Implementiert das B2F (Binary-2-FBB) Protokoll für den Austausch von
-/// Winlink-Nachrichten zwischen Client und RMS-Gateway (oder P2P).
+/// Implements the B2F (Binary-2-FBB) protocol for exchanging
+/// Winlink messages between client and RMS gateway (or P2P).
 ///
-/// Der Protokollablauf folgt exakt der Referenzimplementierung:
+/// The protocol flow follows the reference implementation exactly:
 ///   https://github.com/la5nta/wl2k-go/blob/master/fbb/b2f.go
 ///
-/// Binäre Datenübertragung nutzt SOH/STX/EOT-Framing:
+/// Binary data transfer uses SOH/STX/EOT framing:
 ///   SOH (0x01) + Len + Title + NUL + Offset + NUL    (Header)
-///   STX (0x02) + Len + Data (max 125 Bytes)           (Datenblöcke)
-///   EOT (0x04) + Checksum                              (Abschluss)
+///   STX (0x02) + Len + Data (max 125 bytes)           (Data blocks)
+///   EOT (0x04) + Checksum                              (Termination)
 ///
-/// Referenz: http://www.intangiblesoftware.com/B2F_protocol.pdf
+/// Reference: http://www.intangiblesoftware.com/B2F_protocol.pdf
 
 import Foundation
 
 // MARK: - B2F Protocol Constants
 
-/// B2F Protokollkonstanten (identisch mit wl2k-go/fbb)
+/// B2F protocol constants (identical to wl2k-go/fbb)
 enum B2FProtocol {
     static let sid = "[DigiFox-1.0-B2FHIM$]"
     static let loginPrompt = ";PQ: "
@@ -37,7 +37,7 @@ enum B2FProtocol {
 
 // MARK: - B2F Message Proposal
 
-/// Nachrichtenvorschlag (Proposal) im B2F-Protokoll
+/// Message proposal in the B2F protocol
 struct B2FProposal: Sendable {
     /// Proposal code: 'C' = Wl2k B2 extended, 'B' = FBB
     let code: Character
@@ -64,13 +64,13 @@ struct B2FProposal: Sendable {
     /// Proposal answer from remote
     var answer: ProposalAnswer = .defer_
 
-    /// Formatiert als B2F-Proposal-Zeile: "FC EM MID SIZE CSIZE 0"
+    /// Formatted as B2F proposal line: "FC EM MID SIZE CSIZE 0"
     var proposalLine: String {
         "F\(code) \(msgType) \(messageId) \(uncompressedSize) \(compressedSize) 0"
     }
 }
 
-/// Antwort auf einen Proposal (kompatibel mit wl2k-go)
+/// Response to a proposal (compatible with wl2k-go)
 enum ProposalAnswer: Character, Sendable {
     case accept = "+"
     case reject = "-"
@@ -80,7 +80,7 @@ enum ProposalAnswer: Character, Sendable {
 
 // MARK: - B2F Transport Protocol
 
-/// Transport-Abstraktion für B2F (Telnet oder ARDOP).
+/// Transport abstraction for B2F (Telnet or ARDOP).
 protocol B2FTransport: AnyObject, Sendable {
     func sendLine(_ line: String) async throws
     func receiveLine() async throws -> String
@@ -191,14 +191,14 @@ final class B2FSession {
 
     // MARK: - Outbound (Sending)
 
-    /// Sendet Outbound-Proposals und Daten. Gibt zurück ob FQ gesendet wurde.
+    /// Sends outbound proposals and data. Returns whether FQ was sent.
     private func handleOutbound() async throws -> Bool {
         let outbound = mailbox.outboxMessages()
 
         if outbound.isEmpty {
             // No outgoing messages — send FF or FQ
             let cmd = B2FProtocol.cmdNoMoreMessages  // "FF"
-            Log.d("B2F", "TX: \(cmd) (keine ausgehenden Nachrichten)")
+            Log.d("B2F", "TX: \(cmd) (no outgoing messages)")
             try await transport.sendLine(cmd)
             return false
         }

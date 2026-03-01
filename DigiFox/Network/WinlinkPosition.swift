@@ -145,6 +145,7 @@ final class WinlinkPositionManager {
         report: WinlinkPositionReport,
         callsign: String
     ) {
+        Log.d("Position", "Positionsbericht: lat=\(report.latitude) lon=\(report.longitude) grid=\(report.gridLocator)")
         let subject = "POSITION REPORT"
         let body = report.formattedReport
 
