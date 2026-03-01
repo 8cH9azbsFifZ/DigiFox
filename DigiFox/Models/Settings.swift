@@ -24,6 +24,15 @@ class AppSettings: ObservableObject {
     // Audio
     @AppStorage("txPower") var txPower: Double = 0.5
 
+    // Station info (shared across all reporters)
+    @AppStorage("txPowerWatts") var txPowerWatts: Int = 5
+    @AppStorage("antenna") var antenna: String = ""
+
+    // Spot reporters (all disabled by default)
+    @AppStorage("pskReporterEnabled") var pskReporterEnabled = false
+    @AppStorage("rbnReporterEnabled") var rbnReporterEnabled = false
+    @AppStorage("wsprNetReporterEnabled") var wsprNetReporterEnabled = false
+
     // Radio profile (Digirig vs TruSDX)
     @AppStorage("radioProfile") var radioProfileRaw: String = RadioProfile.digirig.rawValue
 

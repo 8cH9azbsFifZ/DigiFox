@@ -43,6 +43,16 @@ struct SettingsView: View {
                     if let error = locationManager.error {
                         Text(error).font(.caption).foregroundStyle(.red)
                     }
+                    HStack {
+                        Text("TX Power (W)"); Spacer()
+                        TextField("5", value: $settings.txPowerWatts, format: .number)
+                            .multilineTextAlignment(.trailing).keyboardType(.numberPad)
+                    }
+                    HStack {
+                        Text("Antenne"); Spacer()
+                        TextField("z.B. Random Wire", text: $settings.antenna)
+                            .multilineTextAlignment(.trailing).autocorrectionDisabled()
+                    }
                 }
 
                 // USB devices
@@ -222,6 +232,19 @@ struct SettingsView: View {
 
                 Section("Audio") {
                     HStack { Text("TX Leistung"); Slider(value: $settings.txPower, in: 0...1) }
+                }
+
+                Section {
+                    Toggle("PSK Reporter", isOn: $settings.pskReporterEnabled)
+                        .onChange(of: settings.pskReporterEnabled) { _ in appState.setupSpotReporters() }
+                    Toggle("Reverse Beacon Network", isOn: $settings.rbnReporterEnabled)
+                        .onChange(of: settings.rbnReporterEnabled) { _ in appState.setupSpotReporters() }
+                    Toggle("WSPRnet", isOn: $settings.wsprNetReporterEnabled)
+                        .onChange(of: settings.wsprNetReporterEnabled) { _ in appState.setupSpotReporters() }
+                } header: {
+                    Text("Spot Reporter")
+                } footer: {
+                    Text("Empfangene Stationen automatisch an Spotting-Netzwerke melden. Verwendet Rufzeichen und Locator aus den Station-Einstellungen.")
                 }
 
                 Section("Diagnose") {
