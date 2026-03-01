@@ -45,7 +45,8 @@ class AppSettings: ObservableObject {
         set {
             radioProfileRaw = newValue.rawValue
             // Auto-configure for selected profile
-            rigModel = newValue.defaultHamlibModel != 0 ? newValue.defaultHamlibModel : rigModel
+            // Digirig defaults to FT-817 (1020), TruSDX to TS-480 (2028)
+            rigModel = newValue.defaultHamlibModel != 0 ? newValue.defaultHamlibModel : 1020
             rigSerialRate = newValue.defaultBaudRate
         }
     }
