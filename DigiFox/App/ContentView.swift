@@ -25,11 +25,11 @@ struct ContentView: View {
                 .tag(5)
 
             ActivityView()
-                .tabItem { Label("Aktivität", systemImage: "antenna.radiowaves.left.and.right") }
+                .tabItem { Label("Activity", systemImage: "antenna.radiowaves.left.and.right") }
                 .tag(2)
 
             SettingsView()
-                .tabItem { Label("Einstellungen", systemImage: "gear") }
+                .tabItem { Label("Settings", systemImage: "gear") }
                 .tag(3)
         }
         .onChange(of: selectedTab) { newTab in

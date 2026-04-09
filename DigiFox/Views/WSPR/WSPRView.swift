@@ -93,10 +93,10 @@ struct WSPRView: View {
                 if wsprMessages.isEmpty {
                     VStack {
                         Spacer()
-                        Text("Warte auf WSPR Decodes...")
+                        Text("Waiting for WSPR decodes...")
                             .foregroundStyle(.secondary)
                             .font(.caption)
-                        Text("WSPR Zykluszeit: 2 Minuten")
+                        Text("WSPR cycle time: 2 minutes")
                             .foregroundStyle(.secondary)
                             .font(.caption2)
                         Spacer()

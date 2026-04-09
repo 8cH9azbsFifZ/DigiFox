@@ -25,12 +25,12 @@ struct ComposeView: View {
         NavigationView {
             Form {
                 // MARK: - Recipients
-                Section(header: Text("Empfänger")) {
+                Section(header: Text("Recipients")) {
                     HStack {
                         Text("An:")
                             .foregroundColor(.secondary)
                             .frame(width: 30, alignment: .leading)
-                        TextField("Callsign@winlink.org oder E-Mail", text: $to)
+                        TextField("Callsign@winlink.org or email", text: $to)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .keyboardType(.emailAddress)
@@ -47,18 +47,18 @@ struct ComposeView: View {
                 }
 
                 // MARK: - Subject
-                Section(header: Text("Betreff")) {
-                    TextField("Betreff eingeben", text: $subject)
+                Section(header: Text("Subject")) {
+                    TextField("Enter subject", text: $subject)
                 }
 
                 // MARK: - Message Body
-                Section(header: Text("Nachricht")) {
+                Section(header: Text("Message")) {
                     TextEditor(text: $messageBody)
                         .frame(minHeight: 200)
                 }
 
                 // MARK: - Attachments
-                Section(header: Text("Anhänge (\(attachments.count))")) {
+                Section(header: Text("Attachments (\(attachments.count))")) {
                     ForEach(attachments) { attachment in
                         HStack {
                             Image(systemName: iconForMimeType(attachment.mimeType))
@@ -79,7 +79,7 @@ struct ComposeView: View {
                     }
 
                     Button(action: { showingAttachmentPicker = true }) {
-                        Label("Anhang hinzufügen", systemImage: "paperclip")
+                        Label("Add attachment", systemImage: "paperclip")
                     }
                 }
 
@@ -92,18 +92,18 @@ struct ComposeView: View {
                     }
                 }
             }
-            .navigationTitle("Neue Nachricht")
+            .navigationTitle("New Message")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Abbrechen") { dismiss() }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: sendMessage) {
                         if isSending {
                             ProgressView()
                         } else {
-                            Label("Senden", systemImage: "paperplane")
+                            Label("Send", systemImage: "paperplane")
                         }
                     }
                     .disabled(!isValid || isSending)
@@ -126,7 +126,7 @@ struct ComposeView: View {
     private func sendMessage() {
         guard let account = WinlinkAccountManager.shared.loadAccount(),
               account.isConfigured else {
-            errorMessage = "Bitte zuerst Winlink-Konto in den Einstellungen konfigurieren."
+            errorMessage = "Please configure Winlink account in Settings first."
             return
         }
 
@@ -159,7 +159,7 @@ struct ComposeView: View {
         guard let reply = replyTo else { return }
         to = reply.from
         subject = reply.subject.hasPrefix("Re:") ? reply.subject : "Re: \(reply.subject)"
-        messageBody = "\n\n--- Originalangabe von \(reply.from) ---\n\(reply.body)"
+        messageBody = "\n\n--- Original message from \(reply.from) ---\n\(reply.body)"
     }
 
     private func removeAttachment(_ attachment: WinlinkAttachment) {

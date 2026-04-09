@@ -119,7 +119,7 @@ final class B2FSession {
     }
 
     var onProgress: ((Progress) -> Void)?
-    private var progress = Progress(phase: "Initialisierung", detail: "")
+    private var progress = Progress(phase: "Initializing", detail: "")
 
     init(transport: B2FTransport, account: WinlinkAccount, mailbox: WinlinkMailbox) {
         self.transport = transport
@@ -132,23 +132,23 @@ final class B2FSession {
 
     func exchange() async throws {
         Log.d("B2F", "=== Session Start ===")
-        updateProgress(phase: "Anmeldung", detail: "Sende SID...")
+        updateProgress(phase: "Login", detail: "Sending SID...")
 
         // 1. Login (SID exchange + challenge/response)
         try await login()
 
         // 2. Send our proposals (outgoing)
-        updateProgress(phase: "Senden", detail: "Outbound proposals...")
+        updateProgress(phase: "Sending", detail: "Outbound proposals...")
         let quitSent = try await handleOutbound()
 
         if !quitSent {
             // 3. Receive proposals (incoming)
-            updateProgress(phase: "Empfang", detail: "Inbound proposals...")
+            updateProgress(phase: "Receiving", detail: "Inbound proposals...")
             let _ = try await handleInbound()
         }
 
         Log.d("B2F", "=== Session End: sent=\(progress.messagesSent) rcvd=\(progress.messagesReceived) ===")
-        updateProgress(phase: "Abgeschlossen", detail: "Sitzung beendet")
+        updateProgress(phase: "Completed", detail: "Session ended")
     }
 
     // MARK: - Login Phase
@@ -282,7 +282,7 @@ final class B2FSession {
                 mailbox.markSent(messageId: batch[i].messageId)
                 progress.messagesSent += 1
                 progress.bytesTransferred += prop.compressedSize
-                updateProgress(phase: "Sende", detail: "Nachricht \(progress.messagesSent)/\(proposals.count)")
+                updateProgress(phase: "Sending", detail: "Message \(progress.messagesSent)/\(proposals.count)")
             case .reject:
                 Log.d("B2F", "Message \(prop.messageId) rejected (already received)")
                 mailbox.markSent(messageId: batch[i].messageId)
@@ -309,7 +309,7 @@ final class B2FSession {
             if line.isEmpty || line.first == ";" { continue }
 
             guard line.count >= 2, line.first == "F" else {
-                throw WinlinkError.protocolError("Unerwartete Zeile: \(line)")
+                throw WinlinkError.protocolError("Unexpected line: \(line)")
             }
 
             let cmd = String(line.prefix(2))
@@ -340,7 +340,7 @@ final class B2FSession {
                 let theirStr = line.count > 3 ? String(line.dropFirst(3)) : "0"
                 let theirs = Int64(theirStr, radix: 16) ?? 0
                 if theirs != ourChecksum {
-                    throw WinlinkError.protocolError("Checksum-Fehler: erwartet \(ourChecksum), empfangen \(theirs)")
+                    throw WinlinkError.protocolError("Checksum error: expected \(ourChecksum), received \(theirs)")
                 }
                 Log.d("B2F", "Proposal-Checksum OK (\(ourChecksum))")
 
@@ -351,7 +351,7 @@ final class B2FSession {
                 break loop
 
             default:
-                throw WinlinkError.protocolError("Unbekanntes Kommando: \(cmd)")
+                throw WinlinkError.protocolError("Unknown command: \(cmd)")
             }
         }
 
@@ -367,7 +367,7 @@ final class B2FSession {
                 mailbox.storeInbox(message: message)
                 progress.messagesReceived += 1
                 progress.bytesTransferred += proposals[i].compressedSize
-                updateProgress(phase: "Empfang", detail: "\(progress.messagesReceived) empfangen")
+                updateProgress(phase: "Receiving", detail: "\(progress.messagesReceived) received")
             }
         }
 
@@ -449,9 +449,9 @@ final class B2FSession {
         guard firstByte == B2FProtocol.chrSOH else {
             if firstByte == Character("*").asciiValue {
                 let errLine = try await transport.receiveLine()
-                throw WinlinkError.protocolError("CMS-Fehler: \(errLine)")
+                throw WinlinkError.protocolError("CMS error: \(errLine)")
             }
-            throw WinlinkError.protocolError("SOH erwartet, erhalten: \(firstByte)")
+            throw WinlinkError.protocolError("SOH expected, received: \(firstByte)")
         }
 
         // Read header length
@@ -505,17 +505,17 @@ final class B2FSession {
                 let csumByte = try await transport.receiveByte()
                 checksum = (checksum + Int(csumByte)) % 256
                 guard checksum == 0 else {
-                    throw WinlinkError.protocolError("Daten-Checksum falsch")
+                    throw WinlinkError.protocolError("Data checksum incorrect")
                 }
                 guard buf.count == proposal.compressedSize else {
-                    throw WinlinkError.protocolError("Datenlänge: erwartet \(proposal.compressedSize), empfangen \(buf.count)")
+                    throw WinlinkError.protocolError("Data length: expected \(proposal.compressedSize), received \(buf.count)")
                 }
                 proposal.compressedData = buf
                 Log.d("B2F", "RX complete: \(buf.count) bytes, checksum OK")
                 return
 
             default:
-                throw WinlinkError.protocolError("Unerwartetes Byte im Datenstrom: \(c)")
+                throw WinlinkError.protocolError("Unexpected byte in data stream: \(c)")
             }
         }
     }
@@ -526,7 +526,7 @@ final class B2FSession {
         // Format: "FC EM MID SIZE CSIZE OFFSET" or "FC P FROM TO MID SIZE CSIZE OFFSET"
         let parts = line.split(separator: " ")
         guard parts.count >= 5 else {
-            throw WinlinkError.protocolError("Ungültiger Proposal: \(line)")
+            throw WinlinkError.protocolError("Invalid proposal: \(line)")
         }
 
         let code = line.count > 1 ? line[line.index(line.startIndex, offsetBy: 1)] : "C"
@@ -588,7 +588,7 @@ final class B2FSession {
             messageId: proposal.messageId,
             from: headers["from"] ?? proposal.from,
             to: headers["to"] ?? account.callsign,
-            subject: headers["subject"] ?? "(Kein Betreff)",
+            subject: headers["subject"] ?? "(No subject)",
             body: messageBody.trimmingCharacters(in: .whitespacesAndNewlines),
             date: Date(),
             mimeType: headers["content-type"] ?? "text/plain",

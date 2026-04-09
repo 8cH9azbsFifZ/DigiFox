@@ -19,7 +19,7 @@ struct MessageListView: View {
         NavigationView {
             VStack(spacing: 0) {
                 // MARK: - Folder Tabs
-                Picker("Ordner", selection: $selectedFolder) {
+                Picker("Folder", selection: $selectedFolder) {
                     ForEach(WinlinkFolder.allCases, id: \.self) { folder in
                         Label(folder.rawValue, systemImage: folder.systemImage)
                             .tag(folder)
@@ -36,7 +36,7 @@ struct MessageListView: View {
                         Image(systemName: selectedFolder.systemImage)
                             .font(.system(size: 48))
                             .foregroundColor(.secondary)
-                        Text("Keine Nachrichten")
+                        Text("No messages")
                             .font(.headline)
                             .foregroundColor(.secondary)
                         Text(emptyText)
@@ -96,10 +96,10 @@ struct MessageListView: View {
 
     private var emptyText: String {
         switch selectedFolder {
-        case .inbox: return "Verbinden Sie sich mit einem\nRMS-Gateway um Nachrichten abzurufen."
-        case .outbox: return "Verfassen Sie eine Nachricht\nzum Senden."
-        case .sent: return "Gesendete Nachrichten\nerscheinen hier."
-        case .archive: return "Archivierte Nachrichten\nerscheinen hier."
+        case .inbox: return "Connect to an RMS gateway\nto retrieve messages."
+        case .outbox: return "Compose a message\nto send."
+        case .sent: return "Sent messages\nwill appear here."
+        case .archive: return "Archived messages\nwill appear here."
         }
     }
 
@@ -174,7 +174,7 @@ struct MessageRow: View {
         if calendar.isDateInToday(message.date) {
             formatter.dateFormat = "HH:mm"
         } else if calendar.isDateInYesterday(message.date) {
-            return "Gestern"
+            return "Yesterday"
         } else {
             formatter.dateFormat = "dd.MM.yy"
         }
@@ -198,13 +198,13 @@ struct MessageDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     // MARK: - Header
                     Group {
-                        headerRow("Von:", value: message.from)
-                        headerRow("An:", value: message.to)
+                        headerRow("From:", value: message.from)
+                        headerRow("To:", value: message.to)
                         if let cc = message.cc, !cc.isEmpty {
                             headerRow("CC:", value: cc)
                         }
-                        headerRow("Datum:", value: fullDateString)
-                        headerRow("Betreff:", value: message.subject)
+                        headerRow("Date:", value: fullDateString)
+                        headerRow("Subject:", value: message.subject)
                     }
                     .padding(.horizontal)
 
@@ -238,27 +238,27 @@ struct MessageDetailView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("Nachricht")
+            .navigationTitle("Message")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Schließen") { dismiss() }
+                    Button("Close") { dismiss() }
                 }
                 ToolbarItemGroup(placement: .bottomBar) {
                     Button(action: { showingReply = true }) {
-                        Label("Antworten", systemImage: "arrowshape.turn.up.left")
+                        Label("Reply", systemImage: "arrowshape.turn.up.left")
                     }
 
                     Spacer()
 
                     Button(action: archiveMessage) {
-                        Label("Archivieren", systemImage: "archivebox")
+                        Label("Archive", systemImage: "archivebox")
                     }
 
                     Spacer()
 
                     Button(role: .destructive, action: deleteMessage) {
-                        Label("Löschen", systemImage: "trash")
+                        Label("Delete", systemImage: "trash")
                     }
                 }
             }

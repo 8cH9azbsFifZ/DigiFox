@@ -7,7 +7,7 @@ struct TransmitView: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Picker("Modus", selection: $settings.speedRaw) {
+                Picker("Mode", selection: $settings.speedRaw) {
                     ForEach(JS8Speed.allCases) { s in Text(s.name).tag(s.rawValue) }
                 }
                 .pickerStyle(.segmented)
@@ -15,7 +15,7 @@ struct TransmitView: View {
             .padding(.horizontal)
 
             HStack {
-                TextField("Nachricht senden...", text: $appState.txMessage.text)
+                TextField("Send message...", text: $appState.txMessage.text)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(.body, design: .monospaced))
                     .autocorrectionDisabled()

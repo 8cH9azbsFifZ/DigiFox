@@ -17,7 +17,7 @@ struct SettingsView: View {
             Form {
                 Section("Station") {
                     HStack {
-                        Text("Rufzeichen"); Spacer()
+                        Text("Callsign"); Spacer()
                         TextField("e.g. DL1ABC", text: $settings.callsign)
                             .multilineTextAlignment(.trailing).autocorrectionDisabled()
                             .textInputAutocapitalization(.characters)
@@ -49,8 +49,8 @@ struct SettingsView: View {
                             .multilineTextAlignment(.trailing).keyboardType(.numberPad)
                     }
                     HStack {
-                        Text("Antenne"); Spacer()
-                        TextField("z.B. Random Wire", text: $settings.antenna)
+                        Text("Antenna"); Spacer()
+                        TextField("e.g. Random Wire", text: $settings.antenna)
                             .multilineTextAlignment(.trailing).autocorrectionDisabled()
                     }
                 }
@@ -225,13 +225,13 @@ struct SettingsView: View {
                         }
                     }
                 } header: {
-                    Text("Band & Frequenz")
+                    Text("Band & Frequency")
                 } footer: {
-                    Text("Frequenz wird automatisch für FT8/JS8Call gesetzt und per CAT an das Radio gesendet.")
+                    Text("Frequency is automatically set for FT8/JS8Call and sent to the radio via CAT.")
                 }
 
                 Section("Audio") {
-                    HStack { Text("TX Leistung"); Slider(value: $settings.txPower, in: 0...1) }
+                    HStack { Text("TX Level"); Slider(value: $settings.txPower, in: 0...1) }
                 }
 
                 Section {
@@ -244,10 +244,10 @@ struct SettingsView: View {
                 } header: {
                     Text("Spot Reporter")
                 } footer: {
-                    Text("Empfangene Stationen automatisch an Spotting-Netzwerke melden. Verwendet Rufzeichen und Locator aus den Station-Einstellungen.")
+                    Text("Automatically report received stations to spotting networks. Uses callsign and locator from the station settings.")
                 }
 
-                Section("Diagnose") {
+                Section("Diagnostics") {
                     NavigationLink {
                         LogOutputView()
                     } label: {
@@ -269,7 +269,7 @@ struct SettingsView: View {
                     Link(destination: URL(string: "https://github.com/gerolfziegenhain/DigiFox")!) {
                         HStack {
                             Image(systemName: "globe")
-                            Text("DigiFox auf GitHub")
+                            Text("DigiFox on GitHub")
                             Spacer()
                             Image(systemName: "arrow.up.right.square").foregroundStyle(.secondary)
                         }

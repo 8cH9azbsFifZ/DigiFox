@@ -78,7 +78,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
                     continuation.resume(throwing: WinlinkError.connectionFailed(error.localizedDescription))
                 case .cancelled:
                     self?.isConnected = false
-                    continuation.resume(throwing: WinlinkError.connectionFailed("Verbindung abgebrochen"))
+                    continuation.resume(throwing: WinlinkError.connectionFailed("Connection aborted"))
                 default:
                     break
                 }
@@ -142,7 +142,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
     /// Send binary data.
     func sendData(_ data: Data) async throws {
         guard let connection = connection, isConnected else {
-            throw WinlinkError.connectionFailed("Nicht verbunden")
+            throw WinlinkError.connectionFailed("Not connected")
         }
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -183,7 +183,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
 
     private func readFromNetwork() async throws -> Data {
         guard let connection = connection, isConnected else {
-            throw WinlinkError.connectionFailed("Nicht verbunden")
+            throw WinlinkError.connectionFailed("Not connected")
         }
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -193,7 +193,7 @@ final class WinlinkTelnet: B2FTransport, @unchecked Sendable {
                 } else if let data = data, !data.isEmpty {
                     continuation.resume(returning: data)
                 } else {
-                    continuation.resume(throwing: WinlinkError.connectionFailed("Verbindung geschlossen"))
+                    continuation.resume(throwing: WinlinkError.connectionFailed("Connection closed"))
                 }
             }
         }
@@ -215,6 +215,6 @@ extension WinlinkTelnet {
                 continue
             }
         }
-        throw WinlinkError.connectionFailed("Kein CMS-Server erreichbar")
+        throw WinlinkError.connectionFailed("No CMS server reachable")
     }
 }

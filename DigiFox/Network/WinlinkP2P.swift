@@ -18,12 +18,12 @@ import Foundation
 
 /// P2P connection state
 enum P2PState: String, Sendable {
-    case idle = "Inaktiv"
-    case listening = "Empfangsbereit"
-    case connecting = "Verbinde..."
-    case exchanging = "Austausch..."
-    case completed = "Abgeschlossen"
-    case failed = "Fehlgeschlagen"
+    case idle = "Idle"
+    case listening = "Listening"
+    case connecting = "Connecting..."
+    case exchanging = "Exchanging..."
+    case completed = "Completed"
+    case failed = "Failed"
 }
 
 // MARK: - P2P Transport (wraps ARDOP ARQ as B2FTransport)
@@ -95,7 +95,7 @@ final class ARDOPB2FTransport: B2FTransport, @unchecked Sendable {
 
     func sendData(_ data: Data) async throws {
         guard isConnected else {
-            throw WinlinkError.connectionFailed("P2P nicht verbunden")
+            throw WinlinkError.connectionFailed("P2P not connected")
         }
         await session.send(data: data)
     }
@@ -183,7 +183,7 @@ final class WinlinkP2PManager: ObservableObject {
     @MainActor
     func startListening(bandwidth: ARDOPBandwidth = .bw500) async {
         state = .listening
-        statusText = "Warte auf eingehende Verbindung..."
+        statusText = "Waiting for incoming connection..."
 
         let session = ARDOPSession(
             callsign: account.callsign,
@@ -205,7 +205,7 @@ final class WinlinkP2PManager: ObservableObject {
             if await session.state == .connected {
                 await MainActor.run {
                     self.state = .exchanging
-                    self.statusText = "Verbunden, tausche Nachrichten aus..."
+                    self.statusText = "Connected, exchanging messages..."
                 }
                 await runB2FExchange(session: session)
             }
@@ -227,7 +227,7 @@ final class WinlinkP2PManager: ObservableObject {
     func connect(to callsign: String, bandwidth: ARDOPBandwidth = .bw500) async {
         state = .connecting
         remoteCallsign = callsign
-        statusText = "Verbinde zu \(callsign)..."
+        statusText = "Connecting to \(callsign)..."
 
         let session = ARDOPSession(
             callsign: account.callsign,
@@ -249,13 +249,13 @@ final class WinlinkP2PManager: ObservableObject {
             if currentState == .connected {
                 await MainActor.run {
                     self.state = .exchanging
-                    self.statusText = "Verbunden mit \(callsign), tausche Nachrichten aus..."
+                    self.statusText = "Connected to \(callsign), exchanging messages..."
                 }
                 await runB2FExchange(session: session)
             } else {
                 await MainActor.run {
                     self.state = .failed
-                    self.statusText = "Verbindung zu \(callsign) fehlgeschlagen"
+                    self.statusText = "Connection to \(callsign) failed"
                 }
             }
         }
@@ -289,12 +289,12 @@ final class WinlinkP2PManager: ObservableObject {
             try await b2f.exchange()
             await MainActor.run {
                 self.state = .completed
-                self.statusText = "Austausch abgeschlossen"
+                self.statusText = "Exchange completed"
             }
         } catch {
             await MainActor.run {
                 self.state = .failed
-                self.statusText = "Fehler: \(error.localizedDescription)"
+                self.statusText = "Error: \(error.localizedDescription)"
             }
         }
 

@@ -6,7 +6,7 @@ struct JS8MessageListView: View {
     var body: some View {
         List {
             if appState.rxMessages.isEmpty {
-                Text("Keine Nachrichten empfangen")
+                Text("No messages received")
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)

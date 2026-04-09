@@ -20,14 +20,14 @@ import Foundation
 
 /// State of the ARDOP ARQ session
 enum ARDOPSessionState: String, Sendable {
-    case disconnected = "Getrennt"
-    case listening = "Empfangsbereit"
-    case connecting = "Verbinde..."
-    case connected = "Verbunden"
-    case sendingData = "Sende Daten"
-    case receivingData = "Empfange Daten"
-    case disconnecting = "Trenne..."
-    case failed = "Fehlgeschlagen"
+    case disconnected = "Disconnected"
+    case listening = "Listening"
+    case connecting = "Connecting..."
+    case connected = "Connected"
+    case sendingData = "Sending data"
+    case receivingData = "Receiving data"
+    case disconnecting = "Disconnecting..."
+    case failed = "Failed"
 }
 
 /// ARQ frame for session management

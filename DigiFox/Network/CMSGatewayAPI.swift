@@ -171,14 +171,14 @@ final class CMSGatewayAPI {
         }
 
         guard let url = URL(string: urlString) else {
-            throw WinlinkError.connectionFailed("Ungültige API-URL")
+            throw WinlinkError.connectionFailed("Invalid API URL")
         }
 
         let (data, response) = try await URLSession.shared.data(from: url)
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
-            throw WinlinkError.connectionFailed("CMS API Fehler")
+            throw WinlinkError.connectionFailed("CMS API error")
         }
 
         let decoder = JSONDecoder()

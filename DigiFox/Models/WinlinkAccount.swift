@@ -157,14 +157,14 @@ enum WinlinkError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .keychainError(let status): return "Keychain-Fehler: \(status)"
-        case .notConfigured: return "Winlink-Konto nicht konfiguriert"
-        case .authenticationFailed: return "Authentifizierung fehlgeschlagen"
-        case .connectionFailed(let msg): return "Verbindung fehlgeschlagen: \(msg)"
-        case .protocolError(let msg): return "Protokollfehler: \(msg)"
-        case .compressionError: return "Kompressionsfehler"
-        case .mailboxError(let msg): return "Mailbox-Fehler: \(msg)"
-        case .timeout: return "Zeitüberschreitung"
+        case .keychainError(let status): return "Keychain error: \(status)"
+        case .notConfigured: return "Winlink account not configured"
+        case .authenticationFailed: return "Authentication failed"
+        case .connectionFailed(let msg): return "Connection failed: \(msg)"
+        case .protocolError(let msg): return "Protocol error: \(msg)"
+        case .compressionError: return "Compression error"
+        case .mailboxError(let msg): return "Mailbox error: \(msg)"
+        case .timeout: return "Timeout"
         }
     }
 }

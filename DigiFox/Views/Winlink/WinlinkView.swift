@@ -26,12 +26,12 @@ struct WinlinkView: View {
     @State private var showingCompose = false
     @State private var showingAccountSetup = false
     @State private var showingGateways = false
-    @State private var connectionStatus: String = "Getrennt"
+    @State private var connectionStatus: String = "Disconnected"
     @State private var unreadCount: Int = 0
 
     enum WinlinkSection: String, CaseIterable {
         case mail = "Mail"
-        case connect = "Verbinden"
+        case connect = "Connect"
         case info = "Info"
     }
 
@@ -39,7 +39,7 @@ struct WinlinkView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Section Picker
-                Picker("Bereich", selection: $selectedSection) {
+                Picker("Section", selection: $selectedSection) {
                     ForEach(WinlinkSection.allCases, id: \.self) { section in
                         Text(section.rawValue).tag(section)
                     }
@@ -83,14 +83,14 @@ struct WinlinkView: View {
             // Quick actions
             HStack(spacing: 16) {
                 Button(action: { showingCompose = true }) {
-                    Label("Verfassen", systemImage: "square.and.pencil")
+                    Label("Compose", systemImage: "square.and.pencil")
                 }
                 .buttonStyle(.borderedProminent)
 
                 Spacer()
 
                 if unreadCount > 0 {
-                    Text("\(unreadCount) ungelesen")
+                    Text("\(unreadCount) unread")
                         .font(.caption)
                         .foregroundStyle(.blue)
                         .padding(.horizontal, 8)
@@ -116,13 +116,13 @@ struct WinlinkView: View {
                 accountStatusCard
 
                 // Connection Options
-                GroupBox("Verbindungsoptionen") {
+                GroupBox("Connection Options") {
                     VStack(spacing: 12) {
                         // Telnet (Internet)
                         ConnectOptionRow(
                             icon: "network",
                             title: "Telnet (Internet)",
-                            subtitle: "Verbindung über WLAN/Mobilfunk",
+                            subtitle: "Connection via WiFi/cellular",
                             action: connectViaTelnet
                         )
 
@@ -131,8 +131,8 @@ struct WinlinkView: View {
                         // ARDOP (HF Radio)
                         ConnectOptionRow(
                             icon: "antenna.radiowaves.left.and.right",
-                            title: "ARDOP (Kurzwelle)",
-                            subtitle: "Verbindung über HF-Transceiver",
+                            title: "ARDOP (HF)",
+                            subtitle: "Connection via HF transceiver",
                             action: connectViaARDOP
                         )
 
@@ -141,8 +141,8 @@ struct WinlinkView: View {
                         // P2P Direct
                         ConnectOptionRow(
                             icon: "person.2",
-                            title: "P2P (Direkt)",
-                            subtitle: "Station-zu-Station ohne Gateway",
+                            title: "P2P (Direct)",
+                            subtitle: "Station-to-station without gateway",
                             action: connectP2P
                         )
                     }
@@ -150,19 +150,19 @@ struct WinlinkView: View {
                 .padding(.horizontal)
 
                 // Gateway Directory
-                GroupBox("RMS-Gateway-Verzeichnis") {
+                GroupBox("RMS Gateway Directory") {
                     VStack(spacing: 8) {
                         Button(action: { showingGateways = true }) {
                             HStack {
                                 Image(systemName: "map")
-                                Text("Gateways anzeigen")
+                                Text("Show gateways")
                                 Spacer()
                                 Image(systemName: "chevron.right")
                                     .foregroundStyle(.secondary)
                             }
                         }
 
-                        Text("Finde ARDOP-fähige RMS-Gateways in deiner Nähe")
+                        Text("Find ARDOP-capable RMS gateways nearby")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -170,7 +170,7 @@ struct WinlinkView: View {
                 .padding(.horizontal)
 
                 // Winlink Frequencies
-                GroupBox("Standard-Frequenzen") {
+                GroupBox("Standard Frequencies") {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(winlinkFrequencyList, id: \.band) { entry in
                             HStack {
@@ -187,15 +187,15 @@ struct WinlinkView: View {
                 .padding(.horizontal)
 
                 // Position Report
-                GroupBox("Positionsbericht") {
+                GroupBox("Position Report") {
                     VStack(spacing: 8) {
                         Button(action: sendPositionReport) {
-                            Label("Position senden", systemImage: "location")
+                            Label("Send position", systemImage: "location")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
 
-                        Text("Sendet GPS-Position über Winlink")
+                        Text("Sends GPS position via Winlink")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -216,15 +216,15 @@ struct WinlinkView: View {
                 // ARDOP Codec Status
                 GroupBox("ARDOP Codec") {
                     VStack(alignment: .leading, spacing: 10) {
-                        StatusRow(label: "Codec", value: "Implementiert", color: .green)
+                        StatusRow(label: "Codec", value: "Implemented", color: .green)
                         StatusRow(label: "Modulation", value: "4FSK / 4PSK / 8PSK / 16QAM", color: .green)
-                        StatusRow(label: "Bandbreiten", value: "200 / 500 / 1000 / 2000 Hz", color: .green)
+                        StatusRow(label: "Bandwidths", value: "200 / 500 / 1000 / 2000 Hz", color: .green)
                         StatusRow(label: "FEC", value: "Reed-Solomon GF(256)", color: .green)
-                        StatusRow(label: "ARQ Session", value: "Implementiert", color: .green)
-                        StatusRow(label: "B2F Protokoll", value: "Implementiert", color: .green)
-                        StatusRow(label: "LZHUF Kompression", value: "Implementiert", color: .green)
-                        StatusRow(label: "Telnet Transport", value: "Implementiert", color: .green)
-                        StatusRow(label: "P2P Modus", value: "Implementiert", color: .green)
+                        StatusRow(label: "ARQ Session", value: "Implemented", color: .green)
+                        StatusRow(label: "B2F Protocol", value: "Implemented", color: .green)
+                        StatusRow(label: "LZHUF Compression", value: "Implemented", color: .green)
+                        StatusRow(label: "Telnet Transport", value: "Implemented", color: .green)
+                        StatusRow(label: "P2P Mode", value: "Implemented", color: .green)
                     }
                     .font(.system(.body, design: .monospaced))
                 }
@@ -234,16 +234,16 @@ struct WinlinkView: View {
                 GroupBox("Mailbox") {
                     let stats = WinlinkMailbox.shared.getStats()
                     VStack(alignment: .leading, spacing: 8) {
-                        StatusRow(label: "Posteingang", value: "\(stats.inboxCount) (\(stats.unreadCount) ungelesen)", color: stats.unreadCount > 0 ? .blue : .secondary)
-                        StatusRow(label: "Postausgang", value: "\(stats.outboxCount)", color: stats.outboxCount > 0 ? .orange : .secondary)
-                        StatusRow(label: "Gesendet", value: "\(stats.sentCount)", color: .secondary)
-                        StatusRow(label: "Archiv", value: "\(stats.archiveCount)", color: .secondary)
+                        StatusRow(label: "Inbox", value: "\(stats.inboxCount) (\(stats.unreadCount) unread)", color: stats.unreadCount > 0 ? .blue : .secondary)
+                        StatusRow(label: "Outbox", value: "\(stats.outboxCount)", color: stats.outboxCount > 0 ? .orange : .secondary)
+                        StatusRow(label: "Sent", value: "\(stats.sentCount)", color: .secondary)
+                        StatusRow(label: "Archive", value: "\(stats.archiveCount)", color: .secondary)
                     }
                 }
                 .padding(.horizontal)
 
                 // Open Source References
-                GroupBox("Open Source Referenzen") {
+                GroupBox("Open Source References") {
                     VStack(alignment: .leading, spacing: 8) {
                         ReferenceRow(name: "ARDOP TNC", description: "Amateur Radio Digital Open Protocol", url: "github.com/pflarue/ardop")
                         Divider()
@@ -288,9 +288,9 @@ struct WinlinkView: View {
                         .font(.title2)
                         .foregroundStyle(.orange)
                     VStack(alignment: .leading) {
-                        Text("Konto nicht konfiguriert")
+                        Text("Account not configured")
                             .font(.headline)
-                        Text("Bitte Winlink-Zugangsdaten eingeben")
+                        Text("Please enter Winlink credentials")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -308,11 +308,11 @@ struct WinlinkView: View {
 
     private func connectViaTelnet() {
         Task {
-            connectionStatus = "Verbinde über Telnet..."
+            connectionStatus = "Connecting via Telnet..."
             do {
                 let telnet = try await WinlinkTelnet.connectToBestServer()
                 guard let account = WinlinkAccountManager.shared.loadAccount() else {
-                    connectionStatus = "Kein Konto konfiguriert"
+                    connectionStatus = "No account configured"
                     return
                 }
                 let b2f = B2FSession(
@@ -321,21 +321,21 @@ struct WinlinkView: View {
                     mailbox: WinlinkMailbox.shared
                 )
                 try await b2f.exchange()
-                connectionStatus = "Austausch abgeschlossen"
+                connectionStatus = "Exchange completed"
                 unreadCount = WinlinkMailbox.shared.unreadCount()
                 telnet.disconnect()
             } catch {
-                connectionStatus = "Fehler: \(error.localizedDescription)"
+                connectionStatus = "Error: \(error.localizedDescription)"
             }
         }
     }
 
     private func connectViaARDOP() {
-        connectionStatus = "ARDOP-Verbindung wird vorbereitet..."
+        connectionStatus = "Preparing ARDOP connection..."
     }
 
     private func connectP2P() {
-        connectionStatus = "P2P-Modus wird vorbereitet..."
+        connectionStatus = "Preparing P2P mode..."
     }
 
     private func sendPositionReport() {
@@ -376,15 +376,15 @@ struct WinlinkAccountView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Zugangsdaten")) {
-                    TextField("Rufzeichen", text: $callsign)
+                Section(header: Text("Credentials")) {
+                    TextField("Callsign", text: $callsign)
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
-                    SecureField("Winlink-Passwort", text: $password)
+                    SecureField("Winlink password", text: $password)
                 }
 
                 Section(header: Text("Optional")) {
-                    TextField("Grid-Locator (z.B. JN48ab)", text: $gridLocator)
+                    TextField("Grid locator (e.g. JN48ab)", text: $gridLocator)
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
                 }
@@ -397,23 +397,23 @@ struct WinlinkAccountView: View {
                 }
 
                 Section {
-                    Button("Speichern") {
+                    Button("Save") {
                         let account = WinlinkAccount(
                             callsign: callsign,
                             password: password,
                             gridLocator: gridLocator.isEmpty ? nil : gridLocator
                         )
                         try? WinlinkAccountManager.shared.saveAccount(account)
-                        savedMessage = "Konto gespeichert ✓"
+                        savedMessage = "Account saved ✓"
                     }
                     .disabled(callsign.isEmpty || password.isEmpty)
                 }
             }
-            .navigationTitle("Winlink-Konto")
+            .navigationTitle("Winlink Account")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Schließen") { dismiss() }
+                    Button("Close") { dismiss() }
                 }
             }
             .onAppear {
@@ -439,7 +439,7 @@ struct GatewayListView: View {
         NavigationView {
             Group {
                 if isLoading {
-                    ProgressView("Lade Gateways...")
+                    ProgressView("Loading gateways...")
                 } else if let error = errorMessage {
                     VStack {
                         Image(systemName: "exclamationmark.triangle")
@@ -451,7 +451,7 @@ struct GatewayListView: View {
                     }
                     .padding()
                 } else if gateways.isEmpty {
-                    Text("Keine Gateways gefunden")
+                    Text("No gateways found")
                         .foregroundStyle(.secondary)
                 } else {
                     List(gateways) { gw in
@@ -489,7 +489,7 @@ struct GatewayListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Schließen") { dismiss() }
+                    Button("Close") { dismiss() }
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: loadGateways) {
