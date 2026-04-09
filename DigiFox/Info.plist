@@ -17,7 +17,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>0.7.1</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>3</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>DigiFox uses your location to determine your Maidenhead grid locator for digital mode QSOs.</string>
 	<key>NSMicrophoneUsageDescription</key>
