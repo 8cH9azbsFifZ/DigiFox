@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Distribution method for App Store / TestFlight -->
+	<key>method</key>
+	<string>app-store</string>
+
+	<!-- Apple Developer Team ID -->
+	<key>teamID</key>
+	<string>C28S8EFBAD</string>
+
+	<!-- Upload symbols so crash reports are symbolicated in App Store Connect -->
+	<key>uploadSymbols</key>
+	<true/>
+
+	<!-- Strip Swift symbols from the binary to reduce IPA size -->
+	<key>stripSwiftSymbols</key>
+	<true/>
+
+	<!-- Manage signing manually (certificate + provisioning profile from CI secrets) -->
+	<key>signingStyle</key>
+	<string>manual</string>
+
+	<!-- Map bundle ID to the provisioning profile by name.
+	     Update this value to match the exact name of your App Store provisioning profile
+	     as it appears in Apple Developer Portal. -->
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>com.digifox.app</key>
+		<string>DigiFox App Store</string>
+	</dict>
+</dict>
+</plist>
