@@ -419,7 +419,7 @@ class AppState: ObservableObject {
     var hasCompatibleDevice: Bool {
         switch settings.radioProfile {
         case .trusdx: return trusdxConnected || !usbDevices.isEmpty
-        case .digirig: return digirigConnected || !usbDevices.isEmpty
+        case .digirig, .digirigVOX: return digirigConnected || !usbDevices.isEmpty
         }
     }
 
