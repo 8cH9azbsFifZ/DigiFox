@@ -4,6 +4,12 @@ All notable changes to DigiFox are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v0.7.2] - 2026-04-10
+
+### Fixed
+- Fix app icon alpha channel for App Store validation
+- Fix iPad orientations for App Store compliance
+
 ## [v0.7.0] - 2026-04-09
 
 ### Added
