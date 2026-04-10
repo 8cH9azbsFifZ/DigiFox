@@ -63,7 +63,6 @@
 		C2D3E4F5A6B7C8D9E0F1A2B3 /* JS8Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */; };
 		CE30ACCD282740EBA145B5D8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5104ACA8BBA24A30B17A891E /* LocationManager.swift */; };
 		CWTG00000000000000002 /* CWToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CWTG00000000000000001 /* CWToneGenerator.swift */; };
-		CWTG000100010001CWTG0001 /* CWToneGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CWTG000200020002CWTG0002 /* CWToneGenerator.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* CWWaterfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */; };
 		D945D8CD0010A1F5C266E9E0 /* JS8Modulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114AD2A831EDAF8C8FBB9FB2 /* JS8Modulator.swift */; };
 		DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02B03BF1B9F488A4C6226CFB /* FT8Protocol.swift */; };
@@ -183,7 +182,6 @@
 		C2D3E4F5A6B7C8D9E0F1A2B4 /* JS8Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = JS8Icon.swift; path = DigiFox/Views/JS8/JS8Icon.swift; sourceTree = SOURCE_ROOT; };
 		CB1CFB413DE6E09F3B76BA9E /* RadioProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RadioProfile.swift; path = DigiFox/Models/RadioProfile.swift; sourceTree = SOURCE_ROOT; };
 		CWTG00000000000000001 /* CWToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWToneGenerator.swift; sourceTree = "<group>"; };
-		CWTG000200020002CWTG0002 /* CWToneGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CWToneGenerator.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C3 /* CWWaterfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CWWaterfallView.swift; path = DigiFox/Views/CW/CWWaterfallView.swift; sourceTree = SOURCE_ROOT; };
 		D7E9F5C132DC4F7CB50ED1FE /* morse_table.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = morse_table.c; sourceTree = "<group>"; };
 		DC6CEE5B4D054B50A7AD9EF3 /* iir_filter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = iir_filter.c; sourceTree = "<group>"; };
@@ -310,10 +308,9 @@
 			isa = PBXGroup;
 			children = (
 				9B57730840D19777B21EEDA5 /* AudioEngine.swift */,
-				CWTG000200020002CWTG0002 /* CWToneGenerator.swift */,
+				CWTG00000000000000001 /* CWToneGenerator.swift */,
 				A1B2C3D4E5F67890ABCD1234 /* TruSDXSerialAudio.swift */,
 				7C27D0DFD4300E362E4FA820 /* FFTProcessor.swift */,
-				CWTG00000000000000001 /* CWToneGenerator.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -610,7 +607,6 @@
 				ED920B204863FC2595479B13 /* LogManager.swift in Sources */,
 				A2C0C56E20AE4ED76BDB7BED /* AppState.swift in Sources */,
 				E9D7A8B64BA0BA9BBB16B13A /* AudioEngine.swift in Sources */,
-				CWTG000100010001CWTG0001 /* CWToneGenerator.swift in Sources */,
 				A6A97E04832DDEEEAD389FDA /* BandActivityView.swift in Sources */,
 				47CF22F68DE0DB3001BD604B /* CATController.swift in Sources */,
 				E85DC350C18EFFFB2C57092D /* MorseKeyer.swift in Sources */,
