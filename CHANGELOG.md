@@ -4,6 +4,11 @@ All notable changes to DigiFox are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v0.7.6] - 2026-04-11
+
+### Changed
+- Maintenance build — keine inhaltlichen Änderungen
+
 ## [v0.7.5] - 2026-04-10
 
 ### Fixed
