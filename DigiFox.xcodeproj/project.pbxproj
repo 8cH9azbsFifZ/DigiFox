@@ -106,6 +106,8 @@
 		WSPR0001A00000000004 /* WSPRProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000004 /* WSPRProtocol.swift */; };
 		WSPR0001A00000000005 /* WSPRDemodulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WSPR0001B00000000005 /* WSPRDemodulator.swift */; };
 		WTEL01A00000000000000000 /* WinlinkTelnet.swift in Sources */ = {isa = PBXBuildFile; fileRef = WTEL01B00000000000000000 /* WinlinkTelnet.swift */; };
+		CP21020001000000000003 /* CP2102USBDriver.m in Sources */ = {isa = PBXBuildFile; fileRef = CP21020001000000000002 /* CP2102USBDriver.m */; };
+		IOK1T0001000000000002 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = IOK1T0001000000000001 /* IOKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -227,6 +229,9 @@
 		WSPR0001B00000000004 /* WSPRProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRProtocol.swift; sourceTree = "<group>"; };
 		WSPR0001B00000000005 /* WSPRDemodulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSPRDemodulator.swift; sourceTree = "<group>"; };
 		WTEL01B00000000000000000 /* WinlinkTelnet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WinlinkTelnet.swift; path = DigiFox/Network/WinlinkTelnet.swift; sourceTree = SOURCE_ROOT; };
+		CP21020001000000000001 /* CP2102USBDriver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CP2102USBDriver.h; sourceTree = "<group>"; };
+		CP21020001000000000002 /* CP2102USBDriver.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CP2102USBDriver.m; sourceTree = "<group>"; };
+		IOK1T0001000000000001 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -234,6 +239,8 @@
 			isa = PBXGroup;
 			children = (
 				A580375583F534EC4B83A224 /* CATController.swift */,
+				CP21020001000000000001 /* CP2102USBDriver.h */,
+				CP21020001000000000002 /* CP2102USBDriver.m */,
 				62DBA00E8C335F5DDCE7D367 /* MorseKeyer.swift */,
 				F48778C5CEC1F377AD721046 /* HamlibRig.swift */,
 				F05D9D59090B41B404812A32 /* IOKitUSBSerial.h */,
@@ -546,6 +553,7 @@
 			buildConfigurationList = D046ED489AA4F7047CE3A9AC /* Build configuration list for PBXNativeTarget "DigiFox" */;
 			buildPhases = (
 				786B312DDA51E168089A1E34 /* Sources */,
+				IOK1T0001000000000003 /* Frameworks */,
 				22ED092AE861360D3409E229 /* Resources */,
 			);
 			buildRules = (
@@ -586,6 +594,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		IOK1T0001000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				IOK1T0001000000000002 /* IOKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXResourcesBuildPhase section */
 		22ED092AE861360D3409E229 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -623,6 +642,7 @@
 				DAA141A430E5D8FF2201E904 /* FT8Protocol.swift in Sources */,
 				E409D68845E8DB65BF6A02CD /* HamlibRig.swift in Sources */,
 				8720DD51995DA5D5CA21DC88 /* IOKitUSBSerial.m in Sources */,
+				CP21020001000000000003 /* CP2102USBDriver.m in Sources */,
 				ACFEF84CE50EB7CB5D1D3B5B /* JS8CRC.swift in Sources */,
 				89CA2F072218AE7A16625C59 /* JS8CostasSync.swift in Sources */,
 				56454416AC5E0719E6594B03 /* JS8Demodulator.swift in Sources */,

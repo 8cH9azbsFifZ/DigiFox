@@ -84,6 +84,10 @@ HAMLIB_FW_BUILD  = guid("hamlib_fw_build")
 HAMLIB_FW_EMBED  = guid("hamlib_fw_embed")
 EMBED_FW_PHASE   = guid("embed_fw_phase")
 
+# IOKit system framework
+IOKIT_FW_FILE    = guid("iokit_fw_file")
+IOKIT_FW_BUILD   = guid("iokit_fw_build")
+
 # Entitlements
 ENTITLEMENTS_FILE = guid("entitlements_file")
 
@@ -208,6 +212,8 @@ def generate():
     # Hamlib framework build file
     w(f"\t\t{HAMLIB_FW_BUILD} /* Hamlib.xcframework */ = {{isa = PBXBuildFile; fileRef = {HAMLIB_FW_FILE} /* Hamlib.xcframework */; }};")
     w(f"\t\t{HAMLIB_FW_EMBED} /* Hamlib.xcframework */ = {{isa = PBXBuildFile; fileRef = {HAMLIB_FW_FILE} /* Hamlib.xcframework */; settings = {{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }}; }};")
+    # IOKit system framework build file
+    w(f"\t\t{IOKIT_FW_BUILD} /* IOKit.framework */ = {{isa = PBXBuildFile; fileRef = {IOKIT_FW_FILE} /* IOKit.framework */; }};")
     w("/* End PBXBuildFile section */")
     w("")
 
@@ -234,6 +240,8 @@ def generate():
         w(f"\t\t{fr} /* {name} */ = {{isa = PBXFileReference; lastKnownFileType = {ft}; path = \"{name}\"; sourceTree = \"<group>\"; }};")
     # Hamlib xcframework
     w(f"\t\t{HAMLIB_FW_FILE} /* Hamlib.xcframework */ = {{isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Hamlib.xcframework; sourceTree = \"<group>\"; }};")
+    # IOKit system framework
+    w(f"\t\t{IOKIT_FW_FILE} /* IOKit.framework */ = {{isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; }};")
     # App product
     w(f"\t\t{APP_PRODUCT} /* DigiFox.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DigiFox.app; sourceTree = BUILT_PRODUCTS_DIR; }};")
     w("/* End PBXFileReference section */")
@@ -244,7 +252,7 @@ def generate():
     w(f"\t\t{FRAMEWORKS_PHASE} /* Frameworks */ = {{")
     w("\t\t\tisa = PBXFrameworksBuildPhase;")
     w("\t\t\tbuildActionMask = 2147483647;")
-    w(f"\t\t\tfiles = ({HAMLIB_FW_BUILD} /* Hamlib.xcframework */,);")
+    w(f"\t\t\tfiles = ({HAMLIB_FW_BUILD} /* Hamlib.xcframework */, {IOKIT_FW_BUILD} /* IOKit.framework */,);")
     w("\t\t\trunOnlyForDeploymentPostprocessing = 0;")
     w("\t\t};")
     w("/* End PBXFrameworksBuildPhase section */")
@@ -275,7 +283,7 @@ def generate():
     # Frameworks group
     w(f"\t\t{FRAMEWORKS_GROUP} /* Frameworks */ = {{")
     w("\t\t\tisa = PBXGroup;")
-    w(f"\t\t\tchildren = ({HAMLIB_FW_FILE} /* Hamlib.xcframework */,);")
+    w(f"\t\t\tchildren = ({HAMLIB_FW_FILE} /* Hamlib.xcframework */, {IOKIT_FW_FILE} /* IOKit.framework */,);")
     w("\t\t\tpath = Frameworks;")
     w("\t\t\tsourceTree = \"<group>\";")
     w("\t\t};")

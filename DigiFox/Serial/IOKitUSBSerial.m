@@ -1,85 +1,30 @@
 //
 //  IOKitUSBSerial.m
-//  JS8Call
+//  DigiFox
 //
-//  IOKit-based USB Serial port access for iOS via dlopen.
-//  Finds USB-CDC-ACM serial devices (e.g. CP2102 on Digirig Mobile)
-//  and provides standard POSIX serial I/O with RTS/DTR control.
+//  IOKit-based USB Serial port access for iOS.
+//  Uses IOKit.framework directly (public API since iOS 26 SDK).
+//
+//  On Simulator (macOS host): IOSerialBSDClient discovery → POSIX serial I/O.
+//  On real device: discovery delegates to CP2102USBDriver for USB-level comms.
 //
 
 #import "IOKitUSBSerial.h"
-#include <dlfcn.h>
+#import "CP2102USBDriver.h"
+#import <TargetConditionals.h>
+#import <IOKit/IOKitLib.h>
+#import <IOKit/IOTypes.h>
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <mach/mach.h>
-
-// --- IOKit type definitions (not in public iOS SDK) ---
-
-typedef mach_port_t io_object_t;
-typedef io_object_t io_iterator_t;
-typedef io_object_t io_service_t;
-typedef io_object_t io_registry_entry_t;
-
-#define IO_OBJECT_NULL ((io_object_t)0)
-
-// --- IOKit function pointer types ---
-
-typedef CFMutableDictionaryRef (*IOServiceMatching_f)(const char *name);
-typedef kern_return_t (*IOServiceGetMatchingServices_f)(mach_port_t mainPort,
-                                                        CFDictionaryRef matching,
-                                                        io_iterator_t *existing);
-typedef io_object_t (*IOIteratorNext_f)(io_iterator_t iterator);
-typedef kern_return_t (*IOObjectRelease_f)(io_object_t object);
-typedef CFTypeRef (*IORegistryEntryCreateCFProperty_f)(io_registry_entry_t entry,
-                                                       CFStringRef key,
-                                                       CFAllocatorRef allocator,
-                                                       uint32_t options);
-typedef kern_return_t (*IORegistryEntryGetParentEntry_f)(io_registry_entry_t entry,
-                                                         const char *plane,
-                                                         io_registry_entry_t *parent);
-
-// --- Static function pointers ---
-
-static void *_iokit_handle = NULL;
-static IOServiceMatching_f _IOServiceMatching = NULL;
-static IOServiceGetMatchingServices_f _IOServiceGetMatchingServices = NULL;
-static IOIteratorNext_f _IOIteratorNext = NULL;
-static IOObjectRelease_f _IOObjectRelease = NULL;
-static IORegistryEntryCreateCFProperty_f _IORegistryEntryCreateCFProperty = NULL;
-static IORegistryEntryGetParentEntry_f _IORegistryEntryGetParentEntry = NULL;
 
 static NSString * const kIOKitUSBSerialErrorDomain = @"IOKitUSBSerial";
-
-// --- Helper: Load IOKit ---
-
-static BOOL _loadIOKit(void) {
-    static dispatch_once_t onceToken;
-    static BOOL loaded = NO;
-    dispatch_once(&onceToken, ^{
-        _iokit_handle = dlopen("/System/Library/Frameworks/IOKit.framework/IOKit", RTLD_LAZY);
-        if (!_iokit_handle) return;
-
-        _IOServiceMatching = dlsym(_iokit_handle, "IOServiceMatching");
-        _IOServiceGetMatchingServices = dlsym(_iokit_handle, "IOServiceGetMatchingServices");
-        _IOIteratorNext = dlsym(_iokit_handle, "IOIteratorNext");
-        _IOObjectRelease = dlsym(_iokit_handle, "IOObjectRelease");
-        _IORegistryEntryCreateCFProperty = dlsym(_iokit_handle, "IORegistryEntryCreateCFProperty");
-        _IORegistryEntryGetParentEntry = dlsym(_iokit_handle, "IORegistryEntryGetParentEntry");
-
-        loaded = (_IOServiceMatching && _IOServiceGetMatchingServices &&
-                  _IOIteratorNext && _IOObjectRelease &&
-                  _IORegistryEntryCreateCFProperty);
-    });
-    return loaded;
-}
 
 // --- Helper: Get string property from IORegistry ---
 
 static NSString * _Nullable _getStringProperty(io_registry_entry_t entry, CFStringRef key) {
-    if (!_IORegistryEntryCreateCFProperty) return nil;
-    CFTypeRef value = _IORegistryEntryCreateCFProperty(entry, key, kCFAllocatorDefault, 0);
+    CFTypeRef value = IORegistryEntryCreateCFProperty(entry, key, kCFAllocatorDefault, 0);
     if (!value) return nil;
     if (CFGetTypeID(value) != CFStringGetTypeID()) {
         CFRelease(value);
@@ -92,8 +37,7 @@ static NSString * _Nullable _getStringProperty(io_registry_entry_t entry, CFStri
 // --- Helper: Get integer property from IORegistry ---
 
 static NSNumber * _Nullable _getIntProperty(io_registry_entry_t entry, CFStringRef key) {
-    if (!_IORegistryEntryCreateCFProperty) return nil;
-    CFTypeRef value = _IORegistryEntryCreateCFProperty(entry, key, kCFAllocatorDefault, 0);
+    CFTypeRef value = IORegistryEntryCreateCFProperty(entry, key, kCFAllocatorDefault, 0);
     if (!value) return nil;
     if (CFGetTypeID(value) != CFNumberGetTypeID()) {
         CFRelease(value);
@@ -106,15 +50,13 @@ static NSNumber * _Nullable _getIntProperty(io_registry_entry_t entry, CFStringR
 // --- Helper: Walk up IORegistry tree to find USB device properties ---
 
 static void _getUSBDeviceInfo(io_registry_entry_t entry, uint16_t *vendorID, uint16_t *productID, NSString **name) {
-    if (!_IORegistryEntryGetParentEntry) return;
-
     io_registry_entry_t parent = IO_OBJECT_NULL;
     io_registry_entry_t current = entry;
 
     // Walk up the IORegistry tree to find the USB device node
     for (int depth = 0; depth < 10; depth++) {
-        kern_return_t kr = _IORegistryEntryGetParentEntry(current, "IOService", &parent);
-        if (current != entry) _IOObjectRelease(current);
+        kern_return_t kr = IORegistryEntryGetParentEntry(current, "IOService", &parent);
+        if (current != entry) IOObjectRelease(current);
         if (kr != KERN_SUCCESS) break;
 
         NSNumber *vid = _getIntProperty(parent, CFSTR("idVendor"));
@@ -124,12 +66,12 @@ static void _getUSBDeviceInfo(io_registry_entry_t entry, uint16_t *vendorID, uin
             *productID = pid.unsignedShortValue;
             NSString *productName = _getStringProperty(parent, CFSTR("USB Product Name"));
             if (productName) *name = productName;
-            _IOObjectRelease(parent);
+            IOObjectRelease(parent);
             return;
         }
         current = parent;
     }
-    if (parent != IO_OBJECT_NULL) _IOObjectRelease(parent);
+    if (parent != IO_OBJECT_NULL) IOObjectRelease(parent);
 }
 
 // --- Helper: Convert baud rate to speed_t ---
@@ -168,45 +110,69 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 @implementation IOKitUSBSerial {
     int _fd;
     struct termios _originalTermios;
+    CP2102USBDriver *_usbDriver;  // used on real device (no /dev/tty.*)
+    BOOL _usingUSBDriver;
 }
 
 + (BOOL)isAvailable {
-    return _loadIOKit();
+    // IOKit is now public — always available
+    return YES;
+}
+
+/// Is this running on a real iOS device (not Simulator)?
++ (BOOL)_isRealDevice {
+#if TARGET_OS_SIMULATOR
+    return NO;
+#else
+    return YES;
+#endif
 }
 
 + (NSArray<USBSerialDeviceInfo *> *)discoverDevices {
     NSMutableArray *devices = [NSMutableArray array];
 
-    if (!_loadIOKit()) return devices;
+    // === Path A: Simulator (macOS host) — IOSerialBSDClient discovery ===
+    if (![self _isRealDevice]) {
+        CFMutableDictionaryRef matching = IOServiceMatching("IOSerialBSDClient");
+        if (!matching) return devices;
 
-    CFMutableDictionaryRef matching = _IOServiceMatching("IOSerialBSDClient");
-    if (!matching) return devices;
+        io_iterator_t iterator = IO_OBJECT_NULL;
+        kern_return_t kr = IOServiceGetMatchingServices(kIOMainPortDefault, matching, &iterator);
+        if (kr != KERN_SUCCESS) return devices;
 
-    io_iterator_t iterator = IO_OBJECT_NULL;
-    kern_return_t kr = _IOServiceGetMatchingServices(0, matching, &iterator);
-    // matching is consumed by IOServiceGetMatchingServices
-    if (kr != KERN_SUCCESS) return devices;
+        io_service_t service;
+        while ((service = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
+            NSString *path = _getStringProperty(service, CFSTR("IOCalloutDevice"));
+            if (path) {
+                USBSerialDeviceInfo *info = [[USBSerialDeviceInfo alloc] init];
+                info.path = path;
+                info.name = _getStringProperty(service, CFSTR("IOTTYBaseName")) ?: @"Unknown";
 
-    io_service_t service;
-    while ((service = _IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
-        NSString *path = _getStringProperty(service, CFSTR("IOCalloutDevice"));
-        if (path) {
-            USBSerialDeviceInfo *info = [[USBSerialDeviceInfo alloc] init];
-            info.path = path;
-            info.name = _getStringProperty(service, CFSTR("IOTTYBaseName")) ?: @"Unknown";
+                uint16_t vid = 0, pid = 0;
+                NSString *usbName = nil;
+                _getUSBDeviceInfo(service, &vid, &pid, &usbName);
+                info.vendorID = vid;
+                info.productID = pid;
+                if (usbName) info.name = usbName;
 
-            uint16_t vid = 0, pid = 0;
-            NSString *usbName = nil;
-            _getUSBDeviceInfo(service, &vid, &pid, &usbName);
-            info.vendorID = vid;
-            info.productID = pid;
-            if (usbName) info.name = usbName;
-
-            [devices addObject:info];
+                [devices addObject:info];
+            }
+            IOObjectRelease(service);
         }
-        _IOObjectRelease(service);
+        IOObjectRelease(iterator);
+        return devices;
     }
-    _IOObjectRelease(iterator);
+
+    // === Path B: Real device — USB device discovery via CP2102USBDriver ===
+    NSArray<NSDictionary *> *usbDevices = [CP2102USBDriver discoverDevices];
+    for (NSDictionary *dev in usbDevices) {
+        USBSerialDeviceInfo *info = [[USBSerialDeviceInfo alloc] init];
+        info.path = dev[@"path"];
+        info.name = dev[@"name"];
+        info.vendorID = [dev[@"vendorID"] unsignedShortValue];
+        info.productID = [dev[@"productID"] unsignedShortValue];
+        [devices addObject:info];
+    }
 
     return devices;
 }
@@ -220,8 +186,36 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
     _devicePath = [path copy];
     _baudRate = baudRate;
     _fd = -1;
+    _usbDriver = nil;
+    _usingUSBDriver = NO;
 
-    // Open the serial port
+    // === Path A: USB device path (real iOS device) ===
+    // Format: "usb:VID:PID" from CP2102USBDriver discovery
+    if ([path hasPrefix:@"usb:"]) {
+        NSArray *parts = [path componentsSeparatedByString:@":"];
+        if (parts.count >= 3) {
+            unsigned int vid = 0, pid = 0;
+            NSScanner *vidScanner = [NSScanner scannerWithString:parts[1]];
+            NSScanner *pidScanner = [NSScanner scannerWithString:parts[2]];
+            [vidScanner scanHexInt:&vid];
+            [pidScanner scanHexInt:&pid];
+
+            CP2102USBDriver *driver = [[CP2102USBDriver alloc] init];
+            if (![driver openWithVendorID:(uint16_t)vid
+                                productID:(uint16_t)pid
+                                 baudRate:baudRate
+                                    error:error]) {
+                return nil;
+            }
+            _usbDriver = driver;
+            _usingUSBDriver = YES;
+            NSLog(@"IOKitUSBSerial: Opened via USB driver (VID=0x%04X PID=0x%04X @ %lu baud)",
+                  vid, pid, (unsigned long)baudRate);
+            return self;
+        }
+    }
+
+    // === Path B: POSIX serial port (Simulator / macOS) ===
     _fd = open(path.UTF8String, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (_fd < 0) {
         if (error) {
@@ -291,8 +285,11 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 }
 
 - (void)close {
-    if (_fd >= 0) {
-        // Restore original termios
+    if (_usingUSBDriver && _usbDriver) {
+        [_usbDriver close];
+        _usbDriver = nil;
+        _usingUSBDriver = NO;
+    } else if (_fd >= 0) {
         tcsetattr(_fd, TCSANOW, &_originalTermios);
         close(_fd);
         _fd = -1;
@@ -300,14 +297,21 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 }
 
 - (BOOL)isOpen {
+    if (_usingUSBDriver) return _usbDriver.state == CP2102StateConnected;
     return _fd >= 0;
 }
 
 - (int)fileDescriptor {
+    // USB driver path has no POSIX fd — return -1
+    if (_usingUSBDriver) return -1;
     return _fd;
 }
 
 - (NSInteger)writeData:(NSData *)data error:(NSError **)error {
+    if (_usingUSBDriver) {
+        return [_usbDriver writeData:data error:error];
+    }
+
     if (_fd < 0) {
         if (error) {
             *error = [NSError errorWithDomain:kIOKitUSBSerialErrorDomain
@@ -331,6 +335,10 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 }
 
 - (NSInteger)writeString:(NSString *)string error:(NSError **)error {
+    if (_usingUSBDriver) {
+        return [_usbDriver writeString:string error:error];
+    }
+
     NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
     if (!data) {
         if (error) {
@@ -344,6 +352,10 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 }
 
 - (nullable NSData *)readDataWithMaxLength:(NSUInteger)maxLength error:(NSError **)error {
+    if (_usingUSBDriver) {
+        return [_usbDriver readDataWithMaxLength:maxLength timeout:0 error:error];
+    }
+
     if (_fd < 0) {
         if (error) {
             *error = [NSError errorWithDomain:kIOKitUSBSerialErrorDomain
@@ -376,6 +388,10 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 - (nullable NSData *)readDataWithMaxLength:(NSUInteger)maxLength
                                    timeout:(NSTimeInterval)timeout
                                      error:(NSError **)error {
+    if (_usingUSBDriver) {
+        return [_usbDriver readDataWithMaxLength:maxLength timeout:timeout error:error];
+    }
+
     if (_fd < 0) {
         if (error) {
             *error = [NSError errorWithDomain:kIOKitUSBSerialErrorDomain
@@ -412,6 +428,10 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 }
 
 - (BOOL)setRTS:(BOOL)enabled error:(NSError **)error {
+    if (_usingUSBDriver) {
+        return [_usbDriver setRTS:enabled error:error];
+    }
+
     if (_fd < 0) {
         if (error) {
             *error = [NSError errorWithDomain:kIOKitUSBSerialErrorDomain
@@ -436,6 +456,10 @@ static speed_t _baudRateToSpeed(NSUInteger baudRate) {
 }
 
 - (BOOL)setDTR:(BOOL)enabled error:(NSError **)error {
+    if (_usingUSBDriver) {
+        return [_usbDriver setDTR:enabled error:error];
+    }
+
     if (_fd < 0) {
         if (error) {
             *error = [NSError errorWithDomain:kIOKitUSBSerialErrorDomain
