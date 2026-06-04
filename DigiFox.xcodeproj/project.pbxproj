@@ -108,6 +108,11 @@
 		WTEL01A00000000000000000 /* WinlinkTelnet.swift in Sources */ = {isa = PBXBuildFile; fileRef = WTEL01B00000000000000000 /* WinlinkTelnet.swift */; };
 		CP21020001000000000003 /* CP2102USBDriver.m in Sources */ = {isa = PBXBuildFile; fileRef = CP21020001000000000002 /* CP2102USBDriver.m */; };
 		IOK1T0001000000000002 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = IOK1T0001000000000001 /* IOKit.framework */; };
+		2E9BA3CBBC9F5AAAACA467DF /* HermesDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B62831353353628986CEF4 /* HermesDiscovery.swift */; };
+		13015BD223A457E5AD6E4B12 /* HermesProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49F3ECBFCC05CFBAE668891 /* HermesProtocol.swift */; };
+		A8F1AB230A1F5549BEA05D9C /* IQProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0277FE84B2852A6A711D89D /* IQProcessor.swift */; };
+		447AB542D5545AA294A7126A /* HermesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF6BBE38B22A5ABBB49E1091 /* HermesController.swift */; };
+		7B13D803BC8A5378939AE078 /* HermesConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987E0FF0A7055DA894A77391 /* HermesConnectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -232,6 +237,11 @@
 		CP21020001000000000001 /* CP2102USBDriver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CP2102USBDriver.h; sourceTree = "<group>"; };
 		CP21020001000000000002 /* CP2102USBDriver.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CP2102USBDriver.m; sourceTree = "<group>"; };
 		IOK1T0001000000000001 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		49B62831353353628986CEF4 /* HermesDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HermesDiscovery.swift; path = DigiFox/Network/HermesDiscovery.swift; sourceTree = SOURCE_ROOT; };
+		B49F3ECBFCC05CFBAE668891 /* HermesProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HermesProtocol.swift; path = DigiFox/Network/HermesProtocol.swift; sourceTree = SOURCE_ROOT; };
+		C0277FE84B2852A6A711D89D /* IQProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IQProcessor.swift; path = DigiFox/Network/IQProcessor.swift; sourceTree = SOURCE_ROOT; };
+		DF6BBE38B22A5ABBB49E1091 /* HermesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HermesController.swift; path = DigiFox/Network/HermesController.swift; sourceTree = SOURCE_ROOT; };
+		987E0FF0A7055DA894A77391 /* HermesConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HermesConnectionView.swift; path = DigiFox/Views/HermesConnectionView.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -622,6 +632,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E9BA3CBBC9F5AAAACA467DF /* HermesDiscovery.swift in Sources */,
+				13015BD223A457E5AD6E4B12 /* HermesProtocol.swift in Sources */,
+				A8F1AB230A1F5549BEA05D9C /* IQProcessor.swift in Sources */,
+				447AB542D5545AA294A7126A /* HermesController.swift in Sources */,
+				7B13D803BC8A5378939AE078 /* HermesConnectionView.swift in Sources */,
 				77F0218DF3DE148ABBEEF7A0 /* LogOutputView.swift in Sources */,
 				ED920B204863FC2595479B13 /* LogManager.swift in Sources */,
 				A2C0C56E20AE4ED76BDB7BED /* AppState.swift in Sources */,

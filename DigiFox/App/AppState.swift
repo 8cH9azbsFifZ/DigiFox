@@ -69,6 +69,13 @@ class AppState: ObservableObject {
     let trusdxAudio = TruSDXSerialAudio()
     private var trusdxPort: SerialPort?
 
+    // Hermes SDR (network)
+    let hermesController = HermesController()
+    @Published var hermesDevices = [HermesDevice]()
+    @Published var hermesConnected = false
+    @Published var hermesLNAGain: Int = 40
+    @Published var hermesTxPower: Int = 80
+
     private let ft8Modulator = FT8Modulator()
     private let ft8Demodulator = FT8Demodulator()
     private let js8Modulator = JS8Modulator()
@@ -284,7 +291,9 @@ class AppState: ObservableObject {
     func disconnectRig() {
         Log.d("RIG", "Disconnecting rig")
         rigPollTask?.cancel(); rigPollTask = nil
-        if isTruSDX {
+        if isHermes {
+            Task { await disconnectHermes() }
+        } else if isTruSDX {
             trusdxAudio.stopStreaming()
             trusdxAudio.detach()
             Task { await trusdxPort?.close() }
@@ -294,6 +303,90 @@ class AppState: ObservableObject {
         } else {
             Task { await catController.disconnect(); radioState = await catController.state; statusText = "Rig disconnected" }
         }
+    }
+
+    // MARK: - Hermes SDR (Network)
+
+    /// Scan for Hermes devices on the network
+    func scanHermesDevices(directIP: String? = nil) {
+        Task {
+            statusText = "Suche Hermes SDR..."
+            let devices = await hermesController.discoverDevices(directIP: directIP)
+            await MainActor.run {
+                self.hermesDevices = devices
+                if devices.isEmpty {
+                    self.statusText = "Kein Hermes SDR gefunden"
+                } else {
+                    self.statusText = "\(devices.count) Hermes SDR gefunden"
+                }
+            }
+        }
+    }
+
+    /// Connect to a Hermes SDR device
+    func connectHermes(_ device: HermesDevice) {
+        Task {
+            Log.d("Hermes", "Connecting to \(device.displayName)")
+
+            // Wire audio callback: IQ → 12 kHz → feedExternalSamples
+            await hermesController.setOnAudioReceived { [weak self] samples in
+                guard let self else { return }
+                self.audioEngine.feedExternalSamples(samples, sampleRate: 12000)
+            }
+
+            await hermesController.setOnConnectionChanged { [weak self] connected in
+                Task { @MainActor in
+                    self?.hermesConnected = connected
+                    self?.radioState.isConnected = connected
+                    if connected {
+                        self?.radioState.rigName = "Hermes SDR"
+                    }
+                }
+            }
+
+            await hermesController.setOnStatusUpdate { [weak self] status in
+                Task { @MainActor in
+                    self?.statusText = status
+                }
+            }
+
+            // Set frequency before connecting
+            if let freq = BandPlan.dialFrequency(band: settings.selectedBand, mode: settings.digitalMode) {
+                await hermesController.setFrequency(Int(freq))
+            }
+
+            await hermesController.setLNAGain(hermesLNAGain)
+            await hermesController.setTxPower(hermesTxPower)
+            await hermesController.connect(to: device)
+
+            await MainActor.run {
+                self.hermesConnected = true
+                self.radioState.isConnected = true
+                self.radioState.rigName = "Hermes SDR"
+                self.statusText = "Verbunden: Hermes SDR @ \(device.ip)"
+            }
+        }
+    }
+
+    /// Disconnect from Hermes SDR
+    func disconnectHermes() async {
+        await hermesController.disconnect()
+        hermesConnected = false
+        radioState.isConnected = false
+        radioState.rigName = ""
+        statusText = "Hermes getrennt"
+    }
+
+    /// Update Hermes LNA gain
+    func setHermesLNAGain(_ gain: Int) {
+        hermesLNAGain = gain
+        Task { await hermesController.setLNAGain(gain) }
+    }
+
+    /// Update Hermes TX power
+    func setHermesTxPower(_ percent: Int) {
+        hermesTxPower = percent
+        Task { await hermesController.setTxPower(percent) }
     }
 
     /// Switch digital mode: update dial frequency, rig mode, and restart decode loop.
@@ -416,10 +509,12 @@ class AppState: ObservableObject {
     var digirigConnected: Bool { usbDevices.contains { $0.isDigirig } }
     var trusdxConnected: Bool { usbDevices.contains { $0.isTruSDX } }
     var isTruSDX: Bool { settings.radioProfile == .trusdx }
+    var isHermes: Bool { settings.radioProfile == .hermes }
     var hasCompatibleDevice: Bool {
         switch settings.radioProfile {
         case .trusdx: return trusdxConnected || !usbDevices.isEmpty
         case .digirig, .digirigVOX: return digirigConnected || !usbDevices.isEmpty
+        case .hermes: return true  // Network — always "available"
         }
     }
 
@@ -437,8 +532,8 @@ class AppState: ObservableObject {
 
     func startReceiving() {
         Log.d("App", "startReceiving: mode=\(settings.digitalMode.name) hasRig=\(radioState.isConnected)")
-        if settings.useHamlib && !radioState.isConnected && hasCompatibleDevice { connectRig() }
-        if !isTruSDX {
+        if settings.useHamlib && !radioState.isConnected && hasCompatibleDevice && !isHermes { connectRig() }
+        if !isTruSDX && !isHermes {
             audioEngine.start()
         }
         switch settings.digitalMode {
@@ -542,13 +637,26 @@ class AppState: ObservableObject {
         guard selectedTxMessage < txMessages.count else { Log.d("FT8-TX", "selectedTxMessage out of range"); return }
         let msgText = txMessages[selectedTxMessage]
         guard !msgText.isEmpty else { Log.d("FT8-TX", "empty message text"); return }
-        Log.d("FT8-TX", "transmitFT8: msg='\(msgText)' txFreq=\(txFrequency) dialFreq=\(settings.dialFrequency) isTruSDX=\(isTruSDX)")
+        Log.d("FT8-TX", "transmitFT8: msg='\(msgText)' txFreq=\(txFrequency) dialFreq=\(settings.dialFrequency) isTruSDX=\(isTruSDX) isHermes=\(isHermes)")
         statusText = "Sending: \(msgText)"
         let ft8Msg = FT8MessagePack.parseText(msgText, myCall: settings.callsign, myGrid: settings.grid)
         ft8Modulator.baseFrequency = txFrequency
         let samples = ft8Modulator.modulate(ft8Msg)
 
-        if isTruSDX, let port = trusdxPort {
+        if isHermes {
+            // Hermes SDR: send IQ over network
+            isTransmitting = true
+            txTask = Task {
+                Log.d("FT8-TX", "Hermes: transmitting \(samples.count) samples via network")
+                await hermesController.transmit(samples12k: samples)
+                await MainActor.run {
+                    self.isTransmitting = false
+                    self.txTask = nil
+                    self.advanceFT8Sequence()
+                    self.statusText = "Sent"
+                }
+            }
+        } else if isTruSDX, let port = trusdxPort {
             // TruSDX: send audio over serial (CAT streaming)
             isTransmitting = true
             // Monitor: play FT8 tone on speaker for debugging (non-critical)

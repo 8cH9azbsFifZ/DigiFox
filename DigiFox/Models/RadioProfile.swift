@@ -6,6 +6,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
     case digirig = "Digirig"
     case digirigVOX = "Digirig VOX"
     case trusdx  = "(tr)uSDX"
+    case hermes  = "Hermes SDR"
 
     var id: String { rawValue }
 
@@ -15,6 +16,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig: return 0         // User selects rig model
         case .digirigVOX: return 0      // No CAT — audio only, PTT via VOX
         case .trusdx:  return 2028      // Kenwood TS-480 (emulated by TruSDX)
+        case .hermes:  return 0         // No Hamlib — uses HPSDR protocol
         }
     }
 
@@ -24,6 +26,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig: return 38400     // Default for FT-817 (user can change)
         case .digirigVOX: return 0      // No serial port needed
         case .trusdx:  return 115200    // Required for CAT_STREAMING audio
+        case .hermes:  return 0         // No serial — network only
         }
     }
 
@@ -33,6 +36,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig: return false     // USB Audio Class (Digirig sound card)
         case .digirigVOX: return false  // USB Audio Class (Digirig sound card)
         case .trusdx:  return true      // Audio embedded in serial data stream
+        case .hermes:  return false     // Audio over Ethernet (IQ stream)
         }
     }
 
@@ -42,6 +46,15 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig: return true
         case .digirigVOX: return false  // Audio only — no serial needed
         case .trusdx: return true
+        case .hermes: return false      // Network only — no serial
+        }
+    }
+
+    /// Whether this profile uses network (Ethernet/WiFi) for communication
+    var usesNetwork: Bool {
+        switch self {
+        case .hermes: return true
+        default: return false
         }
     }
 
@@ -54,6 +67,8 @@ enum RadioProfile: String, CaseIterable, Identifiable {
             return "Nur USB Audio — PTT über VOX am Funkgerät"
         case .trusdx:
             return "Single USB-C: CAT + Audio über Serial (115200, 8N1)"
+        case .hermes:
+            return "Netzwerk-SDR über Ethernet (HPSDR Protocol 1)"
         }
     }
 
@@ -63,6 +78,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig: return ""    // Uses Hamlib PTT
         case .digirigVOX: return "" // No CAT — VOX handles PTT
         case .trusdx:  return "TX0;"
+        case .hermes:  return ""    // Uses MOX bit over network
         }
     }
 
@@ -71,6 +87,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig: return ""
         case .digirigVOX: return ""
         case .trusdx:  return "RX;"
+        case .hermes:  return ""
         }
     }
 
@@ -80,6 +97,7 @@ enum RadioProfile: String, CaseIterable, Identifiable {
         case .digirig: return ""
         case .digirigVOX: return ""
         case .trusdx:  return "TX2;"
+        case .hermes:  return ""
         }
     }
 }

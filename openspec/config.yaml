@@ -1,0 +1,29 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Swift 5.9, iOS 17+, SwiftUI, Combine, async/await, XcodeGen
+  Domain: Ham radio digital modes (FT8, JS8Call) on iPhone/iPad via USB-C
+  Architecture: AppState (central ObservableObject), AudioEngine (12 kHz USB audio),
+    CATController (actor, Hamlib rig control), SerialPort (actor, USB serial)
+  Signal pipeline: Audio → FFT → Costas sync → LDPC decode → CRC validate → unpack
+  Conventions:
+    - German UI strings
+    - No package manager (vendored Hamlib xcframework)
+    - Codec symmetry: FT8 and JS8 have mirrored file structures
+    - 12 kHz sample rate throughout audio/codec layers
+    - Swift actors for hardware access, @MainActor for UI state
+  Build: xcodegen generate && xcodebuild -project DigiFox.xcodeproj -scheme DigiFox -sdk iphoneos build
+
+rules:
+  proposal:
+    - Keep proposals concise and focused on a single capability
+    - Always include impact on FT8/JS8 codec symmetry if applicable
+    - Note any Hamlib/C interop considerations
+  tasks:
+    - Break tasks into chunks completable in one session
+    - Tag tasks that require both FT8 and JS8 changes
+    - Note if task requires xcodegen regeneration
+  design:
+    - Consider thread safety (actors, @MainActor)
+    - Document audio pipeline impact if applicable
+    - Note USB device lifecycle implications
