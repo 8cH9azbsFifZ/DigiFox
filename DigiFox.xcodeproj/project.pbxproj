@@ -775,7 +775,7 @@
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.9.0;
 				OTHER_LDFLAGS = "-lhamlib";
 				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
 				SDKROOT = iphoneos;
@@ -820,7 +820,7 @@
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/Hamlib.xcframework/ios-arm64-simulator";
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.9.0;
 				OTHER_LDFLAGS = "-lhamlib";
 				PRODUCT_BUNDLE_IDENTIFIER = com.digifox.app;
 				SDKROOT = iphoneos;
