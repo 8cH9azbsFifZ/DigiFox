@@ -41,3 +41,11 @@
 - [x] **5.2** Background mode handling — Stop Hermes stream when app backgrounds, restart on foreground (iOS app lifecycle).
 
 - [x] **5.3** Update `generate_project.py` — Add new `Network/` source files to Xcode project generation. Add `Network.framework` to linked frameworks.
+
+## Phase 6: Signal Quality & Robustness
+
+- [x] **6.1** Add anti-alias low-pass filter before decimation — `IQProcessor.decimateTo12kHz()` needs LPF cutoff ~5.5 kHz before downsampling 48→12 kHz. Use `vDSP_conv` or `vDSP_desamp` with FIR coefficients via Accelerate.
+
+- [x] **6.2** Implement proper USB demodulation — Replace I-channel-only extraction in `IQProcessor.iqToAudio()` with complex USB demod: FFT → zero negative frequencies → IFFT → real part. Rejects image signals that alias into passband.
+
+- [x] **6.3** Thread-safety for external audio pipeline — Protect `inputRate`, `externalFFTBuffer`, and FFT state in `AudioEngine.feedExternalSamples()` with a dedicated lock or serial queue.

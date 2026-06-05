@@ -20,6 +20,7 @@ class AudioEngine: ObservableObject {
     private let bufferLock = NSLock()
     private var routeChangeObserver: NSObjectProtocol?
     private var externalFFTBuffer = [Float]()  // accumulator for external (TruSDX) samples
+    private let externalLock = NSLock()  // protects externalFFTBuffer + inputRate
     /// Actual input sample rate (set from audio tap or external feed, used for resampling)
     private var inputRate: Double = 12000
 
@@ -370,9 +371,11 @@ class AudioEngine: ObservableObject {
         bufferLock.lock(); audioBuffer.removeAll(); bufferLock.unlock()
     }
 
-    /// Feed samples from an external source (e.g. TruSDX serial audio) into the buffer
+    /// Feed samples from an external source (e.g. TruSDX serial audio, Hermes IQ) into the buffer
     func feedExternalSamples(_ samples: [Float], sampleRate: Double) {
+        externalLock.lock()
         inputRate = sampleRate
+        externalLock.unlock()
         DispatchQueue.main.async {
             if self.hardwareSampleRate != sampleRate {
                 Log.d("Audio", "external hardware sampleRate changed: \(self.hardwareSampleRate) → \(sampleRate)")
@@ -391,17 +394,23 @@ class AudioEngine: ObservableObject {
         let rms = sqrt(samples.reduce(0) { $0 + $1 * $1 } / Float(samples.count))
         DispatchQueue.main.async { self.inputLevel = rms }
 
-        // Accumulate resampled samples for FFT
+        // Accumulate resampled samples for FFT (protected by externalLock)
+        externalLock.lock()
         externalFFTBuffer.append(contentsOf: samples)
+        var spectra = [[Float]]()
         while externalFFTBuffer.count >= fftProcessor.size {
             let chunk = Array(externalFFTBuffer.prefix(fftProcessor.size))
             externalFFTBuffer.removeFirst(fftProcessor.size)
             let spectrum = fftProcessor.magnitudeSpectrum(chunk)
-            if !spectrum.isEmpty {
-                DispatchQueue.main.async {
-                    self.spectrumData = spectrum
-                    self.onSpectrumUpdate?(spectrum)
-                }
+            if !spectrum.isEmpty { spectra.append(spectrum) }
+        }
+        externalLock.unlock()
+
+        // Dispatch spectrum updates outside lock
+        if let last = spectra.last {
+            DispatchQueue.main.async {
+                self.spectrumData = last
+                self.onSpectrumUpdate?(last)
             }
         }
 

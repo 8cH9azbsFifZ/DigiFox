@@ -23,3 +23,6 @@ Package.resolved
 Pods/
 fastlane/report.xml
 fastlane/README.md
+S372L2D245.cer
+*.mobileprovision
+*.cer

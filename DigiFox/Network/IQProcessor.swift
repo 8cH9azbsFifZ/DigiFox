@@ -98,37 +98,120 @@ struct IQProcessor {
         return (ptt, addr, [c1, c2, c3, c4])
     }
 
-    /// Convert interleaved IQ [I, Q, I, Q, ...] to real audio (I channel only).
-    /// For HPSDR with NCO at dial frequency, the I channel contains USB audio.
+    /// USB demodulation: extract upper sideband audio from complex IQ.
+    /// FFT → zero negative frequencies → IFFT → real part.
+    /// Properly rejects image signals that would alias into the passband.
     static func iqToAudio(_ iq: [Float]) -> [Float] {
-        // Extract every other sample (I values at even indices)
         let count = iq.count / 2
-        var audio = [Float](repeating: 0, count: count)
+        guard count > 0 else { return [] }
+
+        // Separate I and Q channels
+        var real = [Float](repeating: 0, count: count)
+        var imag = [Float](repeating: 0, count: count)
         for i in 0..<count {
-            audio[i] = iq[i * 2]
+            real[i] = iq[i * 2]
+            imag[i] = iq[i * 2 + 1]
         }
-        return audio
+
+        // Pad to power-of-2 for FFT
+        let log2n = vDSP_Length(max(1, Int(log2(Double(count)).rounded(.up))))
+        let fftSize = Int(1 << log2n)
+        if fftSize > count {
+            real.append(contentsOf: [Float](repeating: 0, count: fftSize - count))
+            imag.append(contentsOf: [Float](repeating: 0, count: fftSize - count))
+        }
+
+        guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
+            // Fallback: I-channel only
+            return Array(real.prefix(count))
+        }
+
+        // Forward FFT
+        var splitComplex = DSPSplitComplex(realp: &real, imagp: &imag)
+        vDSP_fft_zip(fftSetup, &splitComplex, 1, log2n, FFTDirection(kFFTDirection_Forward))
+
+        // Zero negative frequencies (USB demod: keep DC + positive only)
+        let half = fftSize / 2
+        for i in (half + 1)..<fftSize {
+            real[i] = 0
+            imag[i] = 0
+        }
+        // Double positive frequencies (except DC and Nyquist)
+        for i in 1..<half {
+            real[i] *= 2
+            imag[i] *= 2
+        }
+
+        // Inverse FFT
+        vDSP_fft_zip(fftSetup, &splitComplex, 1, log2n, FFTDirection(kFFTDirection_Inverse))
+
+        // Scale by 1/N
+        var scale = 1.0 / Float(fftSize)
+        vDSP_vsmul(real, 1, &scale, &real, 1, vDSP_Length(fftSize))
+
+        vDSP_destroy_fftsetup(fftSetup)
+
+        // Return real part, trimmed to original length
+        return Array(real.prefix(count))
     }
 
-    /// Decimate audio from source rate to 12 kHz using Accelerate.
+    // MARK: - Anti-alias FIR filter coefficients for 48→12 kHz decimation
+    // Low-pass FIR, cutoff ~5.5 kHz at 48 kHz sample rate (order 31)
+    private static let antiAliasFilter: [Float] = {
+        // Windowed-sinc LPF: cutoff = 5500/48000 = 0.1146, order 31
+        let order = 31
+        let fc: Float = 5500.0 / 48000.0
+        let mid = order / 2
+        var h = [Float](repeating: 0, count: order)
+        for i in 0..<order {
+            let n = Float(i - mid)
+            if i == mid {
+                h[i] = 2.0 * fc
+            } else {
+                h[i] = sin(2.0 * .pi * fc * n) / (.pi * n)
+            }
+            // Hamming window
+            h[i] *= 0.54 - 0.46 * cos(2.0 * .pi * Float(i) / Float(order - 1))
+        }
+        // Normalize
+        let sum = h.reduce(0, +)
+        return h.map { $0 / sum }
+    }()
+
+    /// Decimate audio from source rate to 12 kHz with anti-alias filtering.
     static func decimateTo12kHz(_ input: [Float], from srcRate: Double) -> [Float] {
         guard !input.isEmpty else { return [] }
         let ratio = srcRate / 12000.0
         if abs(ratio - 1.0) < 0.01 { return input }
-        let outputCount = Int(Double(input.count) / ratio)
-        guard outputCount > 1 else { return input }
+
+        // Apply anti-alias low-pass filter before downsampling
+        var filtered = [Float](repeating: 0, count: input.count + antiAliasFilter.count - 1)
+        vDSP_conv(input, 1, antiAliasFilter, 1, &filtered, 1,
+                  vDSP_Length(input.count), vDSP_Length(antiAliasFilter.count))
+        // Trim to original length (compensate for filter delay)
+        let delay = antiAliasFilter.count / 2
+        let trimmed: [Float]
+        if input.count > delay {
+            trimmed = Array(filtered[delay..<(delay + input.count)])
+        } else {
+            trimmed = Array(filtered.prefix(input.count))
+        }
+
+        // Decimate via interpolation
+        let outputCount = Int(Double(trimmed.count) / ratio)
+        guard outputCount > 1 else { return trimmed }
 
         var positions = [Float](repeating: 0, count: outputCount)
         var start: Float = 0
         var step = Float(ratio)
         vDSP_vramp(&start, &step, &positions, 1, vDSP_Length(outputCount))
 
-        var maxPos = Float(input.count - 1)
+        var maxPos = Float(trimmed.count - 1)
         var zero: Float = 0
         vDSP_vclip(positions, 1, &zero, &maxPos, &positions, 1, vDSP_Length(outputCount))
 
         var output = [Float](repeating: 0, count: outputCount)
-        vDSP_vlint(input, positions, 1, &output, 1, vDSP_Length(outputCount), vDSP_Length(input.count))
+        vDSP_vlint(trimmed, positions, 1, &output, 1, vDSP_Length(outputCount), vDSP_Length(trimmed.count))
         return output
     }
 
