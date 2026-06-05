@@ -4,6 +4,15 @@ All notable changes to DigiFox are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v0.9.0] - 2026-06-05
+
+### Changed
+- UI zeigt nur noch Hermes SDR als Radio-Verbindung
+- Digirig, Digirig VOX und (tr)uSDX aus dem UI entfernt (Code deaktiviert, nicht gelöscht)
+- USB Devices und Rig (CAT) Sektionen in Einstellungen ausgeblendet
+- TransceiverStatusBadge zeigt Hermes-Verbindungsstatus
+- Standard-Profil auf Hermes SDR umgestellt (inkl. Migration bestehender Nutzer)
+
 ## [v0.7.6] - 2026-04-11
 
 ### Changed
