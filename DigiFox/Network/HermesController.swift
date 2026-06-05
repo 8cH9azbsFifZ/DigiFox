@@ -122,9 +122,17 @@ actor HermesController {
 
         onStatusUpdate?("Sende...")
 
-        // Wait for TX to complete (poll MOX state)
+        // Wait for TX to complete (poll MOX state), handle cancellation
         while await protocol_.isTxActive {
-            try? await Task.sleep(nanoseconds: 100_000_000)  // 100ms
+            do {
+                try await Task.sleep(nanoseconds: 100_000_000)  // 100ms
+            } catch {
+                // Task cancelled — clear TX buffer and MOX
+                logger.info("TX cancelled — clearing MOX")
+                await protocol_.clearTxAudio()
+                onStatusUpdate?("TX abgebrochen")
+                return
+            }
         }
 
         onStatusUpdate?("Gesendet")

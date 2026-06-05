@@ -38,11 +38,46 @@ actor HermesDiscovery {
 
             let responseQueue = DispatchQueue(label: "hermes.discovery")
 
+            // Use NWListener on port 1024 to receive responses (captures sender IP)
+            let listenerParams = NWParameters.udp
+            listenerParams.allowLocalEndpointReuse = true
+            let listener: NWListener
+            do {
+                listener = try NWListener(using: listenerParams, on: NWEndpoint.Port(rawValue: kMetisPort)!)
+            } catch {
+                logger.error("Cannot create listener: \(error)")
+                continuation.resume(returning: [])
+                return
+            }
+
+            listener.newConnectionHandler = { newConn in
+                newConn.start(queue: responseQueue)
+                newConn.receiveMessage { data, _, _, _ in
+                    if let data = data {
+                        // Extract sender IP from the incoming connection's endpoint
+                        var senderIP = "unknown"
+                        if case .hostPort(let host, _) = newConn.currentPath?.remoteEndpoint {
+                            senderIP = "\(host)"
+                            if senderIP.hasPrefix("::ffff:") { senderIP = String(senderIP.dropFirst(7)) }
+                        }
+                        if let device = Self.parseResponse(data: data, senderIP: senderIP) {
+                            if !seenMACs.contains(device.mac) {
+                                seenMACs.insert(device.mac)
+                                results.append(device)
+                                logger.info("Found: \(device.displayName)")
+                            }
+                        }
+                    }
+                    newConn.cancel()
+                }
+            }
+            listener.start(queue: responseQueue)
+
             // Send broadcast via NWConnection to port 1024
             let broadcastEndpoint = NWEndpoint.hostPort(host: "255.255.255.255", port: NWEndpoint.Port(rawValue: kMetisPort)!)
-            let params = NWParameters.udp
-            params.allowLocalEndpointReuse = true
-            let sendConn = NWConnection(to: broadcastEndpoint, using: params)
+            let sendParams = NWParameters.udp
+            sendParams.allowLocalEndpointReuse = true
+            let sendConn = NWConnection(to: broadcastEndpoint, using: sendParams)
 
             sendConn.start(queue: responseQueue)
             sendConn.stateUpdateHandler = { state in
@@ -54,27 +89,13 @@ actor HermesDiscovery {
                             logger.info("Discovery broadcast sent")
                         }
                     })
-
-                    // Receive responses on same connection
-                    func receiveNext() {
-                        sendConn.receiveMessage { data, _, _, _ in
-                            if let data = data, let device = Self.parseResponse(data: data, from: sendConn.endpoint) {
-                                if !seenMACs.contains(device.mac) {
-                                    seenMACs.insert(device.mac)
-                                    results.append(device)
-                                    logger.info("Found: \(device.displayName)")
-                                }
-                            }
-                            receiveNext()  // Keep listening
-                        }
-                    }
-                    receiveNext()
                 }
             }
 
             // Wait for timeout, then collect results
             responseQueue.asyncAfter(deadline: .now() + timeout) {
                 sendConn.cancel()
+                listener.cancel()
                 continuation.resume(returning: results.values)
             }
         }
@@ -131,8 +152,8 @@ actor HermesDiscovery {
         }
     }
 
-    /// Parse a discovery response packet
-    private static func parseResponse(data: Data, from endpoint: NWEndpoint) -> HermesDevice? {
+    /// Parse a discovery response packet with sender IP from listener
+    private static func parseResponse(data: Data, senderIP: String) -> HermesDevice? {
         guard data.count >= 60 else { return nil }
         guard data[0] == 0xEF, data[1] == 0xFE else { return nil }
 
@@ -144,22 +165,24 @@ actor HermesDiscovery {
         let boardID = data[9]
         let gatewareVersion = data[10]
 
-        // Extract IP from endpoint
-        var ip = "unknown"
-        if case .hostPort(let host, let port) = endpoint {
-            ip = "\(host)"
-            // Remove IPv4-mapped IPv6 prefix if present
-            if ip.hasPrefix("::ffff:") { ip = String(ip.dropFirst(7)) }
-        }
-
         return HermesDevice(
             id: mac,
-            ip: ip,
+            ip: senderIP,
             port: kMetisPort,
             mac: mac,
             boardID: boardID,
             gatewareVersion: gatewareVersion
         )
+    }
+
+    /// Parse a discovery response packet with endpoint (for direct IP probe)
+    private static func parseResponse(data: Data, from endpoint: NWEndpoint) -> HermesDevice? {
+        var ip = "unknown"
+        if case .hostPort(let host, _) = endpoint {
+            ip = "\(host)"
+            if ip.hasPrefix("::ffff:") { ip = String(ip.dropFirst(7)) }
+        }
+        return parseResponse(data: data, senderIP: ip)
     }
 }
 

@@ -187,6 +187,14 @@ class AppState: ObservableObject {
             txTask = nil
         }
 
+        // Hermes: clear TX buffer and MOX immediately
+        if isHermes && isTransmitting {
+            Log.d("TX-HALT", "Hermes: halting TX — clearing MOX")
+            Task { await hermesController.haltTx() }
+            isTransmitting = false
+            statusText = "TX abgebrochen"
+        }
+
         // If TruSDX is transmitting, force RX immediately via direct POSIX write
         // (async port.write would queue behind sendAudio chunks — too slow)
         if isTruSDX, let port = trusdxPort, isTransmitting {
@@ -1153,7 +1161,10 @@ class AppState: ObservableObject {
 
     func stopCW() {
         morseKeyer.stop()
-        if isTruSDX, let port = trusdxPort {
+        if isHermes {
+            Log.d("CW-TX", "Hermes: stopping CW — clearing MOX")
+            Task { await hermesController.haltTx() }
+        } else if isTruSDX, let port = trusdxPort {
             // Direct POSIX write for immediate stop
             let fd = port.rawFD
             if fd >= 0 {

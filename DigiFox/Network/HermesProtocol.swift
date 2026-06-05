@@ -167,7 +167,16 @@ actor HermesProtocol {
 
     private func keepaliveTick() {
         guard running else { return }
-        sendEP2()
+        if txAudioBuffer != nil {
+            // TX active: send multiple packets per tick to maintain 48 kHz throughput
+            // 168 samples/packet, 48000 samples/s → ~286 packets/s → ~14 per 50ms tick
+            for _ in 0..<14 {
+                guard txAudioBuffer != nil else { break }
+                sendEP2()
+            }
+        } else {
+            sendEP2()
+        }
     }
 
     private func sendEP2() {
