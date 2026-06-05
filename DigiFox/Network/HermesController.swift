@@ -123,7 +123,7 @@ actor HermesController {
         onStatusUpdate?("Sende...")
 
         // Wait for TX to complete (poll MOX state)
-        while await protocol_.isMOXActive {
+        while await protocol_.isTxActive {
             try? await Task.sleep(nanoseconds: 100_000_000)  // 100ms
         }
 
@@ -188,11 +188,5 @@ extension HermesProtocol {
 
     func setOnDisconnect(_ handler: @escaping () -> Void) {
         self.onDisconnect = handler
-    }
-
-    var isMOXActive: Bool {
-        // Check if TX audio buffer is still being sent
-        // This is a simplified check — in reality we'd check the mox state
-        return false  // Will be properly wired once protocol exposes mox state
     }
 }

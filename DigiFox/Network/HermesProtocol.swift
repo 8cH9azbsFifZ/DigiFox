@@ -20,6 +20,9 @@ actor HermesProtocol {
     private var c0Index = 0
     private var cycleLen = 6
     private var mox = false
+
+    /// Whether TX is currently active (MOX bit set)
+    var isTxActive: Bool { mox }
     private var txFreq: Int = 7_074_000
     private var rxFreqs: [Int] = [7_074_000]
     private var txDriveLevel: Int = 200
@@ -164,13 +167,7 @@ actor HermesProtocol {
 
     private func keepaliveTick() {
         guard running else { return }
-
-        // If TX audio is loaded, send faster (~3.5ms per packet = 48kHz)
-        if txAudioBuffer != nil {
-            sendEP2()
-        } else {
-            sendEP2()
-        }
+        sendEP2()
     }
 
     private func sendEP2() {

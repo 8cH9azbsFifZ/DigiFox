@@ -340,6 +340,15 @@ class AppState: ObservableObject {
                     self?.radioState.isConnected = connected
                     if connected {
                         self?.radioState.rigName = "Hermes SDR"
+                    } else {
+                        self?.radioState.rigName = ""
+                        // Cancel TX if disconnect happens mid-transmission
+                        if self?.isTransmitting == true {
+                            self?.txTask?.cancel()
+                            self?.txTask = nil
+                            self?.isTransmitting = false
+                            self?.statusText = "TX abgebrochen (Verbindung verloren)"
+                        }
                     }
                 }
             }
@@ -360,9 +369,6 @@ class AppState: ObservableObject {
             await hermesController.connect(to: device)
 
             await MainActor.run {
-                self.hermesConnected = true
-                self.radioState.isConnected = true
-                self.radioState.rigName = "Hermes SDR"
                 self.statusText = "Verbunden: Hermes SDR @ \(device.ip)"
             }
         }
@@ -370,6 +376,13 @@ class AppState: ObservableObject {
 
     /// Disconnect from Hermes SDR
     func disconnectHermes() async {
+        // Cancel ongoing TX first
+        if isTransmitting {
+            txTask?.cancel()
+            txTask = nil
+            isTransmitting = false
+            await hermesController.haltTx()
+        }
         await hermesController.disconnect()
         hermesConnected = false
         radioState.isConnected = false
@@ -418,7 +431,8 @@ class AppState: ObservableObject {
                     try? await Task.sleep(nanoseconds: 50_000_000)
                     self.trusdxAudio.startStreaming()
                 }
-            } else {
+            } else if !isHermes {
+                // Hermes doesn't need mode commands — NCO is mode-agnostic
                 let rigMode = mode == .cw ? "CW" : "USB"
                 Task { try? await catController.setMode(rigMode) }
             }
@@ -471,7 +485,11 @@ class AppState: ObservableObject {
 
     func setRigFrequency(_ hz: UInt64) {
         Log.d("RIG", "setRigFrequency: \(hz) Hz (\(String(format: "%.6f", Double(hz)/1_000_000)) MHz)")
-        if isTruSDX, let port = trusdxPort {
+        if isHermes {
+            Task { await hermesController.setFrequency(Int(hz)) }
+            settings.dialFrequency = Double(hz)
+            radioState.frequency = hz
+        } else if isTruSDX, let port = trusdxPort {
             let cmd = String(format: "FA%011d;", hz)
             Log.d("RIG", "TruSDX: sending \(cmd)")
             Task { try? await port.write(cmd) }
@@ -769,7 +787,19 @@ class AppState: ObservableObject {
         let msg = "\(settings.callsign): \(txMessage.text)"
         let samples = js8Modulator.modulate(message: msg, frequency: txMessage.frequency, speed: settings.speed)
 
-        if isTruSDX, let port = trusdxPort {
+        if isHermes {
+            // Hermes SDR: send IQ over network
+            isTransmitting = true
+            txTask = Task {
+                Log.d("JS8-TX", "Hermes: transmitting \(samples.count) samples via network")
+                await hermesController.transmit(samples12k: samples)
+                await MainActor.run {
+                    self.isTransmitting = false
+                    self.txTask = nil
+                    self.statusText = "Sent"
+                }
+            }
+        } else if isTruSDX, let port = trusdxPort {
             // TruSDX: send audio over serial (CAT streaming)
             isTransmitting = true
             // Monitor: play JS8 tone on speaker for debugging (non-critical)
@@ -901,7 +931,19 @@ class AppState: ObservableObject {
         let samples = wsprModulator.modulate(msg)
         Log.d("WSPR-TX", "Generated \(samples.count) samples (~\(String(format: "%.1f", Double(samples.count)/12000))s)")
 
-        if isTruSDX, let port = trusdxPort {
+        if isHermes {
+            // Hermes SDR: send IQ over network
+            isTransmitting = true
+            txTask = Task {
+                Log.d("WSPR-TX", "Hermes: transmitting \(samples.count) samples via network (~110s)")
+                await hermesController.transmit(samples12k: samples)
+                await MainActor.run {
+                    self.isTransmitting = false
+                    self.txTask = nil
+                    self.statusText = "WSPR Sent"
+                }
+            }
+        } else if isTruSDX, let port = trusdxPort {
             isTransmitting = true
             // Monitor: play WSPR tone on speaker for debugging
             Log.d("WSPR-TX", "Playing monitor audio on speaker")
@@ -1021,7 +1063,24 @@ class AppState: ObservableObject {
         cwKeying = true
         isTransmitting = true
 
-        if isTruSDX, let port = trusdxPort {
+        if isHermes {
+            // Hermes SDR: generate CW tone, send as IQ over network
+            Log.d("CW-TX", "Hermes: generating CW tone, \(text) @ \(speed) WPM")
+            let samples = CWToneGenerator.generate(text: text, wpm: speed)
+            guard !samples.isEmpty else {
+                cwKeying = false; isTransmitting = false; statusText = "CW: leerer Text"; return
+            }
+            Log.d("CW-TX", "Hermes: \(samples.count) samples (\(String(format: "%.1f", Double(samples.count) / 12000.0))s)")
+            txTask = Task {
+                await hermesController.transmit(samples12k: samples)
+                await MainActor.run {
+                    self.cwKeying = false
+                    self.isTransmitting = false
+                    self.txTask = nil
+                    self.statusText = "CW gesendet"
+                }
+            }
+        } else if isTruSDX, let port = trusdxPort {
             // TruSDX: direct POSIX writes for zero-latency CW keying
             let fd = port.rawFD
             guard fd >= 0 else { statusText = "Serial port not open"; cwKeying = false; return }

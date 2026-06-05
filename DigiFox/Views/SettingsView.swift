@@ -139,27 +139,29 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Rig (Hamlib)") {
-                    NavigationLink {
-                        RigModelPicker(models: filteredModels, selectedModel: $settings.rigModel, searchText: $searchText) { modelId in
-                            guard modelId > 0, settings.radioProfile == .digirig else { return }
-                            Task.detached {
-                                let rate = HamlibRig.defaultBaudRate(for: modelId)
-                                await MainActor.run { settings.rigSerialRate = rate }
+                if settings.radioProfile.requiresSerial {
+                    Section("Rig (CAT)") {
+                        NavigationLink {
+                            RigModelPicker(models: filteredModels, selectedModel: $settings.rigModel, searchText: $searchText) { modelId in
+                                guard modelId > 0, settings.radioProfile == .digirig else { return }
+                                Task.detached {
+                                    let rate = HamlibRig.defaultBaudRate(for: modelId)
+                                    await MainActor.run { settings.rigSerialRate = rate }
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Text("Rig Model"); Spacer()
+                                Text(selectedRigName).foregroundStyle(.secondary)
                             }
                         }
-                    } label: {
                         HStack {
-                            Text("Rig Model"); Spacer()
-                            Text(selectedRigName).foregroundStyle(.secondary)
+                            Text("Baud Rate"); Spacer()
+                            TextField("9600", value: $settings.rigSerialRate, format: .number)
+                                .multilineTextAlignment(.trailing).keyboardType(.numberPad)
                         }
+                        .disabled(settings.radioProfile == .trusdx)
                     }
-                    HStack {
-                        Text("Baud Rate"); Spacer()
-                        TextField("9600", value: $settings.rigSerialRate, format: .number)
-                            .multilineTextAlignment(.trailing).keyboardType(.numberPad)
-                    }
-                    .disabled(settings.radioProfile == .trusdx)
                 }
 
                 Section {

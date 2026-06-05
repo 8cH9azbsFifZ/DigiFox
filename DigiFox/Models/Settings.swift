@@ -77,5 +77,6 @@ class AppSettings: ObservableObject {
         set { speedRaw = newValue.rawValue }
     }
 
-    var useHamlib: Bool { rigModel > 0 && radioProfile.requiresSerial }
+    /// Hamlib deaktiviert — funktioniert nicht auf iOS (keine POSIX serial FIFOs).
+    var useHamlib: Bool { false }
 }
