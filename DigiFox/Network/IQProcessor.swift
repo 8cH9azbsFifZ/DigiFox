@@ -122,32 +122,37 @@ struct IQProcessor {
         }
 
         guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
-            // Fallback: I-channel only
             return Array(real.prefix(count))
         }
 
-        // Forward FFT
-        var splitComplex = DSPSplitComplex(realp: &real, imagp: &imag)
-        vDSP_fft_zip(fftSetup, &splitComplex, 1, log2n, FFTDirection(kFFTDirection_Forward))
-
-        // Zero negative frequencies (USB demod: keep DC + positive only)
         let half = fftSize / 2
-        for i in (half + 1)..<fftSize {
-            real[i] = 0
-            imag[i] = 0
-        }
-        // Double positive frequencies (except DC and Nyquist)
-        for i in 1..<half {
-            real[i] *= 2
-            imag[i] *= 2
-        }
 
-        // Inverse FFT
-        vDSP_fft_zip(fftSetup, &splitComplex, 1, log2n, FFTDirection(kFFTDirection_Inverse))
+        real.withUnsafeMutableBufferPointer { realBuf in
+            imag.withUnsafeMutableBufferPointer { imagBuf in
+                var split = DSPSplitComplex(realp: realBuf.baseAddress!, imagp: imagBuf.baseAddress!)
 
-        // Scale by 1/N
-        var scale = 1.0 / Float(fftSize)
-        vDSP_vsmul(real, 1, &scale, &real, 1, vDSP_Length(fftSize))
+                // Forward FFT
+                vDSP_fft_zip(fftSetup, &split, 1, log2n, FFTDirection(kFFTDirection_Forward))
+
+                // Zero negative frequencies (USB demod: keep DC + positive only)
+                for i in (half + 1)..<fftSize {
+                    realBuf[i] = 0
+                    imagBuf[i] = 0
+                }
+                // Double positive frequencies (except DC and Nyquist)
+                for i in 1..<half {
+                    realBuf[i] *= 2
+                    imagBuf[i] *= 2
+                }
+
+                // Inverse FFT
+                vDSP_fft_zip(fftSetup, &split, 1, log2n, FFTDirection(kFFTDirection_Inverse))
+
+                // Scale by 1/N
+                var scale = 1.0 / Float(fftSize)
+                vDSP_vsmul(realBuf.baseAddress!, 1, &scale, realBuf.baseAddress!, 1, vDSP_Length(fftSize))
+            }
+        }
 
         vDSP_destroy_fftsetup(fftSetup)
 
@@ -241,11 +246,6 @@ struct IQProcessor {
         // 1. Upsample to 48 kHz
         let audio48k = upsampleTo48kHz(audio12k)
         let n = audio48k.count
-
-        // 2. Hilbert transform: Q = Hilbert(I)
-        //    Simple approach: FFT → zero negative freqs → IFFT
-        //    For our purpose (narrowband FT8/JS8 at 1-3 kHz), a simpler
-        //    90° phase shift FIR works, but FFT is more precise.
         guard n > 0 else { return [] }
 
         // Use vDSP for FFT-based Hilbert
@@ -256,35 +256,40 @@ struct IQProcessor {
         var padded = audio48k + [Float](repeating: 0, count: fftSize - n)
         var imagPart = [Float](repeating: 0, count: fftSize)
 
-        // Forward FFT
         guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
-            // Fallback: return real-only IQ (Q=0)
             var result = [Float](repeating: 0, count: n * 2)
             for i in 0..<n { result[i * 2] = audio48k[i] }
             return result
         }
 
-        var splitComplex = DSPSplitComplex(realp: &padded, imagp: &imagPart)
-        vDSP_fft_zip(fftSetup, &splitComplex, 1, log2n, FFTDirection(kFFTDirection_Forward))
-
-        // Zero negative frequencies, double positive (Hilbert envelope)
         let half = fftSize / 2
-        for i in (half + 1)..<fftSize {
-            padded[i] = 0
-            imagPart[i] = 0
-        }
-        for i in 1..<half {
-            padded[i] *= 2
-            imagPart[i] *= 2
-        }
 
-        // Inverse FFT
-        vDSP_fft_zip(fftSetup, &splitComplex, 1, log2n, FFTDirection(kFFTDirection_Inverse))
+        padded.withUnsafeMutableBufferPointer { realBuf in
+            imagPart.withUnsafeMutableBufferPointer { imagBuf in
+                var split = DSPSplitComplex(realp: realBuf.baseAddress!, imagp: imagBuf.baseAddress!)
 
-        // Scale by 1/N (vDSP convention)
-        var scale = Float(1.0 / Float(fftSize))
-        vDSP_vsmul(padded, 1, &scale, &padded, 1, vDSP_Length(fftSize))
-        vDSP_vsmul(imagPart, 1, &scale, &imagPart, 1, vDSP_Length(fftSize))
+                // Forward FFT
+                vDSP_fft_zip(fftSetup, &split, 1, log2n, FFTDirection(kFFTDirection_Forward))
+
+                // Zero negative frequencies, double positive (Hilbert envelope)
+                for i in (half + 1)..<fftSize {
+                    realBuf[i] = 0
+                    imagBuf[i] = 0
+                }
+                for i in 1..<half {
+                    realBuf[i] *= 2
+                    imagBuf[i] *= 2
+                }
+
+                // Inverse FFT
+                vDSP_fft_zip(fftSetup, &split, 1, log2n, FFTDirection(kFFTDirection_Inverse))
+
+                // Scale by 1/N (vDSP convention)
+                var scale = Float(1.0 / Float(fftSize))
+                vDSP_vsmul(realBuf.baseAddress!, 1, &scale, realBuf.baseAddress!, 1, vDSP_Length(fftSize))
+                vDSP_vsmul(imagBuf.baseAddress!, 1, &scale, imagBuf.baseAddress!, 1, vDSP_Length(fftSize))
+            }
+        }
 
         vDSP_destroy_fftsetup(fftSetup)
 

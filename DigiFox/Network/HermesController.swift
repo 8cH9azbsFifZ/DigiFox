@@ -147,6 +147,10 @@ actor HermesController {
 
     // MARK: - IQ Processing
 
+    // Diagnostics (throttled)
+    private var lastLogTime: CFAbsoluteTime = 0
+    private var packetsSinceLog: Int = 0
+
     private func processEP6(_ data: Data) {
         // Parse IQ from EP6 packet
         let iqArrays = iqProcessor.parseEP6Packet(data)
@@ -157,6 +161,16 @@ actor HermesController {
 
         // Decimate to 12 kHz
         let audio12k = IQProcessor.decimateTo12kHz(audio48k, from: 48000)
+
+        // Throttled diagnostics (1/sec)
+        packetsSinceLog += 1
+        let now = CFAbsoluteTimeGetCurrent()
+        if now - lastLogTime >= 1.0 {
+            let rms = sqrt(audio12k.reduce(0) { $0 + $1 * $1 } / max(1, Float(audio12k.count)))
+            logger.debug("EP6: \(self.packetsSinceLog) pkt/s, \(audio12k.count) samples, RMS=\(String(format: "%.4f", rms))")
+            packetsSinceLog = 0
+            lastLogTime = now
+        }
 
         // Feed into audio engine pipeline
         onAudioReceived?(audio12k)

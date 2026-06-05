@@ -24,5 +24,5 @@
 ## 5. Build & Deploy
 
 - [x] 5.1 Build and verify no compile errors
-- [ ] 5.2 Commit changes
-- [ ] 5.3 Deploy to TestFlight via ios-deploy skill
+- [x] 5.2 Commit changes
+- [x] 5.3 Deploy to TestFlight via ios-deploy skill

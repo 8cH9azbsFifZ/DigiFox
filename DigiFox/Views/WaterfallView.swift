@@ -3,7 +3,7 @@ import SwiftUI
 /// Estimate noise floor from visible spectrum data.
 /// Returns (noiseFloor, dynamicRange) for adaptive scaling.
 func adaptiveNoiseFloor(_ data: [[Float]], loBin: Int, hiBin: Int) -> (floor: Float, range: Float) {
-    guard !data.isEmpty, hiBin >= loBin else { return (-40, 50) }
+    guard !data.isEmpty, hiBin >= loBin else { return (-60, 60) }
     // Collect all visible bin values from recent rows
     let recentCount = min(data.count, 30)
     let startRow = data.count - recentCount
@@ -15,15 +15,15 @@ func adaptiveNoiseFloor(_ data: [[Float]], loBin: Int, hiBin: Int) -> (floor: Fl
             allVals.append(spectrum[bin])
         }
     }
-    guard !allVals.isEmpty else { return (-40, 50) }
+    guard !allVals.isEmpty else { return (-60, 60) }
     allVals.sort()
-    // Noise floor = 25th percentile (robust against signals)
-    let noiseFloor = allVals[allVals.count / 4]
-    // Peak = 98th percentile (robust against spikes)
-    let peak = allVals[min(allVals.count - 1, allVals.count * 98 / 100)]
-    // Dynamic range: at least 15 dB, signals should pop
-    let dynRange = max(15, peak - noiseFloor + 6)
-    return (noiseFloor - 3, dynRange)
+    // Noise floor = 15th percentile (robust against signals)
+    let noiseFloor = allVals[allVals.count * 15 / 100]
+    // Peak = 99th percentile (robust against spikes)
+    let peak = allVals[min(allVals.count - 1, allVals.count * 99 / 100)]
+    // Dynamic range: at least 40 dB to ensure weak signals are visible
+    let dynRange = max(40, peak - noiseFloor + 10)
+    return (noiseFloor - 5, dynRange)
 }
 
 struct WaterfallView: View {
@@ -47,9 +47,8 @@ struct WaterfallView: View {
             let numBins = hiBin - loBin + 1
             guard numBins > 0 else { return }
 
-            // Fixed noise floor (adaptive was hiding signals)
-            let noiseFloor: Float = -60
-            let dynRange: Float = 60
+            // Adaptive noise floor for varying signal levels (Hermes SDR, USB audio, etc.)
+            let (noiseFloor, dynRange) = adaptiveNoiseFloor(data, loBin: loBin, hiBin: hiBin)
 
             let rows = data.count
             let displayCols = min(numBins, 500)
