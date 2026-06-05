@@ -10,6 +10,11 @@ enum RadioProfile: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Profiles currently shown in the UI.
+    /// Serial-dependent profiles (Digirig, TruSDX) are hidden because iOS lacks USB serial support.
+    /// Kept as enum cases so backend code compiles and can be re-enabled later.
+    static var visibleCases: [RadioProfile] { [.hermes] }
+
     /// Hamlib model ID for this profile (0 = user must select)
     var defaultHamlibModel: Int {
         switch self {

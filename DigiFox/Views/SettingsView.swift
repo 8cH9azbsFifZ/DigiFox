@@ -55,7 +55,9 @@ struct SettingsView: View {
                     }
                 }
 
-                // USB devices
+                // USB devices (hidden — serial profiles not available on iOS)
+                // Section kept in code for future re-enablement
+                /* DISABLED: USB serial not available on stock iOS
                 Section {
                     HStack {
                         Image(systemName: appState.ioKitAvailable ? "checkmark.circle.fill" : "xmark.circle.fill")
@@ -114,31 +116,19 @@ struct SettingsView: View {
                         Text("IOKit is not available on this device. USB serial requires iOS with IOKit access (sideload or EU AltStore).")
                     }
                 }
+                */
 
-                Section("Radio Profile") {
-                    Picker("Connection", selection: Binding(
-                        get: { settings.radioProfile },
-                        set: { settings.radioProfile = $0 }
-                    )) {
-                        ForEach(RadioProfile.allCases) { profile in
-                            Text(profile.rawValue).tag(profile)
-                        }
+                Section("Radio") {
+                    HStack {
+                        Text("Connection"); Spacer()
+                        Text(RadioProfile.hermes.rawValue).foregroundStyle(.secondary)
                     }
-                    .pickerStyle(.segmented)
                     Text(settings.radioProfile.description)
                         .font(.caption).foregroundStyle(.secondary)
-                    if settings.radioProfile == .trusdx {
-                        HStack {
-                            Image(systemName: "info.circle").foregroundStyle(.blue)
-                            Text("Baud rate auto-set to 115200 for CAT_STREAMING")
-                                .font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-                    if settings.radioProfile == .hermes {
-                        HermesConnectionView()
-                    }
+                    HermesConnectionView()
                 }
 
+                /* DISABLED: Rig (CAT) section — only needed for serial profiles
                 if settings.radioProfile.requiresSerial {
                     Section("Rig (CAT)") {
                         NavigationLink {
@@ -163,6 +153,7 @@ struct SettingsView: View {
                         .disabled(settings.radioProfile == .trusdx)
                     }
                 }
+                */
 
                 Section {
                     Picker("Band", selection: Binding(
@@ -269,8 +260,6 @@ struct SettingsView: View {
 
                 Section("Info") {
                     HStack { Text("Version"); Spacer(); Text("1.0.0").foregroundStyle(.secondary) }
-                    HStack { Text("Hamlib"); Spacer(); Text("4.7.1").foregroundStyle(.secondary) }
-                    HStack { Text("Rig Models"); Spacer(); Text("\(rigModels.count)").foregroundStyle(.secondary) }
                     Link(destination: URL(string: "https://github.com/gerolfziegenhain/DigiFox")!) {
                         HStack {
                             Image(systemName: "globe")

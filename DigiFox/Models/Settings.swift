@@ -33,15 +33,22 @@ class AppSettings: ObservableObject {
     @AppStorage("rbnReporterEnabled") var rbnReporterEnabled = false
     @AppStorage("wsprNetReporterEnabled") var wsprNetReporterEnabled = false
 
-    // Radio profile (Digirig vs TruSDX)
-    @AppStorage("radioProfile") var radioProfileRaw: String = RadioProfile.digirig.rawValue
+    // Radio profile (Hermes SDR — serial profiles hidden on iOS)
+    @AppStorage("radioProfile") var radioProfileRaw: String = RadioProfile.hermes.rawValue
 
-    // Rig control (default: Yaesu FT-817, 38400 baud)
-    @AppStorage("rigModel") var rigModel: Int = 1020
-    @AppStorage("rigSerialRate") var rigSerialRate: Int = 38400
+    // Rig control (defaults for Hermes — no serial needed)
+    @AppStorage("rigModel") var rigModel: Int = 0
+    @AppStorage("rigSerialRate") var rigSerialRate: Int = 0
 
     var radioProfile: RadioProfile {
-        get { RadioProfile(rawValue: radioProfileRaw) ?? .digirig }
+        get {
+            let profile = RadioProfile(rawValue: radioProfileRaw) ?? .hermes
+            // Migrate away from hidden serial profiles
+            if !RadioProfile.visibleCases.contains(profile) {
+                return .hermes
+            }
+            return profile
+        }
         set {
             radioProfileRaw = newValue.rawValue
             // Auto-configure for selected profile
@@ -56,8 +63,10 @@ class AppSettings: ObservableObject {
     @AppStorage("audioOffset") var audioOffset = 1000.0
 
     init() {
-        if UserDefaults.standard.object(forKey: "rigModel") as? Int == 0 {
-            rigModel = 1020
+        // Migrate existing users from hidden serial profiles to Hermes
+        if let profile = RadioProfile(rawValue: radioProfileRaw),
+           !RadioProfile.visibleCases.contains(profile) {
+            radioProfileRaw = RadioProfile.hermes.rawValue
         }
     }
 

@@ -54,10 +54,7 @@ struct StatusToolbar: ToolbarContent {
                     .foregroundStyle(settings.callsign.isEmpty ? .red : .green)
 
                 TransceiverStatusBadge(
-                    ioKitAvailable: appState.ioKitAvailable,
-                    deviceCount: appState.usbDevices.count,
-                    digirigConnected: appState.digirigConnected,
-                    rigConnected: appState.radioState.isConnected,
+                    hermesConnected: appState.hermesConnected,
                     isTransmitting: appState.isTransmitting
                 )
             }
@@ -141,45 +138,33 @@ struct ActivityView: View {
 // MARK: - Transceiver Status Badge
 
 struct TransceiverStatusBadge: View {
-    let ioKitAvailable: Bool
-    let deviceCount: Int
-    let digirigConnected: Bool
-    let rigConnected: Bool
+    let hermesConnected: Bool
     var isTransmitting: Bool = false
 
     var body: some View {
         HStack(spacing: 3) {
             Image(systemName: iconName).font(.caption).foregroundStyle(iconColor)
-            if digirigConnected {
-                Text("Digirig")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(rigConnected ? .green : .orange)
-            }
+            Text(hermesConnected ? "Hermes" : "")
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(hermesConnected ? .green : .secondary)
         }
         .padding(.horizontal, 6).padding(.vertical, 2)
         .background(Capsule().fill(backgroundColor))
     }
 
     private var iconName: String {
-        if !ioKitAvailable { return "usb.slash" }
-        if rigConnected { return "antenna.radiowaves.left.and.right" }
-        if digirigConnected { return "cable.connector" }
-        if deviceCount > 0 { return "cable.connector" }
-        return "usb"
+        if hermesConnected { return "antenna.radiowaves.left.and.right" }
+        return "network.slash"
     }
 
     private var iconColor: Color {
         if isTransmitting { return .red }
-        if !ioKitAvailable { return .red }
-        if rigConnected { return .green }
-        if digirigConnected { return .green }
-        if deviceCount > 0 { return .green }
-        return .red
+        if hermesConnected { return .green }
+        return .gray
     }
 
     private var backgroundColor: Color {
-        if rigConnected { return .green.opacity(0.15) }
-        if digirigConnected { return .green.opacity(0.15) }
-        return .red.opacity(0.1)
+        if hermesConnected { return .green.opacity(0.15) }
+        return .gray.opacity(0.1)
     }
 }
