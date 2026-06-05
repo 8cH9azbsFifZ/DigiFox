@@ -134,6 +134,9 @@ struct SettingsView: View {
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                     }
+                    if settings.radioProfile == .hermes {
+                        HermesConnectionView()
+                    }
                 }
 
                 Section("Rig (Hamlib)") {
