@@ -4,6 +4,11 @@ All notable changes to DigiFox are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v0.9.1] - 2026-09-19
+
+### Fixed
+- Improve Hermes waterfall decoding with adaptive scaling and IQ pointer safety
+
 ## [v0.9.0] - 2026-06-05
 
 ### Changed
