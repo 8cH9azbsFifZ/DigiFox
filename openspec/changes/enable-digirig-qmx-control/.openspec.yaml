@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-10-04
+# Lifecycle: DEFERRED at user request; serial access is not available.
+# Do not implement, activate profiles, or archive until explicitly resumed.

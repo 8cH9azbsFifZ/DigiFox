@@ -4,6 +4,12 @@ All notable changes to DigiFox are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- Entire project marked DEFERRED and GitHub repository archived on 2026-10-04.
+- Retain source and deferred Digirig/QMX planning; pause implementation and releases because the required direct USB serial solution for both iPhone and iPad is unavailable.
+
 ## [v0.9.2] - 2026-10-04
 
 ### Changed

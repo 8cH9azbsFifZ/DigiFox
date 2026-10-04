@@ -4,6 +4,14 @@
 
 # DigiFox
 
+## Project status: DEFERRED
+
+As of **2026-10-04**, development of the entire app is deferred and the GitHub repository is archived. No further implementation, releases or deployment work is planned unless the project is explicitly reactivated.
+
+The required goal is transceiver operation through a Digirig (potentially also QMX) on **both iPhone and iPad**. No supported public route for direct generic USB serial access on iPhone has been established. USBDriverKit on M-series iPads alone does not satisfy that requirement, and no alternative BLE/network bridge has been approved.
+
+The source and existing builds are retained for reference. Historical feature and hardware descriptions below are not a guarantee of working USB serial support on iOS. The [deferred OpenSpec plan](openspec/changes/enable-digirig-qmx-control/proposal.md) records the blocker, hardware references and conditional implementation approach.
+
 iOS app for digital amateur radio modes (**FT8**, **JS8Call**, **CW**) with USB-C connection to transceivers.
 
 ## Features

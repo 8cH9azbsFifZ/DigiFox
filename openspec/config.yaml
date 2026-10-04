@@ -1,6 +1,13 @@
 schema: spec-driven
 
 context: |
+  Project lifecycle: DEFERRED as of 2026-10-04; the GitHub repository is archived.
+  This applies to the entire app, all changes, implementation tasks and releases.
+  Do not implement, deploy, or archive/sync changes as completed unless the user
+  explicitly reactivates the project. Preserve historical task completion records.
+  Blocker: direct generic USB serial control must work on both iPhone and iPad;
+  no supported public iPhone route has been established, and an iPad-only
+  DriverKit implementation does not satisfy the goal. No bridge is approved.
   Tech stack: Swift 5.9, iOS 17+, SwiftUI, Combine, async/await, XcodeGen
   Domain: Ham radio digital modes (FT8, JS8Call) on iPhone/iPad via USB-C
   Architecture: AppState (central ObservableObject), AudioEngine (12 kHz USB audio),
