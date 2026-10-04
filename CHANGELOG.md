@@ -4,6 +4,11 @@ All notable changes to DigiFox are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v0.9.2] - 2026-10-04
+
+### Changed
+- Maintenance rebuild for TestFlight (Build 6), no code changes
+
 ## [v0.9.1] - 2026-09-19
 
 ### Fixed
